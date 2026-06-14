@@ -1,18 +1,26 @@
 const API_BASE = 'https://sofiabuzz.com';
 
 const CATEGORY_MAP = {
-  'Rock':        { emoji: '🎸', bg: 'var(--coral-bg)', text: 'var(--coral-text)', accent: 'var(--coral)' },
-  'Electronic':  { emoji: '🎧', bg: 'var(--purple-bg)', text: 'var(--purple-text)', accent: 'var(--purple)' },
-  'Jazz':        { emoji: '🎷', bg: 'var(--teal-bg)', text: 'var(--teal-text)', accent: '#2EC4B6' },
-  'Festival':    { emoji: '🎪', bg: 'var(--gold-bg)', text: 'var(--gold-text)', accent: 'var(--gold)' },
-  'Pop':         { emoji: '🎤', bg: 'var(--coral-bg)', text: 'var(--coral-text)', accent: 'var(--coral)' },
-  'Reggae':      { emoji: '🌴', bg: 'var(--teal-bg)', text: 'var(--teal-text)', accent: '#2EC4B6' },
-  'default':     { emoji: '🎫', bg: '#F0EEEA', text: 'var(--dark)', accent: 'var(--muted)' },
+  'Rock':        { emoji: '🎸', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C' },
+  'Electronic':  { emoji: '🎧', border: 'var(--purple-border)', text: 'var(--purple-text)', accent: '#4A3D8F' },
+  'Jazz':        { emoji: '🎷', border: 'var(--teal-border)', text: 'var(--teal-text)', accent: '#2E5C66' },
+  'Festival':    { emoji: '🎪', border: 'var(--gold-border)', text: 'var(--gold-text)', accent: 'var(--gold)' },
+  'Pop':         { emoji: '🎤', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C' },
+  'Reggae':      { emoji: '🌴', border: 'var(--teal-border)', text: 'var(--teal-text)', accent: '#2E5C66' },
+  'default':     { emoji: '🎫', border: 'var(--border)', text: 'var(--muted)', accent: 'var(--muted-dark)' },
 };
 
 function getCatInfo(category) {
   return CATEGORY_MAP[category] || CATEGORY_MAP['default'];
 }
+
+const CORNER_SVG = (cls) => `<svg class="corner-flourish ${cls}" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M24 4 L8 4 Q4 4 4 8 L4 24" stroke="var(--gold)" stroke-width="1.5" stroke-linecap="round"/>
+  <circle cx="24" cy="4" r="2.5" fill="var(--gold)"/>
+  <circle cx="4" cy="24" r="2.5" fill="var(--gold)"/>
+  <path d="M17 4 L17 8" stroke="var(--gold)" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+  <path d="M4 17 L8 17" stroke="var(--gold)" stroke-width="1" stroke-linecap="round" opacity="0.5"/>
+</svg>`;
 
 let allEvents = [];
 let activeCategory = 'all';
@@ -25,7 +33,7 @@ async function loadEvents() {
     buildFilterBar();
     renderEvents('all');
   } catch (err) {
-    container.innerHTML = '<p style="color: var(--muted); padding: 1rem 0;">Error loading events.</p>';
+    container.innerHTML = '<p style="color:var(--muted);padding:1rem 0;">Error loading events.</p>';
     console.error(err);
   }
 }
@@ -33,8 +41,9 @@ async function loadEvents() {
 function buildFilterBar() {
   const bar = document.getElementById('filter-bar');
 
+  // Style the hardcoded "All" button
   const allBtn = bar.querySelector('[data-category="all"]');
-  setAllBtnActive(allBtn, true);
+  styleAllBtn(allBtn);
 
   const categories = [...new Set(allEvents.map(e => e.category))];
   categories.forEach(cat => {
@@ -43,17 +52,23 @@ function buildFilterBar() {
     btn.className = 'filter-btn';
     btn.dataset.category = cat;
     btn.textContent = `${info.emoji} ${cat}`;
-    btn.style.background = info.bg;
-    btn.style.color = info.text;
-    btn.style.borderColor = 'transparent';
+    styleCatBtn(btn, info);
     bar.appendChild(btn);
   });
 }
 
-function setAllBtnActive(btn, active) {
-  btn.style.background = 'var(--dark)';
-  btn.style.color = 'var(--cream)';
-  btn.style.borderColor = 'transparent';
+function styleAllBtn(btn) {
+  btn.style.background = 'var(--gold)';
+  btn.style.color = 'var(--bg)';
+  btn.style.borderColor = 'var(--gold)';
+  btn.style.opacity = '1';
+}
+
+function styleCatBtn(btn, info) {
+  btn.style.background = 'transparent';
+  btn.style.color = info.text;
+  btn.style.border = `1px solid ${info.border}`;
+  btn.style.opacity = '1';
 }
 
 function renderEvents(category) {
@@ -64,7 +79,7 @@ function renderEvents(category) {
     : allEvents.filter(e => e.category === category);
 
   if (filtered.length === 0) {
-    container.innerHTML = '<p style="color: var(--muted); padding: 1rem 0;">No events found.</p>';
+    container.innerHTML = '<p style="color:var(--muted);padding:1rem 0;">No events found.</p>';
     return;
   }
 
@@ -81,52 +96,57 @@ function buildCardHTML(event) {
     ? `<img src="${event.image_url}" alt="${event.title}" loading="lazy">`
     : '';
 
-  const ribbonHTML = event.is_featured
-    ? `<div class="featured-ribbon">FEATURED</div>`
-    : '';
+  const heartBtn = `
+    <button class="heart-btn" onclick="event.stopPropagation()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    </button>`;
 
-  const starBadgeHTML = event.is_featured
-    ? `<div class="featured-star-badge">⭐</div>`
-    : '';
-
-  const featuredClass = event.is_featured ? ' featured' : '';
-
-  return `
-    <div class="card-wrapper" onclick="window.location.href='event.html?id=${event.id}'">
-      <div class="event-card${featuredClass}">
-        <div class="card-image-wrap" style="background-color: ${info.accent};">
-          ${imageHTML}
-          ${ribbonHTML}
-          <button class="heart-btn" onclick="event.stopPropagation()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-          </button>
-        </div>
-        <div class="perforation-divider">
-          <div class="perf-circle perf-left"></div>
-          <div class="perf-circle perf-right"></div>
-        </div>
-        <div class="card-body">
-          <div class="accent-bar" style="background: ${info.accent};"></div>
-          <div class="card-content">
-            <div class="card-title">${event.title}</div>
-            <div class="card-meta">📍 ${event.venue}</div>
-            <div class="card-meta">🕒 ${dateStr}, ${timeStr}</div>
-            <hr class="content-divider" style="border-color: ${info.bg};">
-            <div class="card-footer">
-              <div class="price-wrap">
-                <span class="price-from">from</span>
-                <span class="price-value" style="color: ${info.accent};">${event.price_text}</span>
-              </div>
-              <span class="cat-badge" style="background: ${info.bg}; color: ${info.text};">${info.emoji} ${event.category}</span>
+  const cardInner = `
+    <div class="event-card${event.is_featured ? ' featured' : ''}">
+      <div class="card-image-wrap" style="background-color:${info.accent};">
+        ${imageHTML}
+        ${heartBtn}
+      </div>
+      <div class="perforation-divider">
+        <div class="perf-circle perf-left"></div>
+        <div class="perf-circle perf-right"></div>
+      </div>
+      <div class="card-body">
+        <div class="accent-bar" style="background:${info.accent};"></div>
+        <div class="card-content">
+          <div class="card-title">${event.title}</div>
+          <div class="card-meta">📍 ${event.venue}</div>
+          <div class="card-meta">🕒 ${dateStr}, ${timeStr}</div>
+          <hr class="content-divider">
+          <div class="card-footer">
+            <div class="price-wrap">
+              <span class="price-from">from</span>
+              <span class="price-value" style="color:${info.text};">${event.price_text}</span>
             </div>
+            <span class="cat-badge" style="border:1px solid ${info.border};color:${info.text};">${info.emoji} ${event.category}</span>
           </div>
         </div>
       </div>
-      ${starBadgeHTML}
-    </div>
-  `;
+    </div>`;
+
+  if (event.is_featured) {
+    return `
+      <div class="card-wrapper featured-frame" onclick="window.location.href='event.html?id=${event.id}'">
+        ${CORNER_SVG('fl-tl')}
+        ${CORNER_SVG('fl-tr')}
+        ${CORNER_SVG('fl-br')}
+        ${CORNER_SVG('fl-bl')}
+        <div class="featured-placard">✦ Featured</div>
+        ${cardInner}
+      </div>`;
+  }
+
+  return `
+    <div class="card-wrapper" onclick="window.location.href='event.html?id=${event.id}'">
+      ${cardInner}
+    </div>`;
 }
 
 document.getElementById('filter-bar').addEventListener('click', (e) => {
@@ -135,23 +155,24 @@ document.getElementById('filter-bar').addEventListener('click', (e) => {
 
   const cat = btn.dataset.category;
 
-  // Update button styles
+  // Reset all chips
   document.querySelectorAll('.filter-btn').forEach(b => {
     if (b.dataset.category === 'all') {
-      setAllBtnActive(b, b === btn);
+      styleAllBtn(b);
     } else {
-      b.style.borderColor = 'transparent';
+      const info = getCatInfo(b.dataset.category);
+      styleCatBtn(b, info);
+      b.style.opacity = cat === 'all' ? '1' : '0.5';
     }
   });
 
+  // Highlight selected
   if (cat !== 'all') {
-    const info = getCatInfo(cat);
-    btn.style.borderColor = info.accent;
+    btn.style.opacity = '1';
   }
 
   const container = document.getElementById('event-list');
   container.classList.add('fading');
-
   setTimeout(() => {
     renderEvents(cat);
     container.classList.remove('fading');
