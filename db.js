@@ -11,4 +11,8 @@ const pool = process.env.DATABASE_URL
       database: process.env.DB_NAME,
     });
 
+pool.on('error', (err) => {
+  console.error('Unexpected database error:', err.message, err.code);
+});
+
 module.exports = pool;

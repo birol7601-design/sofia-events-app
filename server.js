@@ -31,7 +31,7 @@ app.get('/health', async (req, res) => {
     const result = await pool.query('SELECT NOW()');
     res.json({ status: 'ok', time: result.rows[0].now });
   } catch (err) {
-    res.status(500).json({ status: 'error', message: err.message });
+    res.status(500).json({ status: 'error', message: err.message, code: err.code, detail: err.toString() });
   }
 });
 
@@ -49,7 +49,7 @@ app.get('/api/events', async (req, res) => {
     `);
     res.json(result.rows);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, code: err.code, detail: err.toString() });
   }
 });
 app.post('/api/organizers/register', async (req, res) => {
