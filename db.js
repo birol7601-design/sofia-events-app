@@ -11,6 +11,13 @@ const pool = process.env.DATABASE_URL
       database: process.env.DB_NAME,
     });
 
+if (process.env.DATABASE_URL) {
+  const { hostname, port } = new URL(process.env.DATABASE_URL);
+  console.log(`DB: production mode — host=${hostname} port=${port}`);
+} else {
+  console.log(`DB: local mode — host=${process.env.DB_HOST} port=${process.env.DB_PORT}`);
+}
+
 pool.on('error', (err) => {
   console.error('Unexpected database error:', err.message, err.code);
 });
