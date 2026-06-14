@@ -1,9 +1,11 @@
+const API_BASE = 'https://sofiabuzz.com';
+
 let allEvents = [];
 
 async function loadEvents() {
   const container = document.getElementById('event-list');
   try {
-    const response = await fetch('/api/events');
+    const response = await fetch(`${API_BASE}/api/events`);
     allEvents = await response.json();
     buildFilterBar();
     renderEvents('all');

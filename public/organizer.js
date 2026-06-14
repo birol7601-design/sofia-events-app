@@ -1,4 +1,4 @@
-const API = '';
+const API_BASE = 'https://sofiabuzz.com';
 let token = localStorage.getItem('organizerToken');
 let organizerName = localStorage.getItem('organizerName');
 let organizerEvents = [];
@@ -16,7 +16,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   errorEl.textContent = '';
 
   try {
-    const res = await fetch(`${API}/api/organizers/login`, {
+    const res = await fetch(`${API_BASE}/api/organizers/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -71,7 +71,7 @@ document.getElementById('add-event-btn').addEventListener('click', async () => {
   };
 
   try {
-    const res = await fetch(`${API}/api/organizer/events`, {
+    const res = await fetch(`${API_BASE}/api/organizer/events`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -113,7 +113,7 @@ function showDashboard() {
 async function loadOrganizerEvents() {
   const container = document.getElementById('organizer-events');
   try {
-    const res = await fetch(`${API}/api/organizer/events`, {
+    const res = await fetch(`${API_BASE}/api/organizer/events`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
     const events = await res.json();
@@ -157,7 +157,7 @@ async function loadSlotAvailability() {
   const grid = document.getElementById('slot-grid');
   grid.innerHTML = '<p style="font-size:13px;color:#aaa;">Loading slots…</p>';
   try {
-    const res = await fetch(`${API}/api/featured-slots/availability`);
+    const res = await fetch(`${API_BASE}/api/featured-slots/availability`);
     const taken = await res.json();
     renderSlotGrid(taken);
   } catch (err) {
@@ -229,7 +229,7 @@ document.getElementById('promote-btn').addEventListener('click', async () => {
   const eventId = document.getElementById('promote-event-select').value;
 
   try {
-    const res = await fetch(`${API}/api/organizer/featured-slots`, {
+    const res = await fetch(`${API_BASE}/api/organizer/featured-slots`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
