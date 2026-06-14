@@ -52,6 +52,27 @@ app.get('/api/events', async (req, res) => {
     res.status(500).json({ error: err.message, code: err.code, detail: err.toString() });
   }
 });
+app.get('/api/events/:id', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT e.id, e.title, e.description, e.category, e.venue, e.start_time,
+             e.price_text, e.ticket_url, e.image_url,
+             fs.slot_number,
+             CASE WHEN fs.id IS NOT NULL AND NOW() BETWEEN fs.start_date AND fs.end_date
+                  THEN true ELSE false END AS is_featured
+      FROM events e
+      LEFT JOIN featured_slots fs ON fs.event_id = e.id
+      WHERE e.id = $1
+    `, [req.params.id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    res.status(500).json({ error: err.message, code: err.code, detail: err.toString() });
+  }
+});
+
 app.post('/api/organizers/register', async (req, res) => {
   try {
     const { name, email, password } = req.body;

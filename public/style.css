@@ -327,6 +327,154 @@ main {
   }
 }
 
+/* ── EVENT DETAIL PAGE ── */
+body.detail-page {
+  padding-bottom: 80px;
+}
+
+.detail-hero {
+  position: relative;
+  height: 200px;
+  background-color: var(--muted);
+}
+
+.hero-btn {
+  position: absolute;
+  top: 16px;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.hero-back { left: 16px; }
+.hero-save { right: 16px; }
+
+.featured-pill {
+  position: absolute;
+  bottom: 14px;
+  left: 16px;
+  background: var(--dark);
+  color: var(--gold);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 5px 14px;
+  border-radius: 999px;
+}
+
+.detail-info {
+  background: var(--white);
+  padding: 20px 16px 18px;
+}
+
+.detail-title {
+  font-family: 'Anton', sans-serif;
+  font-size: 26px;
+  color: var(--dark);
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+
+.detail-meta {
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 7px;
+}
+
+.detail-about {
+  background: var(--gold-bg);
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.detail-details {
+  background: var(--teal-bg);
+  padding: 16px;
+  margin-top: 8px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.about-label { color: var(--gold-text); }
+.details-label { color: var(--teal-text); }
+
+.about-text {
+  font-size: 14px;
+  color: var(--dark);
+  line-height: 1.65;
+}
+
+.detail-ticket-link {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--teal-text);
+  text-decoration: none;
+}
+
+.detail-ticket-link:hover {
+  text-decoration: underline;
+}
+
+.detail-bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border-top: 1px solid rgba(43, 43, 43, 0.08);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 20;
+}
+
+.bottom-price-wrap {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+.bottom-price-value {
+  font-family: 'Anton', sans-serif;
+  font-size: 22px;
+  margin-top: 2px;
+}
+
+.tickets-btn {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--dark);
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.no-tickets {
+  font-size: 13px;
+  color: var(--muted);
+}
+
 /* ── ORGANIZER / SHARED STYLES ── */
 .card-form {
   background: white;
