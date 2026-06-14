@@ -38,7 +38,7 @@ app.get('/health', async (req, res) => {
 app.get('/api/events', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT e.id, e.title, e.description, e.category, e.venue, e.start_time,
+      SELECT e.id, e.title, e.description, e.artist_bio, e.category, e.venue, e.start_time,
              e.price_text, e.ticket_url, e.image_url,
              fs.slot_number,
              CASE WHEN fs.id IS NOT NULL AND NOW() BETWEEN fs.start_date AND fs.end_date
@@ -55,7 +55,7 @@ app.get('/api/events', async (req, res) => {
 app.get('/api/events/:id', async (req, res) => {
   try {
     const result = await pool.query(`
-      SELECT e.id, e.title, e.description, e.category, e.venue, e.start_time,
+      SELECT e.id, e.title, e.description, e.artist_bio, e.category, e.venue, e.start_time,
              e.price_text, e.ticket_url, e.image_url,
              fs.slot_number,
              CASE WHEN fs.id IS NOT NULL AND NOW() BETWEEN fs.start_date AND fs.end_date
@@ -122,11 +122,11 @@ app.get('/api/organizer/events', authenticateOrganizer, async (req, res) => {
 
 app.post('/api/organizer/events', authenticateOrganizer, async (req, res) => {
   try {
-    const { title, description, category, venue, start_time, price_text, ticket_url, image_url } = req.body;
+    const { title, description, artist_bio = null, category, venue, start_time, price_text, ticket_url, image_url } = req.body;
     const result = await pool.query(
-      `INSERT INTO events (organizer_id, title, description, category, venue, start_time, price_text, ticket_url, image_url)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *`,
-      [req.organizerId, title, description, category, venue, start_time, price_text, ticket_url, image_url]
+      `INSERT INTO events (organizer_id, title, description, artist_bio, category, venue, start_time, price_text, ticket_url, image_url)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+      [req.organizerId, title, description, artist_bio, category, venue, start_time, price_text, ticket_url, image_url]
     );
     res.json(result.rows[0]);
   } catch (err) {

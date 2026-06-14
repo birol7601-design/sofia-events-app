@@ -62,6 +62,7 @@ document.getElementById('add-event-btn').addEventListener('click', async () => {
   const body = {
     title: title,
     description: document.getElementById('new-description').value,
+    artist_bio: document.getElementById('new-artist-bio').value || null,
     category: document.getElementById('new-category').value,
     venue: document.getElementById('new-venue').value,
     start_time: startTime,
@@ -88,6 +89,7 @@ document.getElementById('add-event-btn').addEventListener('click', async () => {
 
     document.getElementById('new-title').value = '';
     document.getElementById('new-description').value = '';
+    document.getElementById('new-artist-bio').value = '';
     document.getElementById('new-category').value = '';
     document.getElementById('new-venue').value = '';
     document.getElementById('new-start').value = '';
