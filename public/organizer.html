@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Organizer Dashboard - Sofia Events</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header>
+    <h1>🎉 Organizer Dashboard</h1>
+    <p class="tagline">Manage your events</p>
+  </header>
+
+  <main>
+    <div id="login-section" class="card-form">
+      <h2>Log in</h2>
+      <input type="email" id="login-email" placeholder="Email" value="test@venue.com">
+      <input type="password" id="login-password" placeholder="Password" value="test1234">
+      <button id="login-btn">Log in</button>
+      <p id="login-error" class="error-text"></p>
+    </div>
+
+    <div id="dashboard-section" style="display:none">
+      <div class="dashboard-header">
+        <span id="organizer-name"></span>
+        <button id="logout-btn" class="small-btn">Log out</button>
+      </div>
+
+      <h2>Your events</h2>
+      <div id="organizer-events"></div>
+
+      <h2>Add new event</h2>
+      <div class="card-form">
+        <input type="text" id="new-title" placeholder="Event title">
+        <textarea id="new-description" placeholder="Description"></textarea>
+        <input type="text" id="new-category" placeholder="Category (e.g. Rock, Jazz)">
+        <input type="text" id="new-venue" placeholder="Venue">
+        <input type="datetime-local" id="new-start">
+        <input type="text" id="new-price" placeholder="Price text (e.g. from €20)">
+        <input type="text" id="new-ticket-url" placeholder="Ticket URL">
+        <input type="text" id="new-image-url" placeholder="Image URL (optional)">
+        <button id="add-event-btn">Add event</button>
+        <p id="add-error" class="error-text"></p>
+      </div>
+
+      <h2>Promote your event</h2>
+      <div class="card-form">
+        <p class="promote-intro">Feature your event in one of 6 premium slots on the homepage.</p>
+        <span class="form-label">Your event</span>
+        <select id="promote-event-select">
+          <option value="">— select an event —</option>
+        </select>
+        <span class="form-label">Duration</span>
+        <div class="package-group">
+          <button class="package-btn" data-days="7">7 days</button>
+          <button class="package-btn" data-days="14">14 days</button>
+          <button class="package-btn" data-days="30">30 days</button>
+        </div>
+        <span class="form-label">Featured slot</span>
+        <div class="slot-grid" id="slot-grid"></div>
+        <button id="promote-btn" disabled>Book featured slot</button>
+        <p id="promote-error" class="error-text"></p>
+        <p id="promote-success" class="success-text"></p>
+      </div>
+    </div>
+  </main>
+
+  <script src="organizer.js"></script>
+</body>
+</html>
