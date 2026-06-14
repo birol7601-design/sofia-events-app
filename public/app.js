@@ -1,13 +1,15 @@
 const API_BASE = 'https://sofiabuzz.com';
 
+const GOLD_GRADIENT = 'linear-gradient(135deg, #F4D06F 0%, #D4AF37 50%, #B8860B 100%)';
+
 const CATEGORY_MAP = {
-  'Rock':        { emoji: '🎸', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C' },
-  'Electronic':  { emoji: '🎧', border: 'var(--purple-border)', text: 'var(--purple-text)', accent: '#4A3D8F' },
-  'Jazz':        { emoji: '🎷', border: 'var(--teal-border)', text: 'var(--teal-text)', accent: '#2E5C66' },
-  'Festival':    { emoji: '🎪', border: 'var(--gold-border)', text: 'var(--gold-text)', accent: 'var(--gold)' },
-  'Pop':         { emoji: '🎤', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C' },
-  'Reggae':      { emoji: '🌴', border: 'var(--teal-border)', text: 'var(--teal-text)', accent: '#2E5C66' },
-  'default':     { emoji: '🎫', border: 'var(--border)', text: 'var(--muted)', accent: 'var(--muted-dark)' },
+  'Rock':        { emoji: '🎸', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
+  'Electronic':  { emoji: '🎧', border: 'var(--purple-border)', text: 'var(--purple-text)', accent: '#4A3D8F', badgeBg: '#4A3D8F', badgeText: '#E8E3FB' },
+  'Jazz':        { emoji: '🎷', border: '#8C5A2B', text: '#E0B589', accent: '#B8732E',       badgeBg: '#8C5A2B', badgeText: '#F5E6D3' },
+  'Festival':    { emoji: '🎪', border: 'var(--gold-border)', text: 'var(--gold-text)', accent: 'var(--gold)', badgeBg: '#D4AF37', badgeText: '#0A0912' },
+  'Pop':         { emoji: '🎤', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
+  'Reggae':      { emoji: '🌴', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#E8456B',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
+  'default':     { emoji: '🎫', border: 'var(--border)',       text: 'var(--muted)',      accent: 'var(--muted-dark)', badgeBg: '#3A3830', badgeText: '#E8E3F0' },
 };
 
 function getCatInfo(category) {
@@ -41,7 +43,6 @@ async function loadEvents() {
 function buildFilterBar() {
   const bar = document.getElementById('filter-bar');
 
-  // Style the hardcoded "All" button
   const allBtn = bar.querySelector('[data-category="all"]');
   styleAllBtn(allBtn);
 
@@ -58,9 +59,9 @@ function buildFilterBar() {
 }
 
 function styleAllBtn(btn) {
-  btn.style.background = 'var(--gold)';
+  btn.style.background = GOLD_GRADIENT;
   btn.style.color = 'var(--bg)';
-  btn.style.borderColor = 'var(--gold)';
+  btn.style.borderColor = 'transparent';
   btn.style.opacity = '1';
 }
 
@@ -125,7 +126,7 @@ function buildCardHTML(event) {
               <span class="price-from">from</span>
               <span class="price-value" style="color:${info.text};">${event.price_text}</span>
             </div>
-            <span class="cat-badge" style="border:1px solid ${info.border};color:${info.text};">${info.emoji} ${event.category}</span>
+            <span class="cat-badge" style="background:${info.badgeBg};color:${info.badgeText};">${info.emoji} ${event.category}</span>
           </div>
         </div>
       </div>
@@ -155,7 +156,6 @@ document.getElementById('filter-bar').addEventListener('click', (e) => {
 
   const cat = btn.dataset.category;
 
-  // Reset all chips
   document.querySelectorAll('.filter-btn').forEach(b => {
     if (b.dataset.category === 'all') {
       styleAllBtn(b);
@@ -166,7 +166,6 @@ document.getElementById('filter-bar').addEventListener('click', (e) => {
     }
   });
 
-  // Highlight selected
   if (cat !== 'all') {
     btn.style.opacity = '1';
   }

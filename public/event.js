@@ -1,13 +1,13 @@
 const API_BASE = 'https://sofiabuzz.com';
 
 const CATEGORY_MAP = {
-  'Rock':        { emoji: '🎸', bg: 'var(--coral-bg)', text: 'var(--coral-text)', accent: 'var(--coral)' },
-  'Electronic':  { emoji: '🎧', bg: 'var(--purple-bg)', text: 'var(--purple-text)', accent: 'var(--purple)' },
-  'Jazz':        { emoji: '🎷', bg: 'var(--teal-bg)', text: 'var(--teal-text)', accent: '#2EC4B6' },
-  'Festival':    { emoji: '🎪', bg: 'var(--gold-bg)', text: 'var(--gold-text)', accent: 'var(--gold)' },
-  'Pop':         { emoji: '🎤', bg: 'var(--coral-bg)', text: 'var(--coral-text)', accent: 'var(--coral)' },
-  'Reggae':      { emoji: '🌴', bg: 'var(--teal-bg)', text: 'var(--teal-text)', accent: '#2EC4B6' },
-  'default':     { emoji: '🎫', bg: '#F0EEEA', text: 'var(--dark)', accent: 'var(--muted)' },
+  'Rock':        { emoji: '🎸', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
+  'Electronic':  { emoji: '🎧', border: 'var(--purple-border)', text: 'var(--purple-text)', accent: '#4A3D8F', badgeBg: '#4A3D8F', badgeText: '#E8E3FB' },
+  'Jazz':        { emoji: '🎷', border: '#8C5A2B', text: '#E0B589', accent: '#B8732E',       badgeBg: '#8C5A2B', badgeText: '#F5E6D3' },
+  'Festival':    { emoji: '🎪', border: 'var(--gold-border)', text: 'var(--gold-text)', accent: 'var(--gold)', badgeBg: '#D4AF37', badgeText: '#0A0912' },
+  'Pop':         { emoji: '🎤', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
+  'Reggae':      { emoji: '🌴', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#E8456B',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
+  'default':     { emoji: '🎫', border: 'var(--border)',       text: 'var(--muted)',      accent: 'var(--muted-dark)', badgeBg: '#3A3830', badgeText: '#E8E3F0' },
 };
 
 function getCatInfo(category) {
@@ -65,9 +65,9 @@ function populatePage(event) {
   // Description
   document.getElementById('event-description').textContent = event.description || 'No description available.';
 
-  // Category badge
+  // Category badge — solid fill
   document.getElementById('event-category-badge').innerHTML =
-    `<span class="cat-badge" style="background:${info.bg};color:${info.text};">${info.emoji} ${event.category}</span>`;
+    `<span class="cat-badge" style="background:${info.badgeBg};color:${info.badgeText};">${info.emoji} ${event.category}</span>`;
 
   // Ticket link in details section
   if (event.ticket_url) {
@@ -79,7 +79,7 @@ function populatePage(event) {
   // Bottom bar price
   const priceEl = document.getElementById('bottom-price-value');
   priceEl.textContent = event.price_text;
-  priceEl.style.color = info.accent;
+  priceEl.style.color = info.text;
 
   // Bottom bar action
   const actionEl = document.getElementById('bottom-action');
