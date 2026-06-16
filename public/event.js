@@ -56,17 +56,12 @@ function populatePage(event, rawId) {
 
   document.title = `${event.title} — SofiaBuzz`;
 
-  // Hero background
+  // Hero background — gradient always applied, image layer sits on top if present
   const hero = document.getElementById('detail-hero');
-  const heroOverlay = document.getElementById('hero-overlay');
+  hero.style.background = tod.gradient;
   if (event.image_url) {
-    hero.style.backgroundImage = `url(${event.image_url})`;
-    hero.style.backgroundSize = 'cover';
-    hero.style.backgroundPosition = 'center';
-    heroOverlay.style.background = tod.gradient;
-  } else {
-    hero.style.background = tod.gradient;
-    heroOverlay.style.background = 'linear-gradient(to bottom, transparent 20%, #0A0912 100%)';
+    const imgLayer = document.getElementById('hero-image-layer');
+    imgLayer.style.backgroundImage = `url(${event.image_url})`;
   }
 
   // Badges
@@ -97,20 +92,9 @@ function populatePage(event, rawId) {
   // Description
   document.getElementById('event-description').textContent = event.description || 'No description available.';
 
-  // Detail pills (age restriction, duration, support act)
-  const pillsEl = document.getElementById('event-pills');
-  const pillItems = [];
-  if (event.age_restriction) pillItems.push(event.age_restriction);
-  if (event.duration) pillItems.push(event.duration);
-  if (event.support_act) pillItems.push(`Support: ${event.support_act}`);
-  if (pillItems.length > 0) {
-    pillsEl.innerHTML = pillItems.map(p =>
-      `<span style="background:#2A1F3A;color:#A89AD4;border-radius:999px;font-size:11px;padding:5px 12px;font-family:'IBM Plex Sans',sans-serif;">${p}</span>`
-    ).join('');
-  }
-
-  // Artist section
-  const artistName = event.artist_name || event.title;
+  // Artist section — extract name before " - " separator if present
+  const artistName = event.artist_name ||
+    (event.title.includes(' - ') ? event.title.split(' - ')[0].trim() : event.title);
   document.getElementById('artist-name').textContent = artistName;
   document.getElementById('artist-initial').textContent = artistName.charAt(0).toUpperCase();
   const metaParts = [event.genre, event.origin].filter(Boolean);
