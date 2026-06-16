@@ -44,8 +44,19 @@ function eventCardHTML(ev) {
     </div>`;
 }
 
-function renderEmpty(id, msg) {
-  document.getElementById(id).innerHTML = `<p style="text-align:center;color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px 20px;">${msg}</p>`;
+function renderEmpty(id, tab) {
+  const isSaved = tab === 'saved';
+  document.getElementById(id).innerHTML = `
+    <div style="text-align:center;padding:48px 24px 32px;">
+      <span style="display:block;font-size:48px;margin-bottom:12px;">${isSaved ? '🎭' : '🎪'}</span>
+      <div style="font-family:'Playfair Display',serif;color:#D4AF37;font-size:16px;font-weight:700;margin-bottom:8px;">
+        ${isSaved ? 'No saved events yet' : 'Not attending any events yet'}
+      </div>
+      <p style="font-family:'IBM Plex Sans',sans-serif;color:#6E6A5F;font-size:13px;margin-bottom:20px;">
+        ${isSaved ? 'Tap ♡ on any event to save it' : "Tap 'I'm going' on any event to mark attendance"}
+      </p>
+      <a href="index.html" style="display:inline-block;background:linear-gradient(135deg,#F4D06F,#D4AF37,#B8860B);color:#0A0912;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Browse events →</a>
+    </div>`;
 }
 
 async function loadUserTab(tab) {
@@ -55,12 +66,12 @@ async function loadUserTab(tab) {
   const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
   try {
     const res = await fetch(`${API}/api/users/${userId}/${tab}`, { headers });
-    if (!res.ok) { renderEmpty(listId, 'Could not load events.'); return; }
+    if (!res.ok) { renderEmpty(listId, tab); return; }
     const events = await res.json();
-    if (events.length === 0) { renderEmpty(listId, 'No events here yet.'); return; }
+    if (events.length === 0) { renderEmpty(listId, tab); return; }
     document.getElementById(listId).innerHTML = events.map(eventCardHTML).join('');
   } catch {
-    renderEmpty(listId, 'Network error.');
+    renderEmpty(listId, tab);
   }
 }
 
@@ -101,8 +112,12 @@ async function init() {
     document.getElementById('user-bio').textContent = user.bio || '';
 
     const avatarEl = document.getElementById('user-avatar');
-    avatarEl.style.background = user.avatar_color || '#D4AF37';
+    const c = user.avatar_color || '#D4AF37';
+    avatarEl.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent), ${c}`;
     avatarEl.textContent = getInitial(user.username);
+
+    const wm = document.getElementById('user-hero-watermark');
+    if (wm) wm.textContent = user.username;
 
     document.title = `${user.username} — SofiaBuzz`;
 
@@ -111,6 +126,7 @@ async function init() {
   } catch {
     document.getElementById('private-msg').style.display = 'block';
     document.getElementById('user-hero').style.display = 'none';
+    document.getElementById('user-info').style.display = 'none';
   }
 }
 
