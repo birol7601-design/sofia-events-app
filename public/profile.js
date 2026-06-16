@@ -61,21 +61,17 @@ function formatDate(ts) {
 }
 
 function eventCardHTML(ev) {
-  const c = catInfo(ev.category);
-  const accent = catAccent(ev.category);
+  const catColors = { 'Rock':'#6B2D5C', 'Pop':'#6B2D5C', 'Reggae':'#6B2D5C', 'Electronic':'#4A3D8F', 'Jazz':'#8C5A2B', 'Festival':'#B8860B', 'default':'#2A2736' };
+  const squareColor = catColors[ev.category] || catColors['default'];
   const date = formatDate(ev.start_time);
-  const img = ev.image_url
-    ? `<div class="event-img" style="background-image:url('${ev.image_url}')"></div>`
-    : `<div class="event-img" style="background:${accent}20;"></div>`;
   return `
-    <div class="event-card" onclick="window.location.href='event.html?id=${ev.id}'">
-      <div class="card-image-wrap">${img}</div>
-      <div class="card-body">
-        <div class="card-badges"><span class="badge" style="background:${c.badgeBg};color:${c.badgeText};">${c.emoji} ${ev.category}</span></div>
-        <h3 class="card-title">${ev.title}</h3>
-        <div class="card-meta"><span>${ev.venue}</span><span>${date}</span></div>
-        <div class="card-price">${ev.price_text || 'Free'}</div>
+    <div onclick="window.location.href='event.html?id=${ev.id}'" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(212,175,55,0.15);margin-bottom:8px;background:#16151F;cursor:pointer;">
+      <div style="width:36px;height:36px;border-radius:8px;background:${squareColor};flex-shrink:0;"></div>
+      <div style="flex:1;min-width:0;">
+        <div style="color:#F0E8D6;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ev.title}</div>
+        <div style="color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:12px;">${ev.venue}${date ? ' · ' + date : ''}</div>
       </div>
+      <span style="color:#D4AF37;font-size:18px;flex-shrink:0;">›</span>
     </div>`;
 }
 
@@ -215,6 +211,86 @@ function handlePeopleSearch(val) {
   }, 300);
 }
 
+// ── FRIEND REQUESTS ───────────────────────────────────────────────────────────
+
+function showToast(msg) {
+  const el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#D4AF37;color:#0A0912;padding:10px 20px;border-radius:999px;font-weight:600;font-family:\'IBM Plex Sans\',sans-serif;font-size:13px;z-index:999;white-space:nowrap;pointer-events:none;';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2000);
+}
+
+function checkFriendRequestRow(sectionEl) {
+  if (!sectionEl.querySelector('[data-request-row]')) {
+    sectionEl.style.display = 'none';
+    const dot = document.querySelector('#nav-profile .request-dot');
+    if (dot) dot.remove();
+  }
+}
+
+async function acceptRequest(requesterId, rowEl, sectionEl) {
+  try {
+    const res = await fetch(`${API}/api/friends/accept/${requesterId}`, { method: 'POST', headers: authHeaders() });
+    if (res.ok) {
+      rowEl.remove();
+      checkFriendRequestRow(sectionEl);
+      showToast('You are now friends! 🎉');
+    }
+  } catch {}
+}
+
+async function declineRequest(requesterId, rowEl, sectionEl) {
+  try {
+    const res = await fetch(`${API}/api/friends/decline/${requesterId}`, { method: 'POST', headers: authHeaders() });
+    if (res.ok) {
+      rowEl.remove();
+      checkFriendRequestRow(sectionEl);
+    }
+  } catch {}
+}
+
+async function loadFriendRequests() {
+  const token = localStorage.getItem('userToken');
+  if (!token) return;
+  const sectionEl = document.getElementById('friend-requests-section');
+  if (!sectionEl) return;
+  try {
+    const res = await fetch(`${API}/api/friends/pending`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const requests = await res.json();
+    if (!requests.length) return;
+
+    sectionEl.style.display = '';
+    sectionEl.innerHTML = `<p style="font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:#D4AF37;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 6px;">Friend Requests</p><div id="request-rows"></div>`;
+    const rowsEl = sectionEl.querySelector('#request-rows');
+
+    requests.forEach(u => {
+      const row = document.createElement('div');
+      row.setAttribute('data-request-row', u.id);
+      row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #2A2736;';
+      row.innerHTML = `
+        <div style="flex-shrink:0;">${window.getAvatarSVG(u.avatarType || 'star', 36)}</div>
+        <div style="flex:1;color:#F0E8D6;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;">${u.username}</div>
+        <button style="background:linear-gradient(135deg,#F4D06F,#D4AF37);color:#0A0912;border:none;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">Accept ✓</button>
+        <button style="background:transparent;border:1px solid #E8456B;color:#E8456B;border-radius:999px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">Decline</button>`;
+      const [acceptBtn, declineBtn] = row.querySelectorAll('button');
+      acceptBtn.addEventListener('click', () => acceptRequest(u.id, row, sectionEl));
+      declineBtn.addEventListener('click', () => declineRequest(u.id, row, sectionEl));
+      rowsEl.appendChild(row);
+    });
+
+    const navProfile = document.getElementById('nav-profile');
+    if (navProfile && !navProfile.querySelector('.request-dot')) {
+      const dot = document.createElement('span');
+      dot.className = 'request-dot';
+      dot.style.cssText = 'position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#D4AF37;';
+      navProfile.style.position = 'relative';
+      navProfile.appendChild(dot);
+    }
+  } catch {}
+}
+
 // ── UNREAD DOT ────────────────────────────────────────────────────────────────
 
 async function checkUnreadMessages() {
@@ -245,8 +321,6 @@ async function init() {
 
   const name = localStorage.getItem('userName') || '';
   document.getElementById('profile-username').textContent = name;
-  const wmEl = document.getElementById('hero-watermark');
-  if (wmEl) wmEl.textContent = name;
   renderAvatar(currentAvatarType);
 
   try {
@@ -277,6 +351,7 @@ async function init() {
     }).catch(() => {});
 
   checkUnreadMessages();
+  loadFriendRequests();
 }
 
 init();
