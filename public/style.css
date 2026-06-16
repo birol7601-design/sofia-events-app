@@ -826,3 +826,127 @@ body.organizer-dark .form-label  { color: #B5AE9D; }
 body.organizer-dark .promote-intro { color: #B5AE9D; }
 body.organizer-dark .error-text  { color: #E8456B; }
 body.organizer-dark .success-text { color: #D4AF37; }
+
+/* === AUTH & PROFILE === */
+.dark-input {
+  background: #0A0912;
+  border: 1px solid #D4AF37;
+  color: #F0E8D6;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.dark-input::placeholder { color: #6E6A5F; }
+
+.dark-input:focus {
+  border-color: #F4D06F;
+  outline: none;
+}
+
+.gold-btn {
+  background: linear-gradient(135deg, #F4D06F, #D4AF37, #B8860B);
+  color: #0A0912;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  border: none;
+  border-radius: 999px;
+  padding: 12px 24px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.tab-switcher {
+  display: flex;
+  border-bottom: 1px solid #2A2736;
+  margin: 0 14px 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #6E6A5F;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 12px 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.tab-btn.active { color: #D4AF37; }
+
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #D4AF37;
+}
+
+.going-btn {
+  margin-top: 8px;
+  background: transparent;
+  border: 1px solid rgba(212,175,55,0.45);
+  color: #D4AF37;
+  border-radius: 999px;
+  font-size: 11px;
+  padding: 5px 14px;
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-weight: 500;
+  width: 100%;
+  text-align: center;
+}
+
+.going-btn.attending {
+  background: rgba(212,175,55,0.15);
+  border-color: #D4AF37;
+}
+
+.auth-tab-underline {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #2A2736;
+  margin-bottom: 20px;
+}
+
+.auth-tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: #6E6A5F;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px 0;
+  cursor: pointer;
+  position: relative;
+}
+
+.auth-tab-btn.active {
+  color: #D4AF37;
+}
+
+.auth-tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #D4AF37;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

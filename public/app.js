@@ -1,4 +1,4 @@
-const API_BASE = 'https://sofiabuzz.com';
+const API_BASE = '';
 
 const GOLD_GRADIENT = 'linear-gradient(135deg, #F4D06F 0%, #D4AF37 50%, #B8860B 100%)';
 
@@ -26,39 +26,110 @@ const CORNER_SVG = (cls) => `<svg class="corner-flourish ${cls}" width="28" heig
 
 let allEvents = [];
 let activeCategory = 'all';
+let savedIds = [];
+let attendingIds = [];
 
-function getSavedEvents() {
-  try { return JSON.parse(localStorage.getItem('savedEvents') || '[]'); } catch { return []; }
+function initNav() {
+  const token = localStorage.getItem('userToken');
+  const navProfile = document.getElementById('nav-profile');
+  const navSaved = document.getElementById('nav-saved');
+  if (!navProfile) return;
+  if (!token) {
+    navProfile.href = 'auth.html';
+    if (navSaved) navSaved.href = 'auth.html';
+  } else {
+    const initial = (localStorage.getItem('userName') || '?')[0].toUpperCase();
+    const color = localStorage.getItem('userAvatarColor') || '#D4AF37';
+    navProfile.innerHTML = `<span class="nav-icon" style="width:22px;height:22px;border-radius:50%;background:${color};color:#0A0912;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${initial}</span><span class="nav-label">Profile</span>`;
+  }
 }
 
-function setSavedEvents(ids) {
-  localStorage.setItem('savedEvents', JSON.stringify(ids));
+async function fetchUserIds() {
+  const token = localStorage.getItem('userToken');
+  if (!token) return;
+  try {
+    const [savedRes, attendingRes] = await Promise.all([
+      fetch(`${API_BASE}/api/users/saved/ids`, { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch(`${API_BASE}/api/users/attending/ids`, { headers: { 'Authorization': `Bearer ${token}` } }),
+    ]);
+    if (savedRes.ok) { const d = await savedRes.json(); savedIds = d.savedIds.map(String); }
+    if (attendingRes.ok) { const d = await attendingRes.json(); attendingIds = d.attendingIds.map(String); }
+  } catch {}
 }
 
-function toggleSaved(eventId) {
-  const saved = getSavedEvents();
-  const id = String(eventId);
-  const idx = saved.indexOf(id);
-  if (idx === -1) { saved.push(id); } else { saved.splice(idx, 1); }
-  setSavedEvents(saved);
-  return idx === -1;
-}
-
-function handleHeartClick(domEvent, eventId) {
+async function handleHeartClick(domEvent, eventId) {
   domEvent.stopPropagation();
-  const nowSaved = toggleSaved(eventId);
-  const path = domEvent.currentTarget.querySelector('path');
-  path.setAttribute('fill', nowSaved ? '#D4AF37' : 'none');
-  path.setAttribute('stroke', nowSaved ? '#D4AF37' : 'white');
+  const btn = domEvent.currentTarget;
+  const path = btn.querySelector('path');
+  const token = localStorage.getItem('userToken');
+
+  if (!token) { window.location.href = 'auth.html'; return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/users/saved/${eventId}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.saved) {
+        savedIds.push(String(eventId));
+        path.setAttribute('fill', '#D4AF37');
+        path.setAttribute('stroke', '#D4AF37');
+      } else {
+        savedIds = savedIds.filter(id => id !== String(eventId));
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', 'white');
+      }
+    }
+  } catch {}
 }
 
-function restoreHeartStates() {
-  const saved = getSavedEvents();
+async function handleGoingClick(domEvent, eventId) {
+  domEvent.stopPropagation();
+  const btn = domEvent.currentTarget;
+  const token = localStorage.getItem('userToken');
+
+  if (!token) { window.location.href = 'auth.html'; return; }
+
+  try {
+    const res = await fetch(`${API_BASE}/api/users/attending/${eventId}`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.attending) {
+        attendingIds.push(String(eventId));
+        btn.classList.add('attending');
+        btn.textContent = "Going ✓";
+      } else {
+        attendingIds = attendingIds.filter(id => id !== String(eventId));
+        btn.classList.remove('attending');
+        btn.textContent = "Going";
+      }
+    }
+  } catch {}
+}
+
+function restoreCardStates() {
   document.querySelectorAll('.heart-btn[data-event-id]').forEach(btn => {
-    if (saved.includes(String(btn.dataset.eventId))) {
-      const path = btn.querySelector('path');
+    const path = btn.querySelector('path');
+    if (savedIds.includes(String(btn.dataset.eventId))) {
       path.setAttribute('fill', '#D4AF37');
       path.setAttribute('stroke', '#D4AF37');
+    } else {
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', 'white');
+    }
+  });
+  document.querySelectorAll('.going-card-btn[data-event-id]').forEach(btn => {
+    if (attendingIds.includes(String(btn.dataset.eventId))) {
+      btn.classList.add('attending');
+      btn.textContent = "Going ✓";
+    } else {
+      btn.classList.remove('attending');
+      btn.textContent = "Going";
     }
   });
 }
@@ -68,8 +139,10 @@ async function loadEvents() {
   try {
     const response = await fetch(`${API_BASE}/api/events`);
     allEvents = await response.json();
+    await fetchUserIds();
     buildFilterBar();
     renderEvents('all');
+    initNav();
   } catch (err) {
     container.innerHTML = '<p style="color:var(--muted);padding:1rem 0;">Error loading events.</p>';
     console.error(err);
@@ -121,7 +194,7 @@ function renderEvents(category) {
   }
 
   container.innerHTML = filtered.map(event => buildCardHTML(event)).join('');
-  restoreHeartStates();
+  restoreCardStates();
 }
 
 function buildCardHTML(event) {
@@ -140,6 +213,8 @@ function buildCardHTML(event) {
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
     </button>`;
+
+  const goingBtn = `<button class="going-btn going-card-btn" data-event-id="${event.id}" onclick="handleGoingClick(event, '${event.id}')">Going</button>`;
 
   const cardInner = `
     <div class="event-card${event.is_featured ? ' featured' : ''}">
@@ -165,6 +240,7 @@ function buildCardHTML(event) {
             </div>
             <span class="cat-badge" style="background:${info.badgeBg};color:${info.badgeText};">${info.emoji} ${event.category}</span>
           </div>
+          ${goingBtn}
         </div>
       </div>
     </div>`;

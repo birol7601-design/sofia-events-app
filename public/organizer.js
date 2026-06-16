@@ -1,13 +1,29 @@
-const API_BASE = 'https://sofiabuzz.com';
+const API_BASE = '';
 let token = localStorage.getItem('organizerToken');
 let organizerName = localStorage.getItem('organizerName');
 let organizerEvents = [];
 let selectedDays = null;
 let selectedSlot = null;
 
+function initNav() {
+  const userToken = localStorage.getItem('userToken');
+  const navProfile = document.getElementById('nav-profile');
+  const navSaved = document.getElementById('nav-saved');
+  if (!navProfile) return;
+  if (!userToken) {
+    navProfile.href = 'auth.html';
+    if (navSaved) navSaved.href = 'auth.html';
+  } else {
+    const initial = (localStorage.getItem('userName') || '?')[0].toUpperCase();
+    const color = localStorage.getItem('userAvatarColor') || '#D4AF37';
+    navProfile.innerHTML = `<span class="nav-icon" style="width:22px;height:22px;border-radius:50%;background:${color};color:#0A0912;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${initial}</span><span class="nav-label">Profile</span>`;
+  }
+}
+
 if (token) {
   showDashboard();
 }
+initNav();
 
 document.getElementById('login-btn').addEventListener('click', async () => {
   const email = document.getElementById('login-email').value;

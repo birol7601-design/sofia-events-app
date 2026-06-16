@@ -1,4 +1,4 @@
-const API_BASE = 'https://sofiabuzz.com';
+const API_BASE = '';
 
 const CATEGORY_MAP = {
   'Rock':        { emoji: '🎸', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
@@ -43,6 +43,9 @@ async function loadEvent() {
     const event = await res.json();
     populatePage(event, id);
     loadMoreShows(event, id);
+    wireHeartBtn(id);
+    wireGoingBtn(id);
+    initNav();
   } catch (err) {
     showError('Failed to load event.');
     console.error(err);
@@ -161,6 +164,114 @@ async function loadMoreShows(currentEvent, rawId) {
   } catch (_) {
     container.innerHTML = '<p style="font-size:13px;color:#6E6A5F;font-style:italic;font-family:\'IBM Plex Sans\',sans-serif;">No other shows in this category right now.</p>';
   }
+}
+
+function initNav() {
+  const token = localStorage.getItem('userToken');
+  const navProfile = document.getElementById('nav-profile');
+  const navSaved = document.getElementById('nav-saved');
+  if (!navProfile) return;
+  if (!token) {
+    navProfile.href = 'auth.html';
+    if (navSaved) navSaved.href = 'auth.html';
+  } else {
+    const initial = (localStorage.getItem('userName') || '?')[0].toUpperCase();
+    const color = localStorage.getItem('userAvatarColor') || '#D4AF37';
+    navProfile.innerHTML = `<span class="nav-icon" style="width:22px;height:22px;border-radius:50%;background:${color};color:#0A0912;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${initial}</span><span class="nav-label">Profile</span>`;
+  }
+}
+
+async function wireHeartBtn(eventId) {
+  const btn = document.getElementById('hero-heart-btn');
+  if (!btn) return;
+  const token = localStorage.getItem('userToken');
+
+  async function setHeartState(saved) {
+    const path = btn.querySelector('path');
+    path.setAttribute('fill', saved ? '#D4AF37' : 'none');
+    path.setAttribute('stroke', saved ? '#D4AF37' : 'white');
+  }
+
+  if (token) {
+    try {
+      const res = await fetch(`${API_BASE}/api/users/saved/ids`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setHeartState(data.savedIds.map(String).includes(String(eventId)));
+      }
+    } catch {}
+  }
+
+  btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!token) { window.location.href = 'auth.html'; return; }
+    try {
+      const res = await fetch(`${API_BASE}/api/users/saved/${eventId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setHeartState(data.saved);
+      }
+    } catch {}
+  });
+}
+
+async function wireGoingBtn(eventId) {
+  const goingBtn = document.getElementById('going-btn');
+  const strip = document.getElementById('attending-strip');
+  const countText = document.getElementById('attending-count-text');
+  if (!goingBtn || !strip) return;
+
+  const token = localStorage.getItem('userToken');
+
+  async function loadCount() {
+    try {
+      const res = await fetch(`${API_BASE}/api/events/${eventId}/attending-count`);
+      if (res.ok) {
+        const data = await res.json();
+        const n = data.count;
+        countText.textContent = n > 0 ? `${n} ${n === 1 ? 'person' : 'people'} attending` : '';
+        strip.style.display = '';
+      }
+    } catch {}
+  }
+
+  async function loadAttending() {
+    if (!token) { strip.style.display = ''; return; }
+    try {
+      const res = await fetch(`${API_BASE}/api/users/attending/ids`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const isAttending = data.attendingIds.map(String).includes(String(eventId));
+        goingBtn.classList.toggle('attending', isAttending);
+        goingBtn.textContent = isAttending ? "I'm going ✓" : "I'm going";
+      }
+    } catch {}
+  }
+
+  await Promise.all([loadCount(), loadAttending()]);
+
+  goingBtn.addEventListener('click', async () => {
+    if (!token) { window.location.href = 'auth.html'; return; }
+    try {
+      const res = await fetch(`${API_BASE}/api/users/attending/${eventId}`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        goingBtn.classList.toggle('attending', data.attending);
+        goingBtn.textContent = data.attending ? "I'm going ✓" : "I'm going";
+        loadCount();
+      }
+    } catch {}
+  });
 }
 
 function showError(msg) {
