@@ -2,11 +2,14 @@ const API = '';
 const params = new URLSearchParams(window.location.search);
 const userId = params.get('id');
 
-function getInitial(name) { return name ? name[0].toUpperCase() : '?'; }
-
 function formatDate(ts) {
   if (!ts) return '';
   return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function authHeaders() {
+  const t = localStorage.getItem('userToken');
+  return t ? { 'Authorization': `Bearer ${t}`, 'Content-Type': 'application/json' } : {};
 }
 
 function CATEGORY_MAP(cat) {
@@ -21,7 +24,7 @@ function CATEGORY_MAP(cat) {
     hiphop: { emoji:'🎤', accent:'#784212', badgeBg:'rgba(120,66,18,0.18)',   badgeText:'#F0B27A' },
     drum_and_bass: { emoji:'🥁', accent:'#1A5276', badgeBg:'rgba(26,82,118,0.18)', badgeText:'#85C1E9' },
   };
-  return m[cat] || { emoji:'🎵', accent:'#D4AF37', badgeBg:'rgba(212,175,55,0.18)', badgeText:'#F4D06F' };
+  return m[(cat||'').toLowerCase()] || { emoji:'🎵', accent:'#D4AF37', badgeBg:'rgba(212,175,55,0.18)', badgeText:'#F4D06F' };
 }
 
 function eventCardHTML(ev) {
@@ -29,14 +32,12 @@ function eventCardHTML(ev) {
   const date = formatDate(ev.start_time);
   const img = ev.image_url
     ? `<div class="event-img" style="background-image:url('${ev.image_url}')"></div>`
-    : `<div class="event-img" style="background:linear-gradient(135deg,${c.accent}22,${c.accent}44);display:flex;align-items:center;justify-content:center;font-size:2rem;">${c.emoji}</div>`;
+    : `<div class="event-img" style="background:${c.accent}20;"></div>`;
   return `
     <div class="event-card" onclick="window.location.href='event.html?id=${ev.id}'">
       <div class="card-image-wrap">${img}</div>
       <div class="card-body">
-        <div class="card-badges">
-          <span class="badge" style="background:${c.badgeBg};color:${c.badgeText};">${c.emoji} ${ev.category}</span>
-        </div>
+        <div class="card-badges"><span class="badge" style="background:${c.badgeBg};color:${c.badgeText};">${c.emoji} ${ev.category}</span></div>
         <h3 class="card-title">${ev.title}</h3>
         <div class="card-meta"><span>${ev.venue}</span><span>${date}</span></div>
         <div class="card-price">${ev.price_text || 'Free'}</div>
@@ -49,30 +50,20 @@ function renderEmpty(id, tab) {
   document.getElementById(id).innerHTML = `
     <div style="text-align:center;padding:48px 24px 32px;">
       <span style="display:block;font-size:48px;margin-bottom:12px;">${isSaved ? '🎭' : '🎪'}</span>
-      <div style="font-family:'Playfair Display',serif;color:#D4AF37;font-size:16px;font-weight:700;margin-bottom:8px;">
-        ${isSaved ? 'No saved events yet' : 'Not attending any events yet'}
-      </div>
-      <p style="font-family:'IBM Plex Sans',sans-serif;color:#6E6A5F;font-size:13px;margin-bottom:20px;">
-        ${isSaved ? 'Tap ♡ on any event to save it' : "Tap 'I'm going' on any event to mark attendance"}
-      </p>
-      <a href="index.html" style="display:inline-block;background:linear-gradient(135deg,#F4D06F,#D4AF37,#B8860B);color:#0A0912;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Browse events →</a>
+      <div style="font-family:'Playfair Display',serif;color:#D4AF37;font-size:16px;font-weight:700;margin-bottom:8px;">${isSaved ? 'No saved events yet' : 'Not attending any events yet'}</div>
     </div>`;
 }
 
 async function loadUserTab(tab) {
   const listId = `user-${tab}-list`;
   document.getElementById(listId).innerHTML = `<p style="text-align:center;color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Loading…</p>`;
-  const token = localStorage.getItem('userToken');
-  const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
   try {
-    const res = await fetch(`${API}/api/users/${userId}/${tab}`, { headers });
+    const res = await fetch(`${API}/api/users/${userId}/${tab}`, { headers: authHeaders() });
     if (!res.ok) { renderEmpty(listId, tab); return; }
     const events = await res.json();
     if (events.length === 0) { renderEmpty(listId, tab); return; }
     document.getElementById(listId).innerHTML = events.map(eventCardHTML).join('');
-  } catch {
-    renderEmpty(listId, tab);
-  }
+  } catch { renderEmpty(listId, tab); }
 }
 
 function switchUserTab(tab) {
@@ -83,25 +74,107 @@ function switchUserTab(tab) {
   loadUserTab(tab);
 }
 
+// ── FRIEND ACTIONS ─────────────────────────────────────────────────────────────
+
+function btnStyle(primary) {
+  if (primary) return 'background:linear-gradient(135deg,#F4D06F,#D4AF37,#B8860B);color:#0A0912;border:none;border-radius:999px;font-size:12px;padding:7px 18px;cursor:pointer;font-family:\'IBM Plex Sans\',sans-serif;font-weight:700;';
+  return 'background:transparent;border:1px solid rgba(212,175,55,0.5);color:#D4AF37;border-radius:999px;font-size:12px;padding:7px 18px;cursor:pointer;font-family:\'IBM Plex Sans\',sans-serif;';
+}
+
+function renderFriendActions(status, profileAvatarType, username) {
+  const actionsEl = document.getElementById('friend-actions');
+  if (!actionsEl) return;
+  const msgUrl = `messages.html?user=${userId}&name=${encodeURIComponent(username)}&avatar=${profileAvatarType || 'star'}`;
+
+  if (status === 'accepted') {
+    actionsEl.innerHTML = `
+      <button disabled style="${btnStyle(false)}opacity:0.5;cursor:default;">Friends ✓</button>
+      <a href="${msgUrl}" style="${btnStyle(true)}text-decoration:none;display:inline-block;">Message</a>`;
+  } else if (status === 'pending_sent') {
+    actionsEl.innerHTML = `
+      <button disabled style="${btnStyle(false)}opacity:0.5;cursor:default;">Request sent ✓</button>
+      <a href="${msgUrl}" style="${btnStyle(false)}text-decoration:none;display:inline-block;">Message</a>`;
+  } else if (status === 'pending_received') {
+    actionsEl.innerHTML = `
+      <button onclick="acceptFriend()" style="${btnStyle(true)}">Accept</button>
+      <button onclick="declineFriend()" style="${btnStyle(false)}">Decline</button>
+      <a href="${msgUrl}" style="${btnStyle(false)}text-decoration:none;display:inline-block;">Message</a>`;
+  } else {
+    actionsEl.innerHTML = `
+      <button onclick="sendFriendRequest()" style="${btnStyle(true)}">Add friend</button>
+      <a href="${msgUrl}" style="${btnStyle(false)}text-decoration:none;display:inline-block;">Message</a>`;
+  }
+}
+
+async function sendFriendRequest() {
+  try {
+    const res = await fetch(`${API}/api/friends/request/${userId}`, { method: 'POST', headers: authHeaders() });
+    if (res.ok || res.status === 400) {
+      const actionsEl = document.getElementById('friend-actions');
+      if (actionsEl) {
+        const btn = actionsEl.querySelector('button');
+        if (btn) { btn.textContent = 'Request sent ✓'; btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'default'; }
+      }
+    }
+  } catch {}
+}
+
+async function acceptFriend() {
+  try {
+    const res = await fetch(`${API}/api/friends/accept/${userId}`, { method: 'POST', headers: authHeaders() });
+    if (res.ok) {
+      const username = document.getElementById('user-username').textContent;
+      const avatarType = localStorage.getItem('_viewedUserAvatarType') || 'star';
+      renderFriendActions('accepted', avatarType, username);
+    }
+  } catch {}
+}
+
+async function declineFriend() {
+  try {
+    const res = await fetch(`${API}/api/friends/decline/${userId}`, { method: 'POST', headers: authHeaders() });
+    if (res.ok) {
+      const username = document.getElementById('user-username').textContent;
+      const avatarType = localStorage.getItem('_viewedUserAvatarType') || 'star';
+      renderFriendActions('none', avatarType, username);
+    }
+  } catch {}
+}
+
+// ── UNREAD DOT ────────────────────────────────────────────────────────────────
+
+async function checkUnreadMessages() {
+  const token = localStorage.getItem('userToken');
+  if (!token) return;
+  try {
+    const res = await fetch(`${API}/api/messages/unread-count`, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!res.ok) return;
+    const { count } = await res.json();
+    if (count > 0) {
+      const navMsg = document.getElementById('nav-messages');
+      if (navMsg && !navMsg.querySelector('.unread-dot')) {
+        const dot = document.createElement('span');
+        dot.className = 'unread-dot';
+        dot.style.cssText = 'position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#D4AF37;';
+        navMsg.style.position = 'relative';
+        navMsg.appendChild(dot);
+      }
+    }
+  } catch {}
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+
 async function init() {
   if (!userId) { window.location.href = 'index.html'; return; }
 
-  const navProfile = document.getElementById('nav-profile');
   const token = localStorage.getItem('userToken');
-  if (!token) {
-    navProfile.href = 'auth.html';
-  }
+  const myId = localStorage.getItem('userId');
 
   try {
-    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
-    const res = await fetch(`${API}/api/users/${userId}/profile`, { headers });
+    const res = await fetch(`${API}/api/users/${userId}/profile`, { headers: token ? { 'Authorization': `Bearer ${token}` } : {} });
 
-    if (res.status === 403) {
-      document.getElementById('user-hero').style.display = 'none';
-      document.getElementById('private-msg').style.display = 'block';
-      return;
-    }
-    if (!res.ok) {
+    if (res.status === 403 || !res.ok) {
       document.getElementById('user-hero').style.display = 'none';
       document.getElementById('private-msg').style.display = 'block';
       return;
@@ -112,14 +185,22 @@ async function init() {
     document.getElementById('user-bio').textContent = user.bio || '';
 
     const avatarEl = document.getElementById('user-avatar');
-    const c = user.avatar_color || '#D4AF37';
-    avatarEl.style.background = `radial-gradient(circle at 30% 30%, rgba(255,255,255,0.15), transparent), ${c}`;
-    avatarEl.textContent = getInitial(user.username);
+    avatarEl.innerHTML = window.getAvatarSVG(user.avatar_type || 'star', 72);
+    localStorage.setItem('_viewedUserAvatarType', user.avatar_type || 'star');
 
     const wm = document.getElementById('user-hero-watermark');
     if (wm) wm.textContent = user.username;
-
     document.title = `${user.username} — SofiaBuzz`;
+
+    if (token && myId && String(myId) !== String(userId)) {
+      try {
+        const statusRes = await fetch(`${API}/api/friends/status/${userId}`, { headers: authHeaders() });
+        if (statusRes.ok) {
+          const { status } = await statusRes.json();
+          renderFriendActions(status, user.avatar_type || 'star', user.username);
+        }
+      } catch {}
+    }
 
     document.getElementById('user-tabs-wrap').style.display = '';
     switchUserTab('saved');
@@ -128,6 +209,8 @@ async function init() {
     document.getElementById('user-hero').style.display = 'none';
     document.getElementById('user-info').style.display = 'none';
   }
+
+  checkUnreadMessages();
 }
 
 init();

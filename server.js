@@ -199,7 +199,7 @@ app.post('/api/users/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, id: user.id, username: user.username, email: user.email, avatarColor: user.avatar_color, bio: user.bio, isPublic: user.is_public });
+    res.json({ token, id: user.id, userId: user.id, username: user.username, email: user.email, avatarColor: user.avatar_color, avatarType: user.avatar_type, bio: user.bio, isPublic: user.is_public });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -208,7 +208,7 @@ app.post('/api/users/login', async (req, res) => {
 app.get('/api/users/me', authenticateUser, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, username, email, bio, avatar_color, is_public, created_at FROM users WHERE id = $1',
+      'SELECT id, username, email, bio, avatar_color, avatar_type, is_public, created_at FROM users WHERE id = $1',
       [req.userId]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
@@ -223,12 +223,13 @@ app.patch('/api/users/me', authenticateUser, async (req, res) => {
     const fields = [];
     const values = [];
     let i = 1;
-    if (req.body.bio !== undefined)       { fields.push(`bio = $${i++}`);       values.push(req.body.bio); }
-    if (req.body.is_public !== undefined) { fields.push(`is_public = $${i++}`); values.push(req.body.is_public); }
+    if (req.body.bio !== undefined)         { fields.push(`bio = $${i++}`);         values.push(req.body.bio); }
+    if (req.body.is_public !== undefined)   { fields.push(`is_public = $${i++}`);   values.push(req.body.is_public); }
+    if (req.body.avatar_type !== undefined) { fields.push(`avatar_type = $${i++}`); values.push(req.body.avatar_type); }
     if (fields.length === 0) return res.status(400).json({ error: 'No fields to update' });
     values.push(req.userId);
     const result = await pool.query(
-      `UPDATE users SET ${fields.join(', ')} WHERE id = $${i} RETURNING id, username, email, bio, avatar_color, is_public`,
+      `UPDATE users SET ${fields.join(', ')} WHERE id = $${i} RETURNING id, username, email, bio, avatar_color, avatar_type, is_public`,
       values
     );
     res.json(result.rows[0]);
@@ -242,7 +243,7 @@ app.get('/api/users/search', async (req, res) => {
     const { q } = req.query;
     if (!q || q.length < 2) return res.status(400).json({ error: 'Query must be at least 2 characters' });
     const result = await pool.query(
-      'SELECT id, username, bio, avatar_color FROM users WHERE username ILIKE $1 AND is_public = true LIMIT 10',
+      'SELECT id, username, bio, avatar_color, avatar_type FROM users WHERE username ILIKE $1 AND is_public = true LIMIT 10',
       [`%${q}%`]
     );
     res.json(result.rows);
@@ -309,7 +310,7 @@ app.post('/api/users/attending/:eventId', authenticateUser, async (req, res) => 
 app.get('/api/users/:id/profile', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, username, bio, avatar_color, is_public FROM users WHERE id = $1', [req.params.id]
+      'SELECT id, username, bio, avatar_color, avatar_type, is_public FROM users WHERE id = $1', [req.params.id]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
     const user = result.rows[0];
@@ -389,6 +390,124 @@ app.get('/api/events/:id/attending-count', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// ── FRIEND ROUTES ────────────────────────────────────────────────────────────
+
+app.post('/api/friends/request/:userId', authenticateUser, async (req, res) => {
+  try {
+    const receiver = req.params.userId;
+    if (String(receiver) === String(req.userId)) return res.status(400).json({ error: 'Cannot friend yourself' });
+    await pool.query(
+      'INSERT INTO friendships (requester_id, receiver_id, status) VALUES ($1, $2, $3)',
+      [req.userId, receiver, 'pending']
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    if (err.code === '23505') return res.status(400).json({ error: 'Request already exists' });
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.post('/api/friends/accept/:userId', authenticateUser, async (req, res) => {
+  try {
+    await pool.query(
+      'UPDATE friendships SET status=$1 WHERE requester_id=$2 AND receiver_id=$3',
+      ['accepted', req.params.userId, req.userId]
+    );
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/friends/decline/:userId', authenticateUser, async (req, res) => {
+  try {
+    await pool.query(
+      'DELETE FROM friendships WHERE (requester_id=$1 AND receiver_id=$2) OR (requester_id=$2 AND receiver_id=$1)',
+      [req.params.userId, req.userId]
+    );
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/friends', authenticateUser, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT u.id, u.username, u.bio, u.avatar_color AS "avatarColor", u.avatar_type AS "avatarType"
+      FROM friendships f
+      JOIN users u ON (
+        CASE WHEN f.requester_id = $1 THEN f.receiver_id ELSE f.requester_id END = u.id
+      )
+      WHERE (f.requester_id = $1 OR f.receiver_id = $1) AND f.status = 'accepted'
+    `, [req.userId]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/friends/pending', authenticateUser, async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT u.id, u.username, u.avatar_type AS "avatarType", u.avatar_color AS "avatarColor"
+      FROM friendships f
+      JOIN users u ON f.requester_id = u.id
+      WHERE f.receiver_id = $1 AND f.status = 'pending'
+    `, [req.userId]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/friends/status/:userId', authenticateUser, async (req, res) => {
+  try {
+    const other = req.params.userId;
+    const result = await pool.query(
+      'SELECT status, requester_id FROM friendships WHERE (requester_id=$1 AND receiver_id=$2) OR (requester_id=$2 AND receiver_id=$1)',
+      [req.userId, other]
+    );
+    if (result.rows.length === 0) return res.json({ status: 'none' });
+    const row = result.rows[0];
+    if (row.status === 'accepted') return res.json({ status: 'accepted' });
+    if (String(row.requester_id) === String(req.userId)) return res.json({ status: 'pending_sent' });
+    return res.json({ status: 'pending_received' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── MESSAGE ROUTES ────────────────────────────────────────────────────────────
+
+app.get('/api/messages/unread-count', authenticateUser, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT COUNT(*) FROM messages WHERE receiver_id=$1 AND read=false', [req.userId]
+    );
+    res.json({ count: parseInt(result.rows[0].count) });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/messages/:userId', authenticateUser, async (req, res) => {
+  try {
+    const other = req.params.userId;
+    await pool.query(
+      'UPDATE messages SET read=true WHERE sender_id=$1 AND receiver_id=$2 AND read=false',
+      [other, req.userId]
+    );
+    const result = await pool.query(`
+      SELECT id, sender_id, receiver_id, content, read, created_at
+      FROM messages
+      WHERE (sender_id=$1 AND receiver_id=$2) OR (sender_id=$2 AND receiver_id=$1)
+      ORDER BY created_at ASC
+    `, [req.userId, other]);
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/messages/:userId', authenticateUser, async (req, res) => {
+  try {
+    const { content } = req.body;
+    if (!content || !content.trim()) return res.status(400).json({ error: 'Message cannot be empty' });
+    const result = await pool.query(
+      'INSERT INTO messages (sender_id, receiver_id, content) VALUES ($1, $2, $3) RETURNING *',
+      [req.userId, req.params.userId, content.trim()]
+    );
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 const PORT = process.env.PORT || 3000;
