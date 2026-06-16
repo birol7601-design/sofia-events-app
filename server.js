@@ -168,12 +168,12 @@ function authenticateUser(req, res, next) {
 
 app.post('/api/users/register', async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, email_marketing = false } = req.body;
     if (!username || !email || !password) return res.status(400).json({ error: 'All fields required' });
     const hash = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email',
-      [username.trim(), email.trim().toLowerCase(), hash]
+      'INSERT INTO users (username, email, password_hash, email_marketing) VALUES ($1, $2, $3, $4) RETURNING id, username, email',
+      [username.trim(), email.trim().toLowerCase(), hash, !!email_marketing]
     );
     res.json(result.rows[0]);
   } catch (err) {

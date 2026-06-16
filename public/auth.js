@@ -1,5 +1,13 @@
 const API = '';
 
+function togglePw(inputId, btnId) {
+  const input = document.getElementById(inputId);
+  const btn = document.getElementById(btnId);
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  btn.textContent = isHidden ? '🙈' : '👁';
+}
+
 function showTab(tab) {
   const isLogin = tab === 'login';
   document.getElementById('login-form').style.display = isLogin ? '' : 'none';
@@ -51,6 +59,8 @@ document.getElementById('register-btn').addEventListener('click', async () => {
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
   const confirm = document.getElementById('reg-confirm').value;
+  const emailMarketing = document.getElementById('email-consent').checked;
+  const privacyConsent = document.getElementById('privacy-consent').checked;
   const errEl = document.getElementById('register-error');
   errEl.textContent = '';
 
@@ -58,6 +68,7 @@ document.getElementById('register-btn').addEventListener('click', async () => {
   if (username.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
   if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
   if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
+  if (!privacyConsent) { errEl.textContent = 'Please accept the Privacy Policy to continue.'; return; }
 
   document.getElementById('register-btn').textContent = 'Creating account…';
   document.getElementById('register-btn').disabled = true;
@@ -66,7 +77,7 @@ document.getElementById('register-btn').addEventListener('click', async () => {
     const regRes = await fetch(`${API}/api/users/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password })
+      body: JSON.stringify({ username, email, password, email_marketing: emailMarketing })
     });
     const regData = await regRes.json();
     if (!regRes.ok) { errEl.textContent = regData.error || 'Registration failed.'; return; }
@@ -100,4 +111,7 @@ document.getElementById('register-btn').addEventListener('click', async () => {
 
 if (localStorage.getItem('userToken')) {
   window.location.href = 'profile.html';
+} else if (!localStorage.getItem('hasVisitedAuth')) {
+  localStorage.setItem('hasVisitedAuth', 'true');
+  showTab('register');
 }

@@ -4,3 +4,5 @@ migrate-to-railway.js
 add-artist-bio-railway.js
 update-content-railway.js
 add-club33-event-railway.js
+setup-user-tables.js
+setup-user-tables-railway.js
