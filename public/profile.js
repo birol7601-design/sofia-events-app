@@ -171,6 +171,62 @@ async function saveProfile() {
   } catch { errEl.textContent = 'Network error.'; }
 }
 
+// ── INLINE AVATAR PICKER ─────────────────────────────────────────────────────
+
+let inlineAvatarType = currentAvatarType;
+
+function buildInlineAvatarPicker() {
+  const grid = document.getElementById('avatar-picker-grid-inline');
+  if (!grid) return;
+  inlineAvatarType = currentAvatarType;
+  grid.innerHTML = AVATAR_KEYS.map(key => `
+    <div id="iapick-${key}" onclick="selectInlineAvatar('${key}')" style="cursor:pointer;border-radius:50%;overflow:hidden;transition:box-shadow 0.15s,opacity 0.15s;">
+      ${window.getAvatarSVG(key, 60)}
+    </div>`).join('');
+  highlightInlineAvatar();
+}
+
+function highlightInlineAvatar() {
+  AVATAR_KEYS.forEach(k => {
+    const el = document.getElementById(`iapick-${k}`);
+    if (!el) return;
+    el.style.boxShadow = k === inlineAvatarType ? '0 0 0 3px #D4AF37' : 'none';
+    el.style.opacity = k === inlineAvatarType ? '1' : '0.6';
+    el.style.borderRadius = '50%';
+  });
+}
+
+function selectInlineAvatar(key) {
+  inlineAvatarType = key;
+  highlightInlineAvatar();
+}
+
+function openAvatarPicker() {
+  buildInlineAvatarPicker();
+  document.getElementById('avatar-picker-inline').style.display = '';
+}
+
+function closeAvatarPicker() {
+  document.getElementById('avatar-picker-inline').style.display = 'none';
+}
+
+async function saveAvatarOnly() {
+  try {
+    const res = await fetch(`${API}/api/users/me`, {
+      method: 'PATCH', headers: authHeaders(),
+      body: JSON.stringify({ avatar_type: inlineAvatarType })
+    });
+    if (res.ok) {
+      currentAvatarType = inlineAvatarType;
+      selectedAvatarType = inlineAvatarType;
+      localStorage.setItem('userAvatarType', currentAvatarType);
+      renderAvatar(currentAvatarType);
+      closeAvatarPicker();
+      showToast('Avatar updated! ✨');
+    }
+  } catch {}
+}
+
 // ── PEOPLE SEARCH ─────────────────────────────────────────────────────────────
 
 function getInitial(name) { return name ? name[0].toUpperCase() : '?'; }
