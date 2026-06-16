@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Cormorant+Garamond:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
 :root {
   --bg: #0A0912;
@@ -100,6 +100,22 @@ header {
   color: var(--muted-dark);
   letter-spacing: 2px;
   font-variant: small-caps;
+}
+
+.header-slogan {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-style: italic;
+  -webkit-text-stroke: 0.5px #D4AF37;
+  color: transparent;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  opacity: 0.85;
+  margin-left: 6px;
+}
+
+@media (max-width: 480px) {
+  .header-slogan { display: none; }
 }
 
 /* ── MAIN ── */
