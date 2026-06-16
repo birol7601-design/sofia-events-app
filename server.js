@@ -132,7 +132,24 @@ app.post('/api/organizer/events', authenticateOrganizer, async (req, res) => {
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
-});const PORT = process.env.PORT || 3000;
+});
+
+app.get('/api/featured-slots/availability', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT fs.slot_number, fs.end_date, e.title
+      FROM featured_slots fs
+      JOIN events e ON e.id = fs.event_id
+      WHERE NOW() BETWEEN fs.start_date AND fs.end_date
+      ORDER BY fs.slot_number
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
