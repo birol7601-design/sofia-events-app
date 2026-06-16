@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SofiaBuzz</title>
+  <title>Saved Events — SofiaBuzz</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -30,21 +30,23 @@
       <span class="header-city">Sofia</span>
     </div>
   </header>
+
   <main style="padding-bottom: 70px;">
-    <div class="filter-bar" id="filter-bar">
-      <button class="filter-btn" data-category="all">🎉 All</button>
+    <div style="text-align:center;padding:24px 0 16px;">
+      <h1 style="font-family:'Playfair Display',serif;color:#D4AF37;font-size:24px;font-weight:700;margin-bottom:4px;">Saved Events</h1>
+      <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;">Your saved events</p>
     </div>
     <div id="event-list" class="event-list">
-      <p>Loading events...</p>
+      <p style="text-align:center;color:var(--muted);padding:2rem 0;">Loading…</p>
     </div>
   </main>
 
   <nav class="bottom-nav">
-    <a href="index.html" class="nav-item active">
+    <a href="index.html" class="nav-item">
       <span class="nav-icon">🏠</span>
       <span class="nav-label">Home</span>
     </a>
-    <a href="saved.html" class="nav-item">
+    <a href="saved.html" class="nav-item active">
       <span class="nav-icon">🔖</span>
       <span class="nav-label">Saved</span>
     </a>
@@ -54,6 +56,6 @@
     </a>
   </nav>
 
-  <script src="app.js"></script>
+  <script src="saved.js"></script>
 </body>
 </html>

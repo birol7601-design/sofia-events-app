@@ -665,3 +665,164 @@ h2 { margin: 1.2rem 0 0.6rem; font-size: 17px; }
 .card-form .slot-btn.selected { background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); color: white; border-color: transparent; }
 .card-form .slot-btn.taken    { opacity: 0.45; cursor: not-allowed; background: #f7f7fb; }
 .card-form button:disabled    { opacity: 0.45; cursor: not-allowed; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #16151F;
+  border-top: 1px solid #2A2736;
+  padding: 10px 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 20;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  text-decoration: none;
+  color: #6E6A5F;
+  flex: 1;
+}
+
+.nav-item.active {
+  color: #D4AF37;
+}
+
+.nav-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.nav-label {
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* === ORGANIZER DARK THEME === */
+body.organizer-dark {
+  background: #0A0912;
+}
+
+body.organizer-dark h2 {
+  font-family: 'Playfair Display', serif;
+  color: #D4AF37;
+  font-size: 18px;
+}
+
+body.organizer-dark .card-form {
+  background: #16151F;
+  border: 1px solid rgba(212,175,55,0.35);
+  border-radius: 14px;
+  box-shadow: none;
+  position: relative;
+}
+
+body.organizer-dark .card-form h2 {
+  color: #D4AF37;
+  margin-top: 0;
+}
+
+body.organizer-dark .card-form input,
+body.organizer-dark .card-form textarea,
+body.organizer-dark .card-form select {
+  background: #0A0912;
+  border: 1px solid #D4AF37;
+  color: #F0E8D6;
+  border-radius: 8px;
+}
+
+body.organizer-dark .card-form input::placeholder,
+body.organizer-dark .card-form textarea::placeholder {
+  color: #6E6A5F;
+}
+
+body.organizer-dark .card-form input:focus,
+body.organizer-dark .card-form textarea:focus,
+body.organizer-dark .card-form select:focus {
+  border-color: #F4D06F;
+  outline: none;
+}
+
+body.organizer-dark .card-form button {
+  background: linear-gradient(135deg, #F4D06F, #D4AF37, #B8860B);
+  color: #0A0912;
+  font-weight: 700;
+  border: none;
+  border-radius: 999px;
+}
+
+body.organizer-dark .card-form .package-btn {
+  background: #0A0912;
+  border: 1.5px solid rgba(212,175,55,0.4);
+  color: #B5AE9D;
+  border-radius: 10px;
+}
+
+body.organizer-dark .card-form .package-btn:hover {
+  border-color: #D4AF37;
+  color: #D4AF37;
+}
+
+body.organizer-dark .card-form .package-btn.active {
+  background: linear-gradient(135deg, #F4D06F, #D4AF37, #B8860B);
+  color: #0A0912;
+  border-color: transparent;
+}
+
+body.organizer-dark .card-form .slot-btn {
+  background: #0A0912;
+  border: 1.5px solid rgba(212,175,55,0.3);
+  color: #B5AE9D;
+}
+
+body.organizer-dark .card-form .slot-btn.available:hover {
+  border-color: #D4AF37;
+  background: rgba(212,175,55,0.08);
+  color: #D4AF37;
+}
+
+body.organizer-dark .card-form .slot-btn.selected {
+  background: linear-gradient(135deg, #F4D06F, #D4AF37, #B8860B);
+  color: #0A0912;
+  border-color: transparent;
+}
+
+body.organizer-dark .card-form .slot-btn.taken {
+  opacity: 0.35;
+  background: #0A0912;
+}
+
+body.organizer-dark .small-btn {
+  background: transparent;
+  color: #D4AF37;
+  border: 1px solid rgba(212,175,55,0.5);
+  border-radius: 999px;
+}
+
+body.organizer-dark .dashboard-header span {
+  color: #F0E8D6;
+  font-family: 'Playfair Display', serif;
+  font-size: 16px;
+}
+
+body.organizer-dark .org-event-card {
+  background: #16151F;
+  border: 1px solid rgba(212,175,55,0.2);
+  box-shadow: none;
+}
+
+body.organizer-dark .org-event-card .title { color: #F0E8D6; }
+body.organizer-dark .org-event-card .meta  { color: #6E6A5F; }
+
+body.organizer-dark .form-label  { color: #B5AE9D; }
+body.organizer-dark .promote-intro { color: #B5AE9D; }
+body.organizer-dark .error-text  { color: #E8456B; }
+body.organizer-dark .success-text { color: #D4AF37; }
