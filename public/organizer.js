@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = 'https://sofiabuzz.com';
 let token = localStorage.getItem('organizerToken');
 let organizerName = localStorage.getItem('organizerName');
 let organizerEvents = [];
@@ -15,8 +15,8 @@ function initNav() {
     if (navSaved) navSaved.href = 'auth.html';
   } else {
     const initial = (localStorage.getItem('userName') || '?')[0].toUpperCase();
-    const color = localStorage.getItem('userAvatarColor') || '#D4AF37';
-    navProfile.innerHTML = `<span class="nav-icon" style="width:22px;height:22px;border-radius:50%;background:${color};color:#0A0912;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${initial}</span><span class="nav-label">Profile</span>`;
+    const color = localStorage.getItem('userAvatarColor') || '#FF8C00';
+    navProfile.innerHTML = `<span class="nav-icon" style="width:22px;height:22px;border-radius:50%;background:${color};color:#1A0A00;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${initial}</span><span class="nav-label">Profile</span>`;
   }
 }
 

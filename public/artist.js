@@ -1,4 +1,4 @@
-const API = '';
+const API = 'https://sofiabuzz.com';
 
 const CAT_COLORS = {
   Rock: '#6B1A00', Electronic: '#3D1F80', Jazz: '#804000',

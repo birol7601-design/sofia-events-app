@@ -1,4 +1,4 @@
-const API = '';
+const API = 'https://sofiabuzz.com';
 let myUserId = localStorage.getItem('userId');
 let currentFriendId = null;
 let currentFriendName = '';

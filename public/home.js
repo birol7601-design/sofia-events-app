@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = 'https://sofiabuzz.com';
 
 const CATEGORY_MAP = {
   'Rock':       { emoji: '🎸', accent: '#6B1A00' },

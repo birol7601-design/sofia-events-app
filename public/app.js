@@ -1,4 +1,4 @@
-const API_BASE = '';
+const API_BASE = 'https://sofiabuzz.com';
 
 const GOLD_GRADIENT = 'linear-gradient(135deg, #FF6B35 0%, #FF8C00 50%, #FFD700 100%)';
 

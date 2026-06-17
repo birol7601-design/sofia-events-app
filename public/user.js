@@ -1,4 +1,4 @@
-const API = '';
+const API = 'https://sofiabuzz.com';
 const params = new URLSearchParams(window.location.search);
 const userId = params.get('id');
 

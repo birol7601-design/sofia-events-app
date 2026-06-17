@@ -1,4 +1,4 @@
-const API = '';
+const API = 'https://sofiabuzz.com';
 
 let selectedGenres = new Set();
 let selectedArtistIds = new Set();

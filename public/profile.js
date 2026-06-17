@@ -1,4 +1,4 @@
-const API = '';
+const API = 'https://sofiabuzz.com';
 let currentTab = 'saved';
 let searchTimer = null;
 let isPublic = true;
