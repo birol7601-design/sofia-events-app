@@ -174,7 +174,13 @@ async function loadEvents() {
     allEvents = await response.json();
     await fetchUserIds();
     buildFilterBar();
-    renderEvents('all');
+    const genreParam = new URLSearchParams(window.location.search).get('genre');
+    const matchBtn = genreParam ? document.querySelector(`.filter-btn[data-category="${genreParam}"]`) : null;
+    if (matchBtn) {
+      matchBtn.click();
+    } else {
+      renderEvents('all');
+    }
     renderForYou();
     initNav();
   } catch (err) {

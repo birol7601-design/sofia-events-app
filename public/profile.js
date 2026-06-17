@@ -213,11 +213,23 @@ function selectInlineAvatar(key) {
 
 function openAvatarPicker() {
   buildInlineAvatarPicker();
-  document.getElementById('avatar-picker-inline').style.display = '';
+  const el = document.getElementById('avatar-picker-inline');
+  el.style.display = '';
+  el.style.maxHeight = '0';
+  el.style.overflow = 'hidden';
+  el.style.opacity = '0';
+  el.style.transition = 'max-height 0.35s ease, opacity 0.3s ease';
+  requestAnimationFrame(() => {
+    el.style.maxHeight = '400px';
+    el.style.opacity = '1';
+  });
 }
 
 function closeAvatarPicker() {
-  document.getElementById('avatar-picker-inline').style.display = 'none';
+  const el = document.getElementById('avatar-picker-inline');
+  el.style.maxHeight = '0';
+  el.style.opacity = '0';
+  setTimeout(() => { el.style.display = 'none'; }, 350);
 }
 
 async function saveAvatarOnly() {
