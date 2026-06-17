@@ -415,18 +415,15 @@ async function init() {
     }
   } catch {}
 
-  const params = new URLSearchParams(window.location.search);
-  const tab = params.get('tab') === 'attending' ? 'attending' : 'saved';
-  switchTab(tab);
-
-  const otherId = tab === 'saved' ? 'attending' : 'saved';
   const userId = localStorage.getItem('userId');
-  fetch(`${API}/api/users/${userId}/${otherId}`, { headers: authHeaders() })
-    .then(r => r.json())
-    .then(events => {
-      const el = document.getElementById(otherId === 'saved' ? 'stat-saved' : 'stat-attending');
-      if (el && Array.isArray(events)) el.textContent = events.length;
-    }).catch(() => {});
+  ['saved', 'attending'].forEach(t => {
+    fetch(`${API}/api/users/${userId}/${t}`, { headers: authHeaders() })
+      .then(r => r.json())
+      .then(events => {
+        const el = document.getElementById(t === 'saved' ? 'stat-saved' : 'stat-attending');
+        if (el && Array.isArray(events)) el.textContent = events.length;
+      }).catch(() => {});
+  });
 
   checkUnreadMessages();
   loadFriendRequests();

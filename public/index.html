@@ -13,6 +13,16 @@
 </head>
 <body>
 <script>if (!localStorage.getItem('userToken')) { window.location.href = 'auth.html'; }</script>
+  <div id="splash" style="position:fixed;inset:0;background:#1A0A00;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.5s ease;">
+    <svg width="80" height="80" viewBox="0 0 40 40">
+      <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF6B35"/><stop offset="50%" stop-color="#FF8C00"/><stop offset="100%" stop-color="#FFD700"/></linearGradient></defs>
+      <circle cx="20" cy="20" r="19" fill="url(#sg)"/>
+      <path d="M20 8 L20 32 M8 20 L32 20 M11 11 L29 29 M29 11 L11 29" stroke="#1A0A00" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="20" cy="20" r="5" fill="#1A0A00"/>
+    </svg>
+    <div style="font-family:'DM Serif Display',serif;font-style:italic;font-size:36px;background:linear-gradient(90deg,#FF6B35,#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-top:16px;">Buzz</div>
+    <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;color:#FF8C00;margin-top:6px;">Find your night</div>
+  </div>
   <div class="starfield" aria-hidden="true"></div>
   <header>
     <div class="header-inner">
@@ -44,23 +54,11 @@
   </main>
 
   <nav class="bottom-nav">
-    <a href="home.html" class="nav-item active" id="nav-home">
-      <span class="nav-icon">🏠</span>
-      <span class="nav-label">Home</span>
-    </a>
-    <a href="profile.html?tab=saved" class="nav-item" id="nav-saved">
-      <span class="nav-icon">🔖</span>
-      <span class="nav-label">Saved</span>
-    </a>
+    <a href="saved.html" class="nav-item" id="nav-saved"><span class="nav-icon">🔖</span><span class="nav-label">Saved</span></a>
     <a href="messages.html" class="nav-item" id="nav-messages" style="position:relative;"><span class="nav-icon">💬</span><span class="nav-label">Messages</span></a>
-    <a href="organizer.html" class="nav-item" id="nav-organizers">
-      <span class="nav-icon">🎭</span>
-      <span class="nav-label">Organizers</span>
-    </a>
-    <a href="profile.html" class="nav-item" id="nav-profile">
-      <span class="nav-icon">👤</span>
-      <span class="nav-label">Profile</span>
-    </a>
+    <a href="home.html" class="nav-item" id="nav-home"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
+    <a href="organizer.html" class="nav-item" id="nav-organizers"><span class="nav-icon">🎭</span><span class="nav-label">Organizers</span></a>
+    <a href="profile.html" class="nav-item" id="nav-profile"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></a>
   </nav>
 
   <script src="app.js"></script>
@@ -68,6 +66,13 @@
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/service-worker.js');
     }
+  </script>
+  <script>
+    setTimeout(() => {
+      const splash = document.getElementById('splash');
+      splash.style.opacity = '0';
+      setTimeout(() => splash.style.display = 'none', 500);
+    }, 2000);
   </script>
 </body>
 </html>
