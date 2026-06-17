@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const pool = require('./db');
 require('dotenv').config();
@@ -8,6 +9,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'home.html'));
+});
 app.use(express.static('public'));
 function authenticateOrganizer(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -22,9 +26,6 @@ function authenticateOrganizer(req, res, next) {
     res.status(401).json({ error: 'Invalid token' });
   }
 }
-app.get('/', (req, res) => {
-  res.send('Sofia Events API is running');
-});
 
 app.get('/health', async (req, res) => {
   try {
