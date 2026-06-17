@@ -1,0 +1,9 @@
+{
+  "appId": "com.sofiaevents.app",
+  "appName": "Sofia Events",
+  "webDir": "public",
+  "server": {
+    "url": "https://sofiabuzz.com",
+    "cleartext": true
+  }
+}
