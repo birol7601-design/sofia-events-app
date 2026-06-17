@@ -1,15 +1,15 @@
 const API_BASE = '';
 
-const GOLD_GRADIENT = 'linear-gradient(135deg, #F4D06F 0%, #D4AF37 50%, #B8860B 100%)';
+const GOLD_GRADIENT = 'linear-gradient(135deg, #FF6B35 0%, #FF8C00 50%, #FFD700 100%)';
 
 const CATEGORY_MAP = {
-  'Rock':        { emoji: '🎸', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
-  'Electronic':  { emoji: '🎧', border: 'var(--purple-border)', text: 'var(--purple-text)', accent: '#4A3D8F', badgeBg: '#4A3D8F', badgeText: '#E8E3FB' },
-  'Jazz':        { emoji: '🎷', border: '#8C5A2B', text: '#E0B589', accent: '#B8732E',       badgeBg: '#8C5A2B', badgeText: '#F5E6D3' },
-  'Festival':    { emoji: '🎪', border: 'var(--gold-border)', text: 'var(--gold-text)', accent: 'var(--gold)', badgeBg: '#D4AF37', badgeText: '#0A0912' },
-  'Pop':         { emoji: '🎤', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#6B2D5C',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
-  'Reggae':      { emoji: '🌴', border: 'var(--coral-border)', text: 'var(--coral-text)', accent: '#E8456B',  badgeBg: '#6B2D5C', badgeText: '#F5D5E8' },
-  'default':     { emoji: '🎫', border: 'var(--border)',       text: 'var(--muted)',      accent: 'var(--muted-dark)', badgeBg: '#3A3830', badgeText: '#E8E3F0' },
+  'Rock':        { emoji: '🎸', border: 'rgba(204,68,0,0.5)', text: '#FF8C00', accent: '#6B1A00', badgeBg: '#4A1000', badgeText: '#FFB07A' },
+  'Electronic':  { emoji: '🎧', border: 'rgba(80,40,200,0.5)', text: '#B090FF', accent: '#3D1F80', badgeBg: '#281060', badgeText: '#C8B0FF' },
+  'Jazz':        { emoji: '🎷', border: 'rgba(180,120,0,0.5)', text: '#FFD700', accent: '#804000', badgeBg: '#4A2800', badgeText: '#FFE080' },
+  'Festival':    { emoji: '🎪', border: 'rgba(255,140,0,0.5)', text: '#FF8C00', accent: '#CC4400', badgeBg: '#803000', badgeText: '#FFCC80' },
+  'Pop':         { emoji: '🎤', border: 'rgba(200,40,80,0.5)', text: '#FF90A0', accent: '#801A3D', badgeBg: '#4A0F22', badgeText: '#FFB0C0' },
+  'Reggae':      { emoji: '🌴', border: 'rgba(0,140,60,0.5)', text: '#40CC70', accent: '#1A5020', badgeBg: '#0D3014', badgeText: '#80FF90' },
+  'default':     { emoji: '🎫', border: 'rgba(255,140,0,0.2)', text: '#C7A880', accent: '#2A1200', badgeBg: '#1A0A00', badgeText: '#C7A880' },
 };
 
 function getCatInfo(category) {
@@ -28,6 +28,7 @@ let allEvents = [];
 let activeCategory = 'all';
 let savedIds = [];
 let attendingIds = [];
+let userGenres = [];
 
 function initNav() {
   const token = localStorage.getItem('userToken');
@@ -39,8 +40,8 @@ function initNav() {
     if (navSaved) navSaved.href = 'auth.html';
   } else {
     const initial = (localStorage.getItem('userName') || '?')[0].toUpperCase();
-    const color = localStorage.getItem('userAvatarColor') || '#D4AF37';
-    navProfile.innerHTML = `<span class="nav-icon" style="width:22px;height:22px;border-radius:50%;background:${color};color:#0A0912;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${initial}</span><span class="nav-label">Profile</span>`;
+    const color = localStorage.getItem('userAvatarColor') || '#FF8C00';
+    navProfile.innerHTML = `<span class="nav-icon" style="width:22px;height:22px;border-radius:50%;background:${color};color:#1A0A00;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">${initial}</span><span class="nav-label">Profile</span>`;
   }
 }
 
@@ -48,12 +49,14 @@ async function fetchUserIds() {
   const token = localStorage.getItem('userToken');
   if (!token) return;
   try {
-    const [savedRes, attendingRes] = await Promise.all([
+    const [savedRes, attendingRes, prefRes] = await Promise.all([
       fetch(`${API_BASE}/api/users/saved/ids`, { headers: { 'Authorization': `Bearer ${token}` } }),
       fetch(`${API_BASE}/api/users/attending/ids`, { headers: { 'Authorization': `Bearer ${token}` } }),
+      fetch(`${API_BASE}/api/users/preferences`, { headers: { 'Authorization': `Bearer ${token}` } }),
     ]);
     if (savedRes.ok) { const d = await savedRes.json(); savedIds = d.savedIds.map(String); }
     if (attendingRes.ok) { const d = await attendingRes.json(); attendingIds = d.attendingIds.map(String); }
+    if (prefRes.ok) { const d = await prefRes.json(); userGenres = d.genres || []; }
   } catch {}
 }
 
@@ -74,8 +77,8 @@ async function handleHeartClick(domEvent, eventId) {
       const data = await res.json();
       if (data.saved) {
         savedIds.push(String(eventId));
-        path.setAttribute('fill', '#D4AF37');
-        path.setAttribute('stroke', '#D4AF37');
+        path.setAttribute('fill', '#FF8C00');
+        path.setAttribute('stroke', '#FF8C00');
       } else {
         savedIds = savedIds.filter(id => id !== String(eventId));
         path.setAttribute('fill', 'none');
@@ -116,8 +119,8 @@ function restoreCardStates() {
   document.querySelectorAll('.heart-btn[data-event-id]').forEach(btn => {
     const path = btn.querySelector('path');
     if (savedIds.includes(String(btn.dataset.eventId))) {
-      path.setAttribute('fill', '#D4AF37');
-      path.setAttribute('stroke', '#D4AF37');
+      path.setAttribute('fill', '#FF8C00');
+      path.setAttribute('stroke', '#FF8C00');
     } else {
       path.setAttribute('fill', 'none');
       path.setAttribute('stroke', 'white');
@@ -134,6 +137,36 @@ function restoreCardStates() {
   });
 }
 
+function renderForYou() {
+  const section = document.getElementById('for-you-section');
+  if (!section || !userGenres.length || !allEvents.length) {
+    if (section) section.style.display = 'none';
+    return;
+  }
+  const matching = allEvents.filter(e => userGenres.includes(e.category));
+  if (!matching.length) { section.style.display = 'none'; return; }
+
+  section.style.display = '';
+  const date = (e) => new Date(e.start_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+  const info = (e) => getCatInfo(e.category);
+
+  section.innerHTML = `
+    <div style="padding:4px 0 6px;display:flex;align-items:center;justify-content:space-between;">
+      <span class="section-label" style="margin:0;">For You</span>
+      <span style="font-family:'Cormorant Garamond',serif;font-size:12px;color:var(--muted-dark);font-style:italic;">based on your taste</span>
+    </div>
+    <div class="for-you-strip">
+      ${matching.map(e => `
+        <div class="for-you-card" onclick="window.location.href='event.html?id=${e.id}'">
+          <div class="for-you-card-top" style="background:${info(e).accent};${e.image_url ? `background-image:url('${e.image_url}');background-size:cover;background-position:center;` : ''}"></div>
+          <div class="for-you-card-body">
+            <div class="for-you-card-title">${e.title}</div>
+            <div class="for-you-card-date">${date(e)}</div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
 async function loadEvents() {
   const container = document.getElementById('event-list');
   try {
@@ -142,6 +175,7 @@ async function loadEvents() {
     await fetchUserIds();
     buildFilterBar();
     renderEvents('all');
+    renderForYou();
     initNav();
   } catch (err) {
     container.innerHTML = '<p style="color:var(--muted);padding:1rem 0;">Error loading events.</p>';
@@ -169,7 +203,7 @@ function buildFilterBar() {
 
 function styleAllBtn(btn) {
   btn.style.background = GOLD_GRADIENT;
-  btn.style.color = 'var(--bg)';
+  btn.style.color = '#1A0A00';
   btn.style.borderColor = 'transparent';
   btn.style.opacity = '1';
 }
@@ -184,6 +218,7 @@ function styleCatBtn(btn, info) {
 function renderEvents(category) {
   activeCategory = category;
   const container = document.getElementById('event-list');
+  container.classList.add('section-transition');
   const filtered = category === 'all'
     ? allEvents
     : allEvents.filter(e => e.category === category);
@@ -236,7 +271,7 @@ function buildCardHTML(event) {
           <div class="card-footer">
             <div class="price-wrap">
               <span class="price-from">from</span>
-              <span class="price-value" style="color:${info.text};">${event.price_text}</span>
+              <span class="price-value">${event.price_text}</span>
             </div>
             <span class="cat-badge" style="background:${info.badgeBg};color:${info.badgeText};">${info.emoji} ${event.category}</span>
           </div>

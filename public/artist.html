@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artist — SofiaBuzz</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .artist-hero {
+      height: 200px;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 0 16px 16px;
+    }
+    .artist-hero-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+    .artist-hero-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(to bottom, transparent 0%, rgba(26,10,0,0.7) 60%, #1A0A00 100%);
+    }
+    .artist-hero-content { position: relative; z-index: 2; }
+    .artist-tab-bar {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin: 0 0 4px;
+    }
+    .artist-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--muted-darker);
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      padding: 12px 0;
+      cursor: pointer;
+      position: relative;
+    }
+    .artist-tab.active { color: var(--gold); }
+    .artist-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1px; left: 0; right: 0;
+      height: 2px;
+      background: var(--gold);
+    }
+    .artist-event-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      margin-bottom: 8px;
+      background: var(--surface);
+      cursor: pointer;
+    }
+    .artist-event-row:hover { border-color: var(--border-strong); }
+    .artist-event-square {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+    body { padding-bottom: 80px; }
+  </style>
+</head>
+<body>
+<script>if (!localStorage.getItem('userToken')) { window.location.href = 'auth.html'; }</script>
+
+  <div class="starfield" aria-hidden="true"></div>
+
+  <!-- HERO -->
+  <div class="artist-hero" id="artist-hero">
+    <div class="artist-hero-bg" id="artist-hero-bg"></div>
+    <div class="artist-hero-overlay"></div>
+    <button onclick="history.length > 1 ? history.back() : (location.href='index.html')"
+      style="position:absolute;top:16px;left:16px;width:36px;height:36px;background:rgba(0,0,0,0.4);border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;padding:0;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF8C00" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M19 12H5M12 5l-7 7 7 7"/>
+      </svg>
+    </button>
+    <div class="artist-hero-content">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+        <div id="artist-avatar-hero" style="width:56px;height:56px;flex-shrink:0;"></div>
+        <div>
+          <h1 id="artist-name" class="dm" style="font-size:24px;margin:0 0 2px;"></h1>
+          <div id="artist-genres" style="font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:var(--gold);letter-spacing:1px;text-transform:uppercase;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="artist-tab-bar">
+    <button class="artist-tab active" onclick="showTab('about')">About</button>
+    <button class="artist-tab" onclick="showTab('upcoming')">Upcoming</button>
+    <button class="artist-tab" onclick="showTab('past')">Past Shows</button>
+  </div>
+
+  <main class="page-transition" style="padding:12px 14px 80px;">
+
+    <!-- ABOUT TAB -->
+    <div id="tab-about">
+      <p id="artist-bio" class="cg" style="font-size:16px;line-height:1.9;color:var(--muted);"></p>
+    </div>
+
+    <!-- UPCOMING TAB -->
+    <div id="tab-upcoming" style="display:none;">
+      <div id="upcoming-list"></div>
+    </div>
+
+    <!-- PAST TAB -->
+    <div id="tab-past" style="display:none;">
+      <div id="past-list"></div>
+    </div>
+
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item"><span class="nav-icon">🏠</span><span class="nav-label">Home</span></a>
+    <a href="profile.html?tab=saved" class="nav-item"><span class="nav-icon">🔖</span><span class="nav-label">Saved</span></a>
+    <a href="messages.html" class="nav-item"><span class="nav-icon">💬</span><span class="nav-label">Messages</span></a>
+    <a href="organizer.html" class="nav-item"><span class="nav-icon">🎭</span><span class="nav-label">Organizers</span></a>
+    <a href="profile.html" class="nav-item"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></a>
+  </nav>
+
+  <script src="avatars.js"></script>
+  <script src="artist.js"></script>
+</body>
+</html>

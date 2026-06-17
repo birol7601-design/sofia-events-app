@@ -24,10 +24,10 @@ function renderMessage(msg) {
   const time = formatTime(msg.created_at);
   return `
     <div style="display:flex;flex-direction:column;align-items:${isMe ? 'flex-end' : 'flex-start'};">
-      <div style="max-width:75%;background:${isMe ? 'linear-gradient(135deg,#3A2800,#5C3D00)' : '#16151F'};border:1px solid ${isMe ? 'rgba(212,175,55,0.4)' : 'rgba(212,175,55,0.15)'};border-radius:${isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px'};padding:10px 14px;">
-        <p style="font-family:'Cormorant Garamond',serif;font-size:15px;color:#F0E8D6;margin:0;line-height:1.7;word-break:break-word;">${escapeHtml(msg.content)}</p>
+      <div style="max-width:75%;background:${isMe ? 'linear-gradient(135deg,#3A2800,#5C3D00)' : '#220D00'};border:1px solid ${isMe ? 'rgba(212,175,55,0.4)' : 'rgba(212,175,55,0.15)'};border-radius:${isMe ? '14px 14px 4px 14px' : '14px 14px 14px 4px'};padding:10px 14px;">
+        <p style="font-family:'Cormorant Garamond',serif;font-size:15px;color:#FFD199;margin:0;line-height:1.7;word-break:break-word;">${escapeHtml(msg.content)}</p>
       </div>
-      <span style="font-size:12px;color:#6E6A5F;font-family:'Cormorant Garamond',serif;margin-top:3px;padding:0 4px;">${time}</span>
+      <span style="font-size:12px;color:#8B6040;font-family:'Cormorant Garamond',serif;margin-top:3px;padding:0 4px;">${time}</span>
     </div>`;
 }
 
@@ -44,7 +44,7 @@ async function loadMessages(append) {
     const container = document.getElementById('chat-messages');
     if (!append) {
       container.innerHTML = msgs.length === 0
-        ? `<p style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:15px;color:#6E6A5F;padding:40px 0;font-style:italic;">No messages yet. Say hi!</p>`
+        ? `<p style="text-align:center;font-family:'Cormorant Garamond',serif;font-size:15px;color:#8B6040;padding:40px 0;font-style:italic;">No messages yet. Say hi!</p>`
         : msgs.map(renderMessage).join('');
       if (msgs.length > 0) lastMessageId = msgs[msgs.length - 1].id;
       container.scrollTop = container.scrollHeight;
@@ -112,31 +112,31 @@ function backToConversations() {
 
 async function loadConversations() {
   const container = document.getElementById('conversations-list');
-  container.innerHTML = `<p style="text-align:center;color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Loading…</p>`;
+  container.innerHTML = `<p style="text-align:center;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Loading…</p>`;
   try {
     const res = await fetch(`${API}/api/friends`, { headers: authHeaders() });
-    if (!res.ok) { container.innerHTML = `<p style="text-align:center;color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Could not load friends.</p>`; return; }
+    if (!res.ok) { container.innerHTML = `<p style="text-align:center;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Could not load friends.</p>`; return; }
     const friends = await res.json();
     if (friends.length === 0) {
       container.innerHTML = `
         <div style="text-align:center;padding:48px 24px 32px;">
           <span style="display:block;font-size:48px;margin-bottom:12px;">💬</span>
-          <div style="font-family:'Playfair Display',serif;color:#D4AF37;font-size:16px;font-weight:700;margin-bottom:8px;">No conversations yet</div>
-          <p style="font-family:'Cormorant Garamond',serif;color:#6E6A5F;font-size:15px;margin-bottom:20px;font-style:italic;">Add friends from your profile to start chatting</p>
-          <a href="profile.html" style="display:inline-block;background:linear-gradient(135deg,#F4D06F,#D4AF37,#B8860B);color:#0A0912;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Find friends →</a>
+          <div style="font-family:'DM Serif Display',serif;color:#FF8C00;font-size:16px;font-weight:700;margin-bottom:8px;">No conversations yet</div>
+          <p style="font-family:'Cormorant Garamond',serif;color:#8B6040;font-size:15px;margin-bottom:20px;font-style:italic;">Add friends from your profile to start chatting</p>
+          <a href="profile.html" style="display:inline-block;background:linear-gradient(135deg,#F4D06F,#FF8C00,#B8860B);color:#1A0A00;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Find friends →</a>
         </div>`;
       return;
     }
     container.innerHTML = friends.map(f => `
-      <div onclick="openChat('${f.id}','${escapeHtml(f.username)}','${f.avatarType || 'star'}')" style="display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:12px;border:1px solid rgba(212,175,55,0.2);margin-bottom:8px;background:#16151F;cursor:pointer;">
+      <div onclick="openChat('${f.id}','${escapeHtml(f.username)}','${f.avatarType || 'star'}')" style="display:flex;align-items:center;gap:12px;padding:12px 10px;border-radius:12px;border:1px solid rgba(212,175,55,0.2);margin-bottom:8px;background:#220D00;cursor:pointer;">
         <div style="flex-shrink:0;">${window.getAvatarSVG(f.avatarType || 'star', 44)}</div>
         <div style="flex:1;min-width:0;">
-          <div style="color:#F0E8D6;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;">${escapeHtml(f.username)}</div>
-          <div style="color:#6E6A5F;font-family:'Cormorant Garamond',serif;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;">${f.bio ? escapeHtml(f.bio.substring(0,60)) : 'Tap to chat'}</div>
+          <div style="color:#FFD199;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:500;">${escapeHtml(f.username)}</div>
+          <div style="color:#8B6040;font-family:'Cormorant Garamond',serif;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-style:italic;">${f.bio ? escapeHtml(f.bio.substring(0,60)) : 'Tap to chat'}</div>
         </div>
-        <span style="color:#D4AF37;font-size:18px;flex-shrink:0;">›</span>
+        <span style="color:#FF8C00;font-size:18px;flex-shrink:0;">›</span>
       </div>`).join('');
-  } catch { container.innerHTML = `<p style="text-align:center;color:#6E6A5F;padding:40px;">Error loading conversations.</p>`; }
+  } catch { container.innerHTML = `<p style="text-align:center;color:#8B6040;padding:40px;">Error loading conversations.</p>`; }
 }
 
 async function init() {

@@ -24,7 +24,7 @@ function CATEGORY_MAP(cat) {
     hiphop: { emoji:'🎤', accent:'#784212', badgeBg:'rgba(120,66,18,0.18)',   badgeText:'#F0B27A' },
     drum_and_bass: { emoji:'🥁', accent:'#1A5276', badgeBg:'rgba(26,82,118,0.18)', badgeText:'#85C1E9' },
   };
-  return m[(cat||'').toLowerCase()] || { emoji:'🎵', accent:'#D4AF37', badgeBg:'rgba(212,175,55,0.18)', badgeText:'#F4D06F' };
+  return m[(cat||'').toLowerCase()] || { emoji:'🎵', accent:'#FF8C00', badgeBg:'rgba(212,175,55,0.18)', badgeText:'#F4D06F' };
 }
 
 function eventCardHTML(ev) {
@@ -50,13 +50,13 @@ function renderEmpty(id, tab) {
   document.getElementById(id).innerHTML = `
     <div style="text-align:center;padding:48px 24px 32px;">
       <span style="display:block;font-size:48px;margin-bottom:12px;">${isSaved ? '🎭' : '🎪'}</span>
-      <div style="font-family:'Playfair Display',serif;color:#D4AF37;font-size:16px;font-weight:700;margin-bottom:8px;">${isSaved ? 'No saved events yet' : 'Not attending any events yet'}</div>
+      <div style="font-family:'DM Serif Display',serif;color:#FF8C00;font-size:16px;font-weight:700;margin-bottom:8px;">${isSaved ? 'No saved events yet' : 'Not attending any events yet'}</div>
     </div>`;
 }
 
 async function loadUserTab(tab) {
   const listId = `user-${tab}-list`;
-  document.getElementById(listId).innerHTML = `<p style="text-align:center;color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Loading…</p>`;
+  document.getElementById(listId).innerHTML = `<p style="text-align:center;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Loading…</p>`;
   try {
     const res = await fetch(`${API}/api/users/${userId}/${tab}`, { headers: authHeaders() });
     if (!res.ok) { renderEmpty(listId, tab); return; }
@@ -77,8 +77,8 @@ function switchUserTab(tab) {
 // ── FRIEND ACTIONS ─────────────────────────────────────────────────────────────
 
 function btnStyle(primary) {
-  if (primary) return 'background:linear-gradient(135deg,#F4D06F,#D4AF37,#B8860B);color:#0A0912;border:none;border-radius:999px;font-size:12px;padding:7px 18px;cursor:pointer;font-family:\'IBM Plex Sans\',sans-serif;font-weight:700;';
-  return 'background:transparent;border:1px solid rgba(212,175,55,0.5);color:#D4AF37;border-radius:999px;font-size:12px;padding:7px 18px;cursor:pointer;font-family:\'IBM Plex Sans\',sans-serif;';
+  if (primary) return 'background:linear-gradient(135deg,#F4D06F,#FF8C00,#B8860B);color:#1A0A00;border:none;border-radius:999px;font-size:12px;padding:7px 18px;cursor:pointer;font-family:\'IBM Plex Sans\',sans-serif;font-weight:700;';
+  return 'background:transparent;border:1px solid rgba(212,175,55,0.5);color:#FF8C00;border-radius:999px;font-size:12px;padding:7px 18px;cursor:pointer;font-family:\'IBM Plex Sans\',sans-serif;';
 }
 
 function renderFriendActions(status, profileAvatarType, username) {
@@ -155,7 +155,7 @@ async function checkUnreadMessages() {
       if (navMsg && !navMsg.querySelector('.unread-dot')) {
         const dot = document.createElement('span');
         dot.className = 'unread-dot';
-        dot.style.cssText = 'position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#D4AF37;';
+        dot.style.cssText = 'position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#FF8C00;';
         navMsg.style.position = 'relative';
         navMsg.appendChild(dot);
       }

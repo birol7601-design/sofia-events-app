@@ -39,7 +39,7 @@ app.get('/api/events', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT e.id, e.title, e.description, e.artist_bio, e.category, e.venue, e.start_time,
-             e.price_text, e.ticket_url, e.image_url,
+             e.price_text, e.ticket_url, e.image_url, e.artist_id,
              fs.slot_number,
              CASE WHEN fs.id IS NOT NULL AND NOW() BETWEEN fs.start_date AND fs.end_date
                   THEN true ELSE false END AS is_featured
@@ -56,7 +56,7 @@ app.get('/api/events/:id', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT e.id, e.title, e.description, e.artist_bio, e.category, e.venue, e.start_time,
-             e.price_text, e.ticket_url, e.image_url,
+             e.price_text, e.ticket_url, e.image_url, e.artist_id,
              fs.slot_number,
              CASE WHEN fs.id IS NOT NULL AND NOW() BETWEEN fs.start_date AND fs.end_date
                   THEN true ELSE false END AS is_featured
@@ -199,7 +199,7 @@ app.post('/api/users/login', async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
-    res.json({ token, id: user.id, userId: user.id, username: user.username, email: user.email, avatarColor: user.avatar_color, avatarType: user.avatar_type, bio: user.bio, isPublic: user.is_public });
+    res.json({ token, id: user.id, userId: user.id, username: user.username, email: user.email, avatarColor: user.avatar_color, avatarType: user.avatar_type, bio: user.bio, isPublic: user.is_public, onboardingComplete: user.onboarding_complete || false });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -507,6 +507,86 @@ app.post('/api/messages/:userId', authenticateUser, async (req, res) => {
       [req.userId, req.params.userId, content.trim()]
     );
     res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── ARTIST ROUTES ─────────────────────────────────────────────────────────────
+
+app.get('/api/artists', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT id, name, genres, avatar_type, bio FROM artists ORDER BY name ASC');
+    res.json(result.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/artists/by-name/:name', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM artists WHERE name ILIKE $1 LIMIT 1', [req.params.name]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Artist not found' });
+    res.json(result.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/artists/:id', async (req, res) => {
+  try {
+    const artistResult = await pool.query('SELECT * FROM artists WHERE id = $1', [req.params.id]);
+    if (artistResult.rows.length === 0) return res.status(404).json({ error: 'Artist not found' });
+    const artist = artistResult.rows[0];
+
+    const eventsResult = await pool.query(`
+      SELECT id, title, venue, start_time, price_text, ticket_url, image_url, category
+      FROM events WHERE artist_id = $1 ORDER BY start_time ASC
+    `, [req.params.id]);
+
+    const now = new Date();
+    const upcoming = eventsResult.rows.filter(e => new Date(e.start_time) >= now);
+    const past     = eventsResult.rows.filter(e => new Date(e.start_time) < now);
+
+    res.json({ ...artist, upcoming, past });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── USER PREFERENCES & ONBOARDING ────────────────────────────────────────────
+
+app.get('/api/users/preferences', authenticateUser, async (req, res) => {
+  try {
+    const genres = await pool.query('SELECT genre FROM user_genre_preferences WHERE user_id=$1', [req.userId]);
+    const artists = await pool.query(
+      'SELECT a.id, a.name, a.avatar_type FROM user_artist_preferences uap JOIN artists a ON uap.artist_id=a.id WHERE uap.user_id=$1',
+      [req.userId]
+    );
+    res.json({ genres: genres.rows.map(r => r.genre), artists: artists.rows });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/users/preferences/genres', authenticateUser, async (req, res) => {
+  try {
+    const { genres } = req.body;
+    if (!Array.isArray(genres)) return res.status(400).json({ error: 'genres must be an array' });
+    await pool.query('DELETE FROM user_genre_preferences WHERE user_id=$1', [req.userId]);
+    for (const g of genres) {
+      await pool.query('INSERT INTO user_genre_preferences (user_id, genre) VALUES ($1, $2) ON CONFLICT DO NOTHING', [req.userId, g]);
+    }
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/users/preferences/artists', authenticateUser, async (req, res) => {
+  try {
+    const { artistIds } = req.body;
+    if (!Array.isArray(artistIds)) return res.status(400).json({ error: 'artistIds must be an array' });
+    await pool.query('DELETE FROM user_artist_preferences WHERE user_id=$1', [req.userId]);
+    for (const id of artistIds) {
+      await pool.query('INSERT INTO user_artist_preferences (user_id, artist_id) VALUES ($1, $2) ON CONFLICT DO NOTHING', [req.userId, id]);
+    }
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.patch('/api/users/onboarding', authenticateUser, async (req, res) => {
+  try {
+    await pool.query('UPDATE users SET onboarding_complete=true WHERE id=$1', [req.userId]);
+    res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

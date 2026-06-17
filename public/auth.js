@@ -18,12 +18,16 @@ function showTab(tab) {
   document.getElementById('register-error').textContent = '';
 }
 
-function storeAndRedirect(data) {
+function storeAndRedirect(data, isNewUser) {
   localStorage.setItem('userToken', data.token);
   localStorage.setItem('userName', data.username);
-  localStorage.setItem('userAvatarColor', data.avatarColor || '#D4AF37');
+  localStorage.setItem('userAvatarColor', data.avatarColor || '#FF8C00');
   localStorage.setItem('userId', String(data.id));
-  window.location.href = 'profile.html';
+  if (isNewUser || !data.onboardingComplete) {
+    window.location.href = 'onboarding.html';
+  } else {
+    window.location.href = 'index.html';
+  }
 }
 
 document.getElementById('login-btn').addEventListener('click', async () => {
@@ -45,7 +49,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
     });
     const data = await res.json();
     if (!res.ok) { errEl.textContent = data.error || 'Login failed.'; return; }
-    storeAndRedirect(data);
+    storeAndRedirect(data, false);
   } catch {
     errEl.textContent = 'Network error. Please try again.';
   } finally {
@@ -89,7 +93,7 @@ document.getElementById('register-btn').addEventListener('click', async () => {
     });
     const loginData = await loginRes.json();
     if (!loginRes.ok) { window.location.href = 'auth.html'; return; }
-    storeAndRedirect(loginData);
+    storeAndRedirect(loginData, true);
   } catch {
     errEl.textContent = 'Network error. Please try again.';
   } finally {
@@ -110,7 +114,7 @@ document.getElementById('register-btn').addEventListener('click', async () => {
 });
 
 if (localStorage.getItem('userToken')) {
-  window.location.href = 'profile.html';
+  window.location.href = 'index.html';
 } else if (!localStorage.getItem('hasVisitedAuth')) {
   localStorage.setItem('hasVisitedAuth', 'true');
   showTab('register');

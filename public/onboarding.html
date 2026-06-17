@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome — SofiaBuzz</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { min-height: 100vh; background: var(--bg); overflow-x: hidden; }
+
+    .onboarding-wrap {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .onboarding-header {
+      padding: 24px 0 20px;
+      text-align: center;
+    }
+
+    .onboarding-step {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+    }
+    .onboarding-step.active { display: flex; animation: fadeSlideIn 0.35s ease forwards; }
+
+    .step-title {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 26px;
+      color: var(--cream);
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .step-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px;
+      color: var(--muted-dark);
+      text-align: center;
+      margin-bottom: 28px;
+      font-style: italic;
+    }
+
+    .genre-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .genre-pill {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 8px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--muted-dark);
+    }
+    .genre-pill .pill-emoji { font-size: 22px; }
+    .genre-pill.selected {
+      border-color: var(--gold);
+      background: rgba(255,140,0,0.12);
+      color: var(--gold);
+    }
+
+    .artist-search-wrap { margin-bottom: 20px; }
+    .artist-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .artist-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .artist-card.selected {
+      border-color: var(--gold);
+      background: rgba(255,140,0,0.1);
+    }
+    .artist-card .artist-name-text {
+      font-family: 'DM Serif Display', serif;
+      font-style: italic;
+      font-size: 14px;
+      color: var(--cream);
+      line-height: 1.2;
+    }
+    .artist-card.selected .artist-name-text { color: var(--gold); }
+    .artist-card .artist-genre-text {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 10px;
+      color: var(--muted-darker);
+      margin-top: 2px;
+    }
+
+    .progress-dots {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background 0.2s;
+    }
+    .dot.active { background: var(--gold); }
+
+    .skip-link {
+      text-align: center;
+      margin-top: 12px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 13px;
+      color: var(--muted-darker);
+      cursor: pointer;
+    }
+    .skip-link:hover { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+
+  <div class="onboarding-wrap">
+
+    <!-- HEADER -->
+    <div class="onboarding-header">
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;">
+        <svg width="36" height="36" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs><linearGradient id="sunFillOb" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF6B35"/><stop offset="50%" stop-color="#FF8C00"/><stop offset="100%" stop-color="#FFD700"/></linearGradient></defs>
+          <circle cx="20" cy="20" r="19" fill="url(#sunFillOb)"/>
+          <path d="M20 8L20 32M8 20L32 20M11.5 11.5L28.5 28.5M28.5 11.5L11.5 28.5" stroke="#1A0A00" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="20" cy="20" r="5" fill="#1A0A00"/>
+        </svg>
+        <div class="logo-text-group">
+          <span class="logo-text">Buzz</span>
+          <span class="header-slogan">Find your night</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="progress-dots">
+      <div class="dot active" id="dot-1"></div>
+      <div class="dot" id="dot-2"></div>
+    </div>
+
+    <!-- STEP 1: GENRES -->
+    <div class="onboarding-step active" id="step-1">
+      <div class="step-title">What's your scene?</div>
+      <p class="step-sub">Pick your favourite genres — we'll tailor your feed.</p>
+
+      <div class="genre-grid" id="genre-grid">
+        <div class="genre-pill" data-genre="Rock"       onclick="toggleGenre(this)"><span class="pill-emoji">🎸</span>Rock</div>
+        <div class="genre-pill" data-genre="Electronic" onclick="toggleGenre(this)"><span class="pill-emoji">🎧</span>Electronic</div>
+        <div class="genre-pill" data-genre="Jazz"       onclick="toggleGenre(this)"><span class="pill-emoji">🎷</span>Jazz</div>
+        <div class="genre-pill" data-genre="Festival"   onclick="toggleGenre(this)"><span class="pill-emoji">🎪</span>Festival</div>
+        <div class="genre-pill" data-genre="Pop"        onclick="toggleGenre(this)"><span class="pill-emoji">🎤</span>Pop</div>
+        <div class="genre-pill" data-genre="Reggae"     onclick="toggleGenre(this)"><span class="pill-emoji">🌴</span>Reggae</div>
+        <div class="genre-pill" data-genre="Classical"  onclick="toggleGenre(this)"><span class="pill-emoji">🎻</span>Classical</div>
+        <div class="genre-pill" data-genre="Hip-Hop"    onclick="toggleGenre(this)"><span class="pill-emoji">🎤</span>Hip-Hop</div>
+        <div class="genre-pill" data-genre="Funk"       onclick="toggleGenre(this)"><span class="pill-emoji">🕺</span>Funk</div>
+        <div class="genre-pill" data-genre="World"      onclick="toggleGenre(this)"><span class="pill-emoji">🌍</span>World</div>
+        <div class="genre-pill" data-genre="R&B"        onclick="toggleGenre(this)"><span class="pill-emoji">🎙️</span>R&B</div>
+        <div class="genre-pill" data-genre="Metal"      onclick="toggleGenre(this)"><span class="pill-emoji">🤘</span>Metal</div>
+      </div>
+
+      <button class="gold-btn" onclick="nextStep()">Continue →</button>
+      <div class="skip-link" onclick="skip()">Skip for now</div>
+    </div>
+
+    <!-- STEP 2: ARTISTS -->
+    <div class="onboarding-step" id="step-2">
+      <div class="step-title">Follow artists</div>
+      <p class="step-sub">Select artists performing in Sofia to get personalised alerts.</p>
+
+      <div class="artist-search-wrap">
+        <input type="text" class="dark-input" id="artist-search" placeholder="Search artists…" oninput="filterArtists(this.value)">
+      </div>
+
+      <div class="artist-grid" id="artist-grid"></div>
+
+      <button class="gold-btn" onclick="finishOnboarding()">Let's go →</button>
+      <div class="skip-link" onclick="skip()">Skip for now</div>
+    </div>
+
+  </div>
+
+  <script src="avatars.js"></script>
+  <script src="onboarding.js"></script>
+</body>
+</html>

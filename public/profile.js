@@ -65,13 +65,13 @@ function eventCardHTML(ev) {
   const squareColor = catColors[ev.category] || catColors['default'];
   const date = formatDate(ev.start_time);
   return `
-    <div onclick="window.location.href='event.html?id=${ev.id}'" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(212,175,55,0.15);margin-bottom:8px;background:#16151F;cursor:pointer;">
+    <div onclick="window.location.href='event.html?id=${ev.id}'" style="display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;border:1px solid rgba(212,175,55,0.15);margin-bottom:8px;background:#220D00;cursor:pointer;">
       <div style="width:36px;height:36px;border-radius:8px;background:${squareColor};flex-shrink:0;"></div>
       <div style="flex:1;min-width:0;">
-        <div style="color:#F0E8D6;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ev.title}</div>
-        <div style="color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:12px;">${ev.venue}${date ? ' · ' + date : ''}</div>
+        <div style="color:#FFD199;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ev.title}</div>
+        <div style="color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:12px;">${ev.venue}${date ? ' · ' + date : ''}</div>
       </div>
-      <span style="color:#D4AF37;font-size:18px;flex-shrink:0;">›</span>
+      <span style="color:#FF8C00;font-size:18px;flex-shrink:0;">›</span>
     </div>`;
 }
 
@@ -80,16 +80,16 @@ function renderEmpty(containerId, tab) {
   document.getElementById(containerId).innerHTML = `
     <div style="text-align:center;padding:48px 24px 32px;">
       <span style="display:block;font-size:48px;margin-bottom:12px;">${isSaved ? '🎭' : '🎪'}</span>
-      <div style="font-family:'Playfair Display',serif;color:#D4AF37;font-size:16px;font-weight:700;margin-bottom:8px;">${isSaved ? 'No saved events yet' : 'Not attending any events yet'}</div>
-      <p style="font-family:'IBM Plex Sans',sans-serif;color:#6E6A5F;font-size:13px;margin-bottom:20px;">${isSaved ? 'Tap ♡ on any event to save it' : "Tap 'I'm going' on any event to mark attendance"}</p>
-      <a href="index.html" style="display:inline-block;background:linear-gradient(135deg,#F4D06F,#D4AF37,#B8860B);color:#0A0912;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Browse events →</a>
+      <div style="font-family:'DM Serif Display',serif;color:#FF8C00;font-size:16px;font-weight:700;margin-bottom:8px;">${isSaved ? 'No saved events yet' : 'Not attending any events yet'}</div>
+      <p style="font-family:'IBM Plex Sans',sans-serif;color:#8B6040;font-size:13px;margin-bottom:20px;">${isSaved ? 'Tap ♡ on any event to save it' : "Tap 'I'm going' on any event to mark attendance"}</p>
+      <a href="index.html" style="display:inline-block;background:linear-gradient(135deg,#F4D06F,#FF8C00,#B8860B);color:#1A0A00;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Browse events →</a>
     </div>`;
 }
 
 async function loadTab(tab) {
   const userId = localStorage.getItem('userId');
   const listId = `${tab}-list`;
-  document.getElementById(listId).innerHTML = `<p style="text-align:center;color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Loading…</p>`;
+  document.getElementById(listId).innerHTML = `<p style="text-align:center;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:14px;padding:40px;">Loading…</p>`;
   try {
     const res = await fetch(`${API}/api/users/${userId}/${tab}`, { headers: authHeaders() });
     if (!res.ok) { renderEmpty(listId, tab); return; }
@@ -128,7 +128,7 @@ function highlightSelectedAvatar() {
   AVATAR_KEYS.forEach(k => {
     const el = document.getElementById(`apick-${k}`);
     if (!el) return;
-    el.style.boxShadow = k === selectedAvatarType ? '0 0 0 3px #D4AF37' : 'none';
+    el.style.boxShadow = k === selectedAvatarType ? '0 0 0 3px #FF8C00' : 'none';
     el.style.borderRadius = '50%';
   });
 }
@@ -190,7 +190,7 @@ function highlightInlineAvatar() {
   AVATAR_KEYS.forEach(k => {
     const el = document.getElementById(`iapick-${k}`);
     if (!el) return;
-    el.style.boxShadow = k === inlineAvatarType ? '0 0 0 3px #D4AF37' : 'none';
+    el.style.boxShadow = k === inlineAvatarType ? '0 0 0 3px #FF8C00' : 'none';
     el.style.opacity = k === inlineAvatarType ? '1' : '0.6';
     el.style.borderRadius = '50%';
   });
@@ -251,17 +251,17 @@ function handlePeopleSearch(val) {
       const res = await fetch(`${API}/api/users/search?q=${encodeURIComponent(val)}`);
       const users = await res.json();
       if (!res.ok || users.length === 0) {
-        el.innerHTML = `<p style="font-size:13px;color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;padding:8px 0;">No users found.</p>`;
+        el.innerHTML = `<p style="font-size:13px;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;padding:8px 0;">No users found.</p>`;
         return;
       }
       el.innerHTML = users.map(u => `
-        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;border:1px solid rgba(212,175,55,0.2);margin-bottom:6px;background:#16151F;">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px;border-radius:10px;border:1px solid rgba(212,175,55,0.2);margin-bottom:6px;background:#220D00;">
           <div onclick="window.location.href='user.html?id=${u.id}'" style="cursor:pointer;flex-shrink:0;">${window.getAvatarSVG(u.avatar_type || 'star', 36)}</div>
           <div onclick="window.location.href='user.html?id=${u.id}'" style="flex:1;min-width:0;cursor:pointer;">
-            <div style="color:#F0E8D6;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;">${u.username}</div>
-            <div style="color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:12px;">${u.bio ? u.bio.substring(0,50) : ''}</div>
+            <div style="color:#FFD199;font-family:'IBM Plex Sans',sans-serif;font-size:14px;font-weight:600;">${u.username}</div>
+            <div style="color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:12px;">${u.bio ? u.bio.substring(0,50) : ''}</div>
           </div>
-          <button id="addfriend-${u.id}" onclick="sendFriendRequest('${u.id}', this)" style="background:transparent;border:1px solid rgba(212,175,55,0.5);color:#D4AF37;border-radius:999px;font-size:11px;padding:5px 12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;white-space:nowrap;flex-shrink:0;">Add friend</button>
+          <button id="addfriend-${u.id}" onclick="sendFriendRequest('${u.id}', this)" style="background:transparent;border:1px solid rgba(212,175,55,0.5);color:#FF8C00;border-radius:999px;font-size:11px;padding:5px 12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;white-space:nowrap;flex-shrink:0;">Add friend</button>
         </div>`).join('');
     } catch { el.innerHTML = ''; }
   }, 300);
@@ -272,7 +272,7 @@ function handlePeopleSearch(val) {
 function showToast(msg) {
   const el = document.createElement('div');
   el.textContent = msg;
-  el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#D4AF37;color:#0A0912;padding:10px 20px;border-radius:999px;font-weight:600;font-family:\'IBM Plex Sans\',sans-serif;font-size:13px;z-index:999;white-space:nowrap;pointer-events:none;';
+  el.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#FF8C00;color:#1A0A00;padding:10px 20px;border-radius:999px;font-weight:600;font-family:\'IBM Plex Sans\',sans-serif;font-size:13px;z-index:999;white-space:nowrap;pointer-events:none;';
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 2000);
 }
@@ -318,7 +318,7 @@ async function loadFriendRequests() {
     if (!requests.length) return;
 
     sectionEl.style.display = '';
-    sectionEl.innerHTML = `<p style="font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:#D4AF37;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 6px;">Friend Requests</p><div id="request-rows"></div>`;
+    sectionEl.innerHTML = `<p style="font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:#FF8C00;text-transform:uppercase;letter-spacing:2px;font-weight:600;margin:0 0 6px;">Friend Requests</p><div id="request-rows"></div>`;
     const rowsEl = sectionEl.querySelector('#request-rows');
 
     requests.forEach(u => {
@@ -327,8 +327,8 @@ async function loadFriendRequests() {
       row.style.cssText = 'display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #2A2736;';
       row.innerHTML = `
         <div style="flex-shrink:0;">${window.getAvatarSVG(u.avatarType || 'star', 36)}</div>
-        <div style="flex:1;color:#F0E8D6;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;">${u.username}</div>
-        <button style="background:linear-gradient(135deg,#F4D06F,#D4AF37);color:#0A0912;border:none;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">Accept ✓</button>
+        <div style="flex:1;color:#FFD199;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:500;">${u.username}</div>
+        <button style="background:linear-gradient(135deg,#F4D06F,#FF8C00);color:#1A0A00;border:none;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">Accept ✓</button>
         <button style="background:transparent;border:1px solid #E8456B;color:#E8456B;border-radius:999px;padding:5px 12px;font-size:12px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;">Decline</button>`;
       const [acceptBtn, declineBtn] = row.querySelectorAll('button');
       acceptBtn.addEventListener('click', () => acceptRequest(u.id, row, sectionEl));
@@ -340,7 +340,7 @@ async function loadFriendRequests() {
     if (navProfile && !navProfile.querySelector('.request-dot')) {
       const dot = document.createElement('span');
       dot.className = 'request-dot';
-      dot.style.cssText = 'position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#D4AF37;';
+      dot.style.cssText = 'position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#FF8C00;';
       navProfile.style.position = 'relative';
       navProfile.appendChild(dot);
     }
@@ -361,7 +361,7 @@ async function checkUnreadMessages() {
       if (navMsg && !navMsg.querySelector('.unread-dot')) {
         const dot = document.createElement('span');
         dot.className = 'unread-dot';
-        dot.style.cssText = 'position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#D4AF37;';
+        dot.style.cssText = 'position:absolute;top:-2px;right:-2px;width:8px;height:8px;border-radius:50%;background:#FF8C00;';
         navMsg.style.position = 'relative';
         navMsg.appendChild(dot);
       }
