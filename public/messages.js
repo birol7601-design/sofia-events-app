@@ -87,17 +87,37 @@ function stopPolling() {
   if (pollInterval) { clearInterval(pollInterval); pollInterval = null; }
 }
 
+function switchView(showEl, hideEl) {
+  hideEl.style.opacity = '0';
+  hideEl.style.transform = 'translateX(-20px)';
+  hideEl.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+  setTimeout(() => {
+    hideEl.style.display = 'none';
+    hideEl.style.opacity = '';
+    hideEl.style.transform = '';
+    showEl.style.display = 'block';
+    showEl.style.opacity = '0';
+    showEl.style.transform = 'translateX(20px)';
+    showEl.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+    setTimeout(() => {
+      showEl.style.opacity = '1';
+      showEl.style.transform = 'translateX(0)';
+    }, 20);
+  }, 200);
+}
+
 function openChat(friendId, username, avatarType) {
   currentFriendId = friendId;
   currentFriendName = username;
   currentFriendAvatarType = avatarType || 'star';
   lastMessageId = 0;
 
-  document.getElementById('conversations-view').style.display = 'none';
-  document.getElementById('chat-view').style.display = '';
+  const convsView = document.getElementById('conversations-view');
+  const chatView = document.getElementById('chat-view');
   document.getElementById('chat-friend-name').textContent = username;
   document.getElementById('chat-friend-avatar').innerHTML = window.getAvatarSVG(currentFriendAvatarType, 36);
 
+  switchView(chatView, convsView);
   loadMessages(false);
   startPolling();
 }
@@ -105,8 +125,9 @@ function openChat(friendId, username, avatarType) {
 function backToConversations() {
   stopPolling();
   currentFriendId = null;
-  document.getElementById('chat-view').style.display = 'none';
-  document.getElementById('conversations-view').style.display = '';
+  const chatView = document.getElementById('chat-view');
+  const convsView = document.getElementById('conversations-view');
+  switchView(convsView, chatView);
   loadConversations();
 }
 

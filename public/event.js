@@ -295,6 +295,18 @@ async function wireGoingBtn(eventId) {
   });
 }
 
+const backBtn = document.getElementById('back-btn');
+if (backBtn) {
+  backBtn.addEventListener('click', () => {
+    const main = document.querySelector('main');
+    if (main) main.classList.add('page-exit');
+    setTimeout(() => {
+      if (history.length > 1) history.back();
+      else window.location.href = 'index.html';
+    }, 250);
+  });
+}
+
 function showError(msg) {
   document.body.innerHTML = `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;padding:2rem;background:#1A0A00;">

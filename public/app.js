@@ -282,7 +282,7 @@ function buildCardHTML(event) {
 
   if (event.is_featured) {
     return `
-      <div class="card-wrapper featured-frame" onclick="window.location.href='event.html?id=${event.id}'">
+      <div class="card-wrapper featured-frame" onclick="navigateToEvent('${event.id}')">
         ${CORNER_SVG('fl-tl')}
         ${CORNER_SVG('fl-tr')}
         ${CORNER_SVG('fl-br')}
@@ -293,9 +293,19 @@ function buildCardHTML(event) {
   }
 
   return `
-    <div class="card-wrapper" onclick="window.location.href='event.html?id=${event.id}'">
+    <div class="card-wrapper" onclick="navigateToEvent('${event.id}')">
       ${cardInner}
     </div>`;
+}
+
+function navigateToEvent(id) {
+  const main = document.querySelector('main');
+  if (main) {
+    main.classList.add('page-exit');
+    setTimeout(() => { window.location.href = `event.html?id=${id}`; }, 250);
+  } else {
+    window.location.href = `event.html?id=${id}`;
+  }
 }
 
 document.getElementById('filter-bar').addEventListener('click', (e) => {
@@ -319,10 +329,13 @@ document.getElementById('filter-bar').addEventListener('click', (e) => {
   }
 
   const container = document.getElementById('event-list');
-  container.classList.add('fading');
+  container.style.opacity = '0';
+  container.style.transform = 'translateY(8px)';
+  container.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
   setTimeout(() => {
     renderEvents(cat);
-    container.classList.remove('fading');
+    container.style.opacity = '1';
+    container.style.transform = 'translateY(0)';
   }, 200);
 });
 

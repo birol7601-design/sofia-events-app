@@ -103,11 +103,21 @@ async function loadTab(tab) {
 
 function switchTab(tab) {
   currentTab = tab;
-  document.getElementById('saved-list').style.display = tab === 'saved' ? '' : 'none';
-  document.getElementById('attending-list').style.display = tab === 'attending' ? '' : 'none';
   document.getElementById('tab-saved-btn').classList.toggle('active', tab === 'saved');
   document.getElementById('tab-attending-btn').classList.toggle('active', tab === 'attending');
+  const savedList = document.getElementById('saved-list');
+  const attendingList = document.getElementById('attending-list');
+  savedList.style.display = tab === 'saved' ? '' : 'none';
+  attendingList.style.display = tab === 'attending' ? '' : 'none';
+  const activeList = tab === 'saved' ? savedList : attendingList;
+  activeList.style.opacity = '0';
+  activeList.style.transform = 'translateY(6px)';
+  activeList.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
   loadTab(tab);
+  setTimeout(() => {
+    activeList.style.opacity = '1';
+    activeList.style.transform = 'translateY(0)';
+  }, 200);
 }
 
 // ── AVATAR PICKER ─────────────────────────────────────────────────────────────
