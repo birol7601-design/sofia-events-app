@@ -210,7 +210,7 @@ async function wireHeartBtn(eventId) {
   function setHeartState(saved) {
     const path = btn.querySelector('path');
     path.setAttribute('fill', saved ? '#FF8C00' : 'none');
-    path.setAttribute('stroke', saved ? '#FF8C00' : 'white');
+    path.setAttribute('stroke', saved ? '#FF8C00' : 'rgba(255,140,0,0.4)');
   }
 
   if (token) {
@@ -245,9 +245,23 @@ async function wireGoingBtn(eventId) {
   const goingBtn = document.getElementById('going-btn');
   const strip = document.getElementById('attending-strip');
   const countText = document.getElementById('attending-count-text');
-  if (!goingBtn || !strip) return;
+  if (!goingBtn) return;
 
   const token = localStorage.getItem('userToken');
+
+  function setGoingState(attending) {
+    if (attending) {
+      goingBtn.style.background = 'linear-gradient(135deg, #FF6B35, #CC4400)';
+      goingBtn.style.color = '#FFE8CC';
+      goingBtn.style.border = 'none';
+      goingBtn.textContent = "Going ✓";
+    } else {
+      goingBtn.style.background = 'transparent';
+      goingBtn.style.color = '#FF8C00';
+      goingBtn.style.border = '1px solid rgba(255,140,0,0.5)';
+      goingBtn.textContent = "I'm going";
+    }
+  }
 
   async function loadCount() {
     try {
@@ -255,23 +269,21 @@ async function wireGoingBtn(eventId) {
       if (res.ok) {
         const data = await res.json();
         const n = data.count;
-        countText.textContent = n > 0 ? `${n} ${n === 1 ? 'person' : 'people'} attending` : '';
-        strip.style.display = '';
+        if (countText) countText.textContent = n > 0 ? `${n} ${n === 1 ? 'person' : 'people'} attending` : '';
+        if (strip && n > 0) strip.style.display = '';
       }
     } catch {}
   }
 
   async function loadAttending() {
-    if (!token) { strip.style.display = ''; return; }
+    if (!token) return;
     try {
       const res = await fetch(`${API_BASE}/api/users/attending/ids`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
         const data = await res.json();
-        const isAttending = data.attendingIds.map(String).includes(String(eventId));
-        goingBtn.classList.toggle('attending', isAttending);
-        goingBtn.textContent = isAttending ? "I'm going ✓" : "I'm going";
+        setGoingState(data.attendingIds.map(String).includes(String(eventId)));
       }
     } catch {}
   }
@@ -287,8 +299,7 @@ async function wireGoingBtn(eventId) {
       });
       if (res.ok) {
         const data = await res.json();
-        goingBtn.classList.toggle('attending', data.attending);
-        goingBtn.textContent = data.attending ? "I'm going ✓" : "I'm going";
+        setGoingState(data.attending);
         loadCount();
       }
     } catch {}

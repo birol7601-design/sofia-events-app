@@ -23,12 +23,6 @@
       </svg>
     </button>
 
-    <button id="hero-heart-btn" aria-label="Save event" style="position:absolute;top:16px;right:16px;width:36px;height:36px;background:rgba(0,0,0,0.35);border:none;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;padding:0;">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-      </svg>
-    </button>
-
     <div style="position:absolute;bottom:0;left:0;right:0;padding:0 16px 14px;z-index:2;">
       <div id="hero-badges" style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;align-items:center;"></div>
       <h1 id="event-title" style="font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:#F0E8D6;line-height:1.2;margin-bottom:4px;">Loading…</h1>
@@ -50,11 +44,8 @@
   </div>
 
   <!-- ATTENDING STRIP -->
-  <div id="attending-strip" style="display:none;padding:10px 16px;background:#16151F;border-bottom:1px solid rgba(212,175,55,0.12);">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <span id="attending-count-text" style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;flex:1;"></span>
-      <button id="going-btn" class="going-btn" style="width:auto;margin-top:0;">I'm going</button>
-    </div>
+  <div id="attending-strip" style="display:none;padding:5px 16px;background:#16151F;border-bottom:1px solid rgba(212,175,55,0.12);">
+    <span id="attending-count-text" style="font-family:'Cormorant Garamond',serif;font-size:12px;color:#8B6040;font-style:italic;"></span>
   </div>
 
   <main class="page-transition" id="event-main">
@@ -165,10 +156,16 @@
 
   <!-- STICKY BOTTOM BAR -->
   <div class="detail-bottom-bar">
+    <button id="hero-heart-btn" aria-label="Save event" style="width:36px;height:36px;background:rgba(26,10,0,0.6);border:1px solid rgba(255,140,0,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;flex-shrink:0;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,140,0,0.4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+      </svg>
+    </button>
     <div class="bottom-price-wrap">
       <span style="font-size:10px;color:#6E6A5F;display:block;margin-bottom:2px;">from</span>
       <span id="bottom-price-value" class="bottom-price-value"></span>
     </div>
+    <button id="going-btn" style="background:transparent;border:1px solid rgba(255,140,0,0.5);color:#FF8C00;border-radius:999px;padding:8px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">I'm going</button>
     <div id="bottom-action"></div>
   </div>
 

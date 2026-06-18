@@ -82,38 +82,12 @@ async function handleHeartClick(domEvent, eventId) {
       } else {
         savedIds = savedIds.filter(id => id !== String(eventId));
         path.setAttribute('fill', 'none');
-        path.setAttribute('stroke', 'white');
+        path.setAttribute('stroke', 'rgba(255,140,0,0.4)');
       }
     }
   } catch {}
 }
 
-async function handleGoingClick(domEvent, eventId) {
-  domEvent.stopPropagation();
-  const btn = domEvent.currentTarget;
-  const token = localStorage.getItem('userToken');
-
-  if (!token) { window.location.href = 'auth.html'; return; }
-
-  try {
-    const res = await fetch(`${API_BASE}/api/users/attending/${eventId}`, {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
-    });
-    if (res.ok) {
-      const data = await res.json();
-      if (data.attending) {
-        attendingIds.push(String(eventId));
-        btn.classList.add('attending');
-        btn.textContent = "Going ✓";
-      } else {
-        attendingIds = attendingIds.filter(id => id !== String(eventId));
-        btn.classList.remove('attending');
-        btn.textContent = "Going";
-      }
-    }
-  } catch {}
-}
 
 function restoreCardStates() {
   document.querySelectorAll('.heart-btn[data-event-id]').forEach(btn => {
@@ -123,16 +97,7 @@ function restoreCardStates() {
       path.setAttribute('stroke', '#FF8C00');
     } else {
       path.setAttribute('fill', 'none');
-      path.setAttribute('stroke', 'white');
-    }
-  });
-  document.querySelectorAll('.going-card-btn[data-event-id]').forEach(btn => {
-    if (attendingIds.includes(String(btn.dataset.eventId))) {
-      btn.classList.add('attending');
-      btn.textContent = "Going ✓";
-    } else {
-      btn.classList.remove('attending');
-      btn.textContent = "Going";
+      path.setAttribute('stroke', 'rgba(255,140,0,0.4)');
     }
   });
 }
@@ -249,17 +214,15 @@ function buildCardHTML(event) {
     : '';
 
   const heartBtn = `
-    <button class="heart-btn" data-event-id="${event.id}" onclick="handleHeartClick(event, '${event.id}')">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+    <button class="heart-btn" data-event-id="${event.id}" onclick="handleHeartClick(event, '${event.id}')" style="position:absolute;top:10px;right:10px;width:32px;height:32px;background:rgba(26,10,0,0.6);border:1px solid rgba(255,140,0,0.4);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,140,0,0.4)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
       </svg>
     </button>`;
 
-  const goingBtn = `<button class="going-btn going-card-btn" data-event-id="${event.id}" onclick="handleGoingClick(event, '${event.id}')">Going</button>`;
-
   const cardInner = `
     <div class="event-card${event.is_featured ? ' featured' : ''}">
-      <div class="card-image-wrap" style="background-color:${info.accent};">
+      <div class="card-image-wrap" style="background-color:${info.accent};position:relative;">
         ${imageHTML}
         ${heartBtn}
       </div>
@@ -281,7 +244,6 @@ function buildCardHTML(event) {
             </div>
             <span class="cat-badge" style="background:${info.badgeBg};color:${info.badgeText};">${info.emoji} ${event.category}</span>
           </div>
-          ${goingBtn}
         </div>
       </div>
     </div>`;
