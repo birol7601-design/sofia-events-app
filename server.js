@@ -603,8 +603,12 @@ app.patch('/api/users/onboarding', authenticateUser, async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-app.get('*', (req, res) => {
-  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+app.use((req, res, next) => {
+  if (req.method === 'GET' && !req.path.startsWith('/api/')) {
+    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+  } else {
+    next();
+  }
 });
 
 app.use((err, req, res, next) => {
