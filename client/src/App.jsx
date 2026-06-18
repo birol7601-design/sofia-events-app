@@ -12,7 +12,7 @@ import Organizer   from './pages/Organizer';
 import Onboarding        from './pages/Onboarding';
 import ComponentsPreview from './pages/ComponentsPreview';
 
-const HIDE_NAV = ['/auth', '/onboarding'];
+const HIDE_NAV = ['/auth', '/onboarding', '/event/'];
 
 function AnimatedRoutes() {
   const location = useLocation();
