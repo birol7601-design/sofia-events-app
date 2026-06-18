@@ -5,7 +5,16 @@ const pool = require('./db');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const app = express();
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Please try again in 15 minutes.' }
+});
 
 app.use(cors());
 app.use(express.json());
@@ -167,7 +176,7 @@ function authenticateUser(req, res, next) {
 
 // ── USER ROUTES ───────────────────────────────────────────────────────────────
 
-app.post('/api/users/register', async (req, res) => {
+app.post('/api/users/register', authLimiter, async (req, res) => {
   try {
     const { username, email, password, email_marketing = false } = req.body;
     if (!username || !email || !password) return res.status(400).json({ error: 'All fields required' });
@@ -187,7 +196,7 @@ app.post('/api/users/register', async (req, res) => {
   }
 });
 
-app.post('/api/users/login', async (req, res) => {
+app.post('/api/users/login', authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await pool.query('SELECT * FROM users WHERE email = $1', [email.trim().toLowerCase()]);
