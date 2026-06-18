@@ -46,7 +46,7 @@ function renderEmpty(tab) {
       <span style="display:block;font-size:48px;margin-bottom:12px;">${isSaved ? '🔖' : '🎪'}</span>
       <div style="font-family:'DM Serif Display',serif;color:var(--gold);font-size:18px;margin-bottom:8px;">${isSaved ? 'Nothing saved yet' : 'Not attending anything yet'}</div>
       <p style="font-family:'Cormorant Garamond',serif;color:var(--muted-dark);font-size:15px;margin-bottom:20px;font-style:italic;">${isSaved ? 'Tap ♡ on any event to save it' : "Tap 'I'm going' on any event"}</p>
-      <a href="index.html" style="display:inline-block;background:linear-gradient(135deg,#FF6B35,#FFD700);color:#1A0A00;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Browse events →</a>
+      <a href="events.html" style="display:inline-block;background:linear-gradient(135deg,#FF6B35,#FFD700);color:#1A0A00;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Browse events →</a>
     </div>`;
 }
 

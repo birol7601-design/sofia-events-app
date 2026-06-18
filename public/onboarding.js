@@ -90,14 +90,14 @@ async function finishOnboarding() {
   try {
     await fetch(`${API}/api/users/onboarding`, { method: 'PATCH', headers: authHeaders() });
   } catch {}
-  window.location.href = 'index.html';
+  window.location.href = 'home.html';
 }
 
 async function skip() {
   try {
     await fetch(`${API}/api/users/onboarding`, { method: 'PATCH', headers: authHeaders() });
   } catch {}
-  window.location.href = 'index.html';
+  window.location.href = 'home.html';
 }
 
 function goToStep(n) {

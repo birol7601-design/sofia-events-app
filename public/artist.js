@@ -52,11 +52,11 @@ function renderEventList(containerId, events, emptyMsg) {
 async function init() {
   const params = new URLSearchParams(window.location.search);
   const artistId = params.get('id');
-  if (!artistId) { window.location.href = 'index.html'; return; }
+  if (!artistId) { window.location.href = 'events.html'; return; }
 
   try {
     const res = await fetch(`${API}/api/artists/${artistId}`, { headers: authHeaders() });
-    if (!res.ok) { window.location.href = 'index.html'; return; }
+    if (!res.ok) { window.location.href = 'events.html'; return; }
     artistData = await res.json();
 
     document.title = `${artistData.name} — SofiaBuzz`;

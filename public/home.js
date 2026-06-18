@@ -64,7 +64,7 @@ function renderGenreBrowse(events, userGenres) {
   container.innerHTML = genres.map(g => {
     const info = getCatInfo(g);
     const sel = userGenres.includes(g);
-    return `<button class="home-genre-pill${sel ? ' selected' : ''}" onclick="homeNavigate('index.html?genre=${encodeURIComponent(g)}')">${info.emoji} ${g}</button>`;
+    return `<button class="home-genre-pill${sel ? ' selected' : ''}" onclick="homeNavigate('events.html?genre=${encodeURIComponent(g)}')">${info.emoji} ${g}</button>`;
   }).join('');
 }
 

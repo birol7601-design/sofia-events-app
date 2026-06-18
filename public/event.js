@@ -302,7 +302,7 @@ if (backBtn) {
     if (main) main.classList.add('page-exit');
     setTimeout(() => {
       if (history.length > 1) history.back();
-      else window.location.href = 'index.html';
+      else window.location.href = 'events.html';
     }, 250);
   });
 }
@@ -312,7 +312,7 @@ function showError(msg) {
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;padding:2rem;background:#1A0A00;">
       <div style="font-size:48px;">🎫</div>
       <p style="color:var(--muted);text-align:center;font-family:'IBM Plex Sans',sans-serif;">${msg}</p>
-      <a href="index.html" style="color:#FF8C00;font-weight:600;text-decoration:none;font-family:'IBM Plex Sans',sans-serif;">← Back to events</a>
+      <a href="events.html" style="color:#FF8C00;font-weight:600;text-decoration:none;font-family:'IBM Plex Sans',sans-serif;">← Back to events</a>
     </div>
   `;
 }

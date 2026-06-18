@@ -26,7 +26,7 @@ function storeAndRedirect(data, isNewUser) {
   if (isNewUser || !data.onboardingComplete) {
     window.location.href = 'onboarding.html';
   } else {
-    window.location.href = 'index.html';
+    window.location.href = 'home.html';
   }
 }
 
@@ -114,7 +114,7 @@ document.getElementById('register-btn').addEventListener('click', async () => {
 });
 
 if (localStorage.getItem('userToken')) {
-  window.location.href = 'index.html';
+  window.location.href = 'home.html';
 } else if (!localStorage.getItem('hasVisitedAuth')) {
   localStorage.setItem('hasVisitedAuth', 'true');
   showTab('register');

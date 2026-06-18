@@ -82,7 +82,7 @@ function renderEmpty(containerId, tab) {
       <span style="display:block;font-size:48px;margin-bottom:12px;">${isSaved ? '🎭' : '🎪'}</span>
       <div style="font-family:'DM Serif Display',serif;color:#FF8C00;font-size:16px;font-weight:700;margin-bottom:8px;">${isSaved ? 'No saved events yet' : 'Not attending any events yet'}</div>
       <p style="font-family:'IBM Plex Sans',sans-serif;color:#8B6040;font-size:13px;margin-bottom:20px;">${isSaved ? 'Tap ♡ on any event to save it' : "Tap 'I'm going' on any event to mark attendance"}</p>
-      <a href="index.html" style="display:inline-block;background:linear-gradient(135deg,#F4D06F,#FF8C00,#B8860B);color:#1A0A00;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Browse events →</a>
+      <a href="events.html" style="display:inline-block;background:linear-gradient(135deg,#F4D06F,#FF8C00,#B8860B);color:#1A0A00;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:13px;border-radius:999px;padding:10px 24px;text-decoration:none;">Browse events →</a>
     </div>`;
 }
 

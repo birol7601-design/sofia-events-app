@@ -166,7 +166,7 @@ async function checkUnreadMessages() {
 // ── INIT ──────────────────────────────────────────────────────────────────────
 
 async function init() {
-  if (!userId) { window.location.href = 'index.html'; return; }
+  if (!userId) { window.location.href = 'home.html'; return; }
 
   const token = localStorage.getItem('userToken');
   const myId = localStorage.getItem('userId');
