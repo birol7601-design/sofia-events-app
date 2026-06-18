@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { apiGet } from '../lib/api';
 import { isLoggedIn } from '../lib/auth';
 import EventCard from '../components/EventCard';
@@ -56,22 +56,22 @@ export default function Feed() {
   return (
     <motion.div
       variants={pageVariants} initial="initial" animate="animate" exit="exit"
-      className="flex flex-col min-h-dvh pb-24"
+      className="flex flex-col min-h-dvh pb-24 comb-bg"
     >
       {/* Sticky frosted header */}
       <div
         className="sticky top-0 z-40 transition-all duration-300"
         style={{
-          background: scrolled ? 'rgba(13,10,26,0.92)' : 'rgba(13,10,26,0.6)',
+          background: scrolled ? 'rgba(10,6,0,0.95)' : 'rgba(10,6,0,0.7)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: scrolled ? '1px solid rgba(167,139,250,0.15)' : '1px solid transparent',
-          boxShadow: scrolled ? '0 4px 24px rgba(0,0,0,0.3)' : 'none',
+          borderBottom: scrolled ? '1px solid rgba(255,184,0,0.2)' : '1px solid transparent',
+          boxShadow: scrolled ? '0 4px 24px rgba(0,0,0,0.5)' : 'none',
         }}
       >
         <div className="px-5 pt-10 pb-2">
-          <h1 className="font-display font-bold text-2xl text-text">Events</h1>
-          <p className="text-textMuted text-sm font-body">What's on in Sofia</p>
+          <h1 className="font-display font-bold text-2xl" style={{ color: '#FFF4D6' }}>Events</h1>
+          <p className="text-sm font-body" style={{ color: '#8A7B4A' }}>What's buzzing in Sofia</p>
         </div>
 
         {/* Category chips */}
@@ -83,17 +83,18 @@ export default function Feed() {
               className="flex-shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold font-body"
               style={{
                 background: filter === cat
-                  ? 'linear-gradient(135deg, #7C3AED, #EC4899)'
-                  : 'rgba(30,24,56,0.7)',
+                  ? 'radial-gradient(ellipse 80% 140% at 35% 20%, #FFE45C 0%, #FFB800 55%, #C46A00 100%)'
+                  : 'rgba(28,23,8,0.9)',
                 border: filter === cat
-                  ? '1px solid rgba(167,139,250,0.4)'
-                  : '1px solid rgba(167,139,250,0.15)',
-                color: filter === cat ? '#fff' : '#A39CC4',
-                boxShadow: filter === cat ? '0 0 14px rgba(124,58,237,0.35)' : 'none',
+                  ? '1px solid rgba(255,184,0,0.5)'
+                  : '1px solid rgba(255,184,0,0.15)',
+                color: filter === cat ? '#7A3D00' : '#C7B68A',
+                fontWeight: filter === cat ? 800 : 600,
+                boxShadow: filter === cat ? '0 0 12px rgba(255,184,0,0.3)' : 'none',
               }}
               whileTap={{ scale: 0.91 }}
             >
-              {cat === 'all' ? '🎉 All' : cat}
+              {cat === 'all' ? '🐝 All' : cat}
             </motion.button>
           ))}
         </div>
@@ -115,7 +116,7 @@ export default function Feed() {
           </div>
         )}
         {error && (
-          <p className="text-accent text-sm text-center py-12">{error}</p>
+          <p className="text-sm text-center py-12 font-body" style={{ color: '#FF6B35' }}>{error}</p>
         )}
 
         {!loading && !error && (
@@ -124,7 +125,8 @@ export default function Feed() {
               <motion.p
                 key="empty"
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                className="text-textMuted text-sm text-center py-14"
+                className="text-sm text-center py-14 font-body"
+                style={{ color: '#8A7B4A' }}
               >
                 No events in this category yet.
               </motion.p>
@@ -148,12 +150,15 @@ export default function Feed() {
                     <div className="flex items-center gap-2 mb-1.5">
                       <span
                         className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full font-body"
-                        style={{ background: 'linear-gradient(135deg, #FB923C, #EC4899)', color: '#fff' }}
+                        style={{
+                          background: 'radial-gradient(ellipse 80% 140% at 35% 20%, #FFE45C 0%, #FFB800 55%, #C46A00 100%)',
+                          color: '#7A3D00',
+                        }}
                       >
-                        ★ Featured
+                        ✦ Featured
                       </span>
                     </div>
-                    <div style={{ boxShadow: '0 0 22px rgba(251,146,60,0.18)' }}>
+                    <div style={{ boxShadow: '0 0 24px rgba(255,184,0,0.18)' }}>
                       <EventCard event={ev} initialSaved={savedIds.has(ev.id)} />
                     </div>
                   </motion.div>
@@ -169,7 +174,7 @@ export default function Feed() {
                     whileInView="animate"
                     viewport={{ once: true, margin: '-30px' }}
                   >
-                    <EventCard event={ev} />
+                    <EventCard event={ev} initialSaved={savedIds.has(ev.id)} />
                   </motion.div>
                 ))}
               </motion.div>

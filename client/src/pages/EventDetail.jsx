@@ -8,15 +8,15 @@ import BuzzSays from '../components/BuzzSays';
 import { EventCardSkeleton } from '../components/Skeleton';
 
 const CAT_COLORS = {
-  rock:       ['#7C3AED', '#5B21B6'],
-  pop:        ['#EC4899', '#9D174D'],
-  jazz:       ['#FB923C', '#C2410C'],
-  electronic: ['#3B82F6', '#1D4ED8'],
-  techno:     ['#8B5CF6', '#5B21B6'],
-  house:      ['#06B6D4', '#0E7490'],
-  festival:   ['#10B981', '#065F46'],
-  classical:  ['#A78BFA', '#5B21B6'],
-  default:    ['#4B5563', '#1F2937'],
+  rock:       ['#7A3D00', '#4A1A00'],
+  pop:        ['#C46A00', '#7A3D00'],
+  jazz:       ['#FFB800', '#C46A00'],
+  electronic: ['#1C1708', '#0A0A0A'],
+  techno:     ['#3A2000', '#1A0A00'],
+  house:      ['#2A1800', '#120E04'],
+  festival:   ['#FFB800', '#7A3D00'],
+  classical:  ['#C7B68A', '#8A7B4A'],
+  default:    ['#1C1708', '#0A0A0A'],
 };
 function catGradient(cat = '') {
   const [c1, c2] = CAT_COLORS[cat.toLowerCase()] || CAT_COLORS.default;
@@ -28,16 +28,16 @@ function InfoCard({ icon, label, value, sub }) {
     <div
       className="flex items-center gap-3 px-4 py-3 rounded-2xl"
       style={{
-        background: 'rgba(22,18,43,0.75)',
-        border: '1px solid rgba(167,139,250,0.15)',
+        background: 'linear-gradient(160deg, #1C1708 0%, #120E04 100%)',
+        border: '1px solid rgba(255,184,0,0.18)',
         backdropFilter: 'blur(16px)',
       }}
     >
       <span className="text-2xl leading-none">{icon}</span>
       <div className="min-w-0">
-        <p className="text-textMuted text-[10px] font-body uppercase tracking-widest">{label}</p>
-        <p className="text-text font-display font-semibold text-sm leading-snug truncate">{value}</p>
-        {sub && <p className="text-textMuted text-xs font-body">{sub}</p>}
+        <p className="text-[10px] font-body uppercase tracking-widest" style={{ color: '#8A7B4A' }}>{label}</p>
+        <p className="font-display font-semibold text-sm leading-snug truncate" style={{ color: '#FFF4D6' }}>{value}</p>
+        {sub && <p className="text-xs font-body" style={{ color: '#C7B68A' }}>{sub}</p>}
       </div>
     </div>
   );
@@ -45,7 +45,7 @@ function InfoCard({ icon, label, value, sub }) {
 
 function GoingAvatars({ count }) {
   if (!count || count < 1) return null;
-  const colors = ['#7C3AED', '#EC4899', '#3B82F6', '#10B981', '#FB923C'];
+  const colors = ['#FFB800', '#C46A00', '#FFE45C', '#7A3D00', '#FFF4D6'];
   const shown  = Math.min(count, 4);
   return (
     <div className="flex items-center gap-2">
@@ -57,7 +57,7 @@ function GoingAvatars({ count }) {
             style={{
               width: 26, height: 26,
               background: colors[i % colors.length],
-              borderColor: '#0D0A1A',
+              borderColor: '#0A0A0A',
               marginLeft: i > 0 ? -8 : 0,
               zIndex: shown - i,
               position: 'relative',
@@ -65,8 +65,8 @@ function GoingAvatars({ count }) {
           />
         ))}
       </div>
-      <span className="text-text/80 text-sm font-body">
-        <strong className="text-text">{count}</strong> going
+      <span className="text-sm font-body" style={{ color: '#C7B68A' }}>
+        <strong style={{ color: '#FFB800' }}>{count}</strong> in the hive
       </span>
     </div>
   );
@@ -79,21 +79,21 @@ const pageVariants = {
 };
 
 export default function EventDetail() {
-  const { id }    = useParams();
-  const navigate  = useNavigate();
-  const heroRef   = useRef(null);
+  const { id }   = useParams();
+  const navigate = useNavigate();
+  const heroRef  = useRef(null);
 
-  const { scrollY }    = useScroll();
-  const heroParallaxY  = useTransform(scrollY, [0, 350], [0, 70]);
-  const heroScale      = useTransform(scrollY, [0, 350], [1, 1.12]);
+  const { scrollY }   = useScroll();
+  const heroParallaxY = useTransform(scrollY, [0, 350], [0, 70]);
+  const heroScale     = useTransform(scrollY, [0, 350], [1, 1.12]);
 
-  const [event,       setEvent]       = useState(null);
-  const [moreEvents,  setMoreEvents]  = useState([]);
-  const [loading,     setLoading]     = useState(true);
-  const [saved,       setSaved]       = useState(false);
-  const [attending,   setAttending]   = useState(false);
-  const [saveFlying,  setSaveFlying]  = useState(false);
-  const [attendFlying,setAttendFlying]= useState(false);
+  const [event,        setEvent]        = useState(null);
+  const [moreEvents,   setMoreEvents]   = useState([]);
+  const [loading,      setLoading]      = useState(true);
+  const [saved,        setSaved]        = useState(false);
+  const [attending,    setAttending]    = useState(false);
+  const [saveFlying,   setSaveFlying]   = useState(false);
+  const [attendFlying, setAttendFlying] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -101,10 +101,8 @@ export default function EventDetail() {
       try {
         const ev = await apiGet(`/api/events/${id}`);
         setEvent(ev);
-        // Load more in same category
         const all = await apiGet('/api/events');
         setMoreEvents(all.filter(e => e.id !== parseInt(id) && e.category === ev.category).slice(0, 4));
-        // Check initial save/attend state using lightweight ID endpoints
         if (isLoggedIn()) {
           try {
             const [savedData, attendingData] = await Promise.all([
@@ -127,13 +125,13 @@ export default function EventDetail() {
   const toggleSave = async () => {
     if (!isLoggedIn()) { navigate('/auth'); return; }
     if (saveFlying) return;
-    setSaved(s => !s); // optimistic
+    setSaved(s => !s);
     setSaveFlying(true);
     try {
       const data = await apiPost(`/api/users/saved/${id}`);
-      setSaved(data.saved); // confirm with server truth
+      setSaved(data.saved);
     } catch {
-      setSaved(s => !s); // revert on network error
+      setSaved(s => !s);
     } finally {
       setSaveFlying(false);
     }
@@ -142,13 +140,13 @@ export default function EventDetail() {
   const toggleAttend = async () => {
     if (!isLoggedIn()) { navigate('/auth'); return; }
     if (attendFlying) return;
-    setAttending(s => !s); // optimistic
+    setAttending(s => !s);
     setAttendFlying(true);
     try {
       const data = await apiPost(`/api/users/attending/${id}`);
-      setAttending(data.attending); // confirm with server truth
+      setAttending(data.attending);
     } catch {
-      setAttending(s => !s); // revert on network error
+      setAttending(s => !s);
     } finally {
       setAttendFlying(false);
     }
@@ -164,7 +162,7 @@ export default function EventDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-dvh pb-28">
+      <div className="min-h-dvh pb-28 comb-bg">
         <div className="h-72 shimmer-bg" />
         <div className="px-5 pt-4 space-y-3">
           {[0, 1].map(i => <EventCardSkeleton key={i} />)}
@@ -176,11 +174,8 @@ export default function EventDetail() {
   if (!event) {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center gap-4">
-        <p className="text-textMuted text-sm">Event not found.</p>
-        <button
-          onClick={() => navigate(-1)}
-          className="text-primaryLight text-sm font-body"
-        >
+        <p className="text-sm font-body" style={{ color: '#8A7B4A' }}>Event not found.</p>
+        <button onClick={() => navigate(-1)} className="text-sm font-body" style={{ color: '#FFB800' }}>
           ← Go back
         </button>
       </div>
@@ -191,7 +186,7 @@ export default function EventDetail() {
     <>
       <motion.div
         variants={pageVariants} initial="initial" animate="animate" exit="exit"
-        className="flex flex-col min-h-dvh pb-32"
+        className="flex flex-col min-h-dvh pb-32 comb-bg"
       >
         {/* Hero with scroll parallax */}
         <div className="relative h-72 overflow-hidden" ref={heroRef}>
@@ -207,16 +202,19 @@ export default function EventDetail() {
               className="absolute inset-0"
               style={{ background: catGradient(event.category || ''), y: heroParallaxY, scale: heroScale }}
             >
-              <div className="absolute inset-0 flex items-center justify-center opacity-10">
-                <span style={{ fontSize: 160, filter: 'blur(6px)' }}>✦</span>
+              <div className="absolute inset-0 comb-bg opacity-40" />
+              <div className="absolute inset-0 flex items-center justify-center opacity-15">
+                <svg width="140" height="161" viewBox="0 0 100 115" fill="none">
+                  <polygon points="50,4 96,28 96,87 50,111 4,87 4,28" fill="rgba(255,255,255,0.18)" />
+                </svg>
               </div>
             </motion.div>
           )}
 
-          {/* Bottom gradient */}
+          {/* Bottom gradient — honey to dark */}
           <div
             className="absolute inset-0"
-            style={{ background: 'linear-gradient(to bottom, rgba(13,10,26,0.25) 0%, rgba(13,10,26,0) 35%, rgba(13,10,26,0.8) 80%, rgba(13,10,26,1) 100%)' }}
+            style={{ background: 'linear-gradient(to bottom, rgba(10,10,10,0.2) 0%, rgba(10,6,0,0) 35%, rgba(10,6,0,0.82) 80%, rgba(10,6,0,1) 100%)' }}
           />
 
           {/* Back button */}
@@ -224,10 +222,10 @@ export default function EventDetail() {
             onClick={() => navigate(-1)}
             className="absolute top-12 left-4 z-20 w-9 h-9 rounded-full flex items-center justify-center"
             style={{
-              background: 'rgba(13,10,26,0.6)',
+              background: 'rgba(10,6,0,0.65)',
               backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(167,139,250,0.2)',
-              color: '#F5F3FF',
+              border: '1px solid rgba(255,184,0,0.25)',
+              color: '#FFF4D6',
               fontSize: 16,
             }}
             whileTap={{ scale: 0.86 }}
@@ -243,22 +241,24 @@ export default function EventDetail() {
               <span
                 className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-0.5 rounded-full font-body mb-2 inline-block"
                 style={{
-                  background: 'rgba(13,10,26,0.55)',
+                  background: 'rgba(10,6,0,0.6)',
                   backdropFilter: 'blur(8px)',
-                  border: '1px solid rgba(167,139,250,0.3)',
-                  color: '#A78BFA',
+                  border: '1px solid rgba(255,184,0,0.35)',
+                  color: '#FFB800',
                 }}
               >
                 {event.category}
               </span>
             )}
-            <h1 className="font-display font-bold text-2xl text-text leading-tight">{event.title}</h1>
+            <h1 className="font-display font-bold text-2xl leading-tight" style={{ color: '#FFF4D6' }}>
+              {event.title}
+            </h1>
           </div>
         </div>
 
         {/* Body */}
         <div className="px-5 mt-4 space-y-5">
-          {/* Going count */}
+          {/* In the hive count */}
           {event.attending_count > 0 && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1, transition: { delay: 0.18 } }}>
               <GoingAvatars count={event.attending_count} />
@@ -271,8 +271,8 @@ export default function EventDetail() {
             initial={{ opacity: 0, y: 14 }}
             animate={{ opacity: 1, y: 0, transition: { delay: 0.14, duration: 0.38 } }}
           >
-            {date     && <InfoCard icon="📅" label="When"  value={date}              sub={time}           />}
-            {event.venue  && <InfoCard icon="📍" label="Where" value={event.venue}  sub={event.address || null} />}
+            {date             && <InfoCard icon="📅" label="When"  value={date} sub={time} />}
+            {event.venue      && <InfoCard icon="📍" label="Where" value={event.venue} sub={event.address || null} />}
             {event.price_text && <InfoCard icon="🎟" label="Price" value={event.price_text} />}
           </motion.div>
 
@@ -284,8 +284,8 @@ export default function EventDetail() {
           {/* About */}
           {event.description && (
             <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0, transition: { delay: 0.28 } }}>
-              <h2 className="font-display font-bold text-lg text-text mb-2">About</h2>
-              <p className="text-text/80 text-sm font-body leading-relaxed">{event.description}</p>
+              <h2 className="font-display font-bold text-lg mb-2" style={{ color: '#FFF4D6' }}>About</h2>
+              <p className="text-sm font-body leading-relaxed" style={{ color: '#C7B68A' }}>{event.description}</p>
             </motion.section>
           )}
 
@@ -293,17 +293,20 @@ export default function EventDetail() {
           {(event.artist_bio || event.organizer_bio || event.artist) && (
             <motion.section
               className="rounded-2xl p-4"
-              style={{ background: 'rgba(30,24,56,0.55)', border: '1px solid rgba(167,139,250,0.15)' }}
+              style={{
+                background: 'linear-gradient(160deg, #1C1708 0%, #120E04 100%)',
+                border: '1px solid rgba(255,184,0,0.18)',
+              }}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0, transition: { delay: 0.34 } }}
             >
-              <p className="text-[10px] font-bold uppercase tracking-[2px] mb-1 font-body" style={{ color: '#FB923C' }}>
-                About the artist
+              <p className="text-[10px] font-bold uppercase tracking-[2px] mb-1 font-body" style={{ color: '#FFB800' }}>
+                🐝 About the artist
               </p>
               {event.artist && (
-                <h3 className="font-display font-semibold text-text text-base mb-1">{event.artist}</h3>
+                <h3 className="font-display font-semibold text-base mb-1" style={{ color: '#FFF4D6' }}>{event.artist}</h3>
               )}
-              <p className="text-text/75 text-sm font-body leading-relaxed">
+              <p className="text-sm font-body leading-relaxed" style={{ color: '#C7B68A' }}>
                 {event.artist_bio || event.organizer_bio}
               </p>
             </motion.section>
@@ -318,9 +321,9 @@ export default function EventDetail() {
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 w-full py-3 rounded-2xl text-sm font-semibold font-body"
                 style={{
-                  background: 'rgba(30,24,56,0.65)',
-                  border: '1px solid rgba(167,139,250,0.25)',
-                  color: '#A78BFA',
+                  background: 'rgba(28,23,8,0.8)',
+                  border: '1px solid rgba(255,184,0,0.28)',
+                  color: '#FFB800',
                 }}
               >
                 Buy tickets ↗
@@ -334,7 +337,7 @@ export default function EventDetail() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0, transition: { delay: 0.42 } }}
             >
-              <h2 className="font-display font-bold text-lg text-text mb-3">
+              <h2 className="font-display font-bold text-lg mb-3" style={{ color: '#FFF4D6' }}>
                 More {event.category} events
               </h2>
               <div className="space-y-3">
@@ -349,10 +352,10 @@ export default function EventDetail() {
       <motion.div
         className="fixed bottom-0 left-0 right-0 z-50 px-5 pb-8 pt-4"
         style={{
-          background: 'rgba(13,10,26,0.92)',
+          background: 'rgba(10,6,0,0.94)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          borderTop: '1px solid rgba(167,139,250,0.12)',
+          borderTop: '1px solid rgba(255,184,0,0.18)',
         }}
         initial={{ y: 80, opacity: 0 }}
         animate={{ y: 0, opacity: 1, transition: { delay: 0.48, duration: 0.4, ease: [0.16, 1, 0.3, 1] } }}
@@ -363,9 +366,9 @@ export default function EventDetail() {
             onClick={toggleSave}
             className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 text-xl"
             style={{
-              background: saved ? 'rgba(236,72,153,0.18)' : 'rgba(30,24,56,0.85)',
-              border: saved ? '1px solid rgba(236,72,153,0.5)' : '1px solid rgba(167,139,250,0.2)',
-              color: saved ? '#EC4899' : '#A39CC4',
+              background: saved ? 'rgba(255,184,0,0.18)' : 'rgba(28,23,8,0.9)',
+              border: saved ? '1px solid rgba(255,184,0,0.7)' : '1px solid rgba(255,184,0,0.2)',
+              color: saved ? '#FFB800' : '#8A7B4A',
             }}
             whileTap={{ scale: 0.82 }}
             animate={{ scale: saved ? [1, 1.22, 1] : 1 }}
@@ -377,25 +380,28 @@ export default function EventDetail() {
           {/* Price */}
           {event.price_text && (
             <div className="flex-shrink-0">
-              <p className="text-textMuted text-[10px] font-body leading-none">from</p>
-              <p className="font-display font-bold text-base leading-tight" style={{ color: '#FB923C' }}>
+              <p className="text-[10px] font-body leading-none" style={{ color: '#8A7B4A' }}>from</p>
+              <p className="font-display font-bold text-base leading-tight" style={{ color: '#FFB800' }}>
                 {event.price_text}
               </p>
             </div>
           )}
 
-          {/* Going button */}
+          {/* GET YOUR SPOT button */}
           <motion.button
             onClick={toggleAttend}
-            className="flex-1 h-12 rounded-2xl font-display font-bold text-sm text-white"
+            className="flex-1 h-12 rounded-2xl font-display font-bold text-sm"
             style={{
               background: attending
-                ? 'rgba(16,185,129,0.85)'
-                : 'linear-gradient(135deg, #7C3AED, #EC4899)',
-              border: attending ? '1px solid rgba(16,185,129,0.5)' : 'none',
+                ? 'rgba(28,23,8,0.9)'
+                : 'radial-gradient(ellipse 80% 140% at 35% 20%, #FFF7C0 0%, #FFE45C 22%, #FFB800 55%, #D87A00 100%)',
+              border: attending ? '1px solid rgba(255,184,0,0.5)' : 'none',
+              color: attending ? '#FFB800' : '#7A3D00',
               boxShadow: attending
-                ? '0 0 20px rgba(16,185,129,0.28)'
-                : '0 0 20px rgba(124,58,237,0.4)',
+                ? 'none'
+                : '0 6px 18px rgba(255,150,0,0.38), inset 0 2px 5px rgba(255,255,255,0.65), inset 0 -3px 8px rgba(150,70,0,0.45)',
+              position: 'relative',
+              overflow: 'hidden',
             }}
             whileTap={{ scale: 0.96 }}
           >
@@ -407,7 +413,7 @@ export default function EventDetail() {
                 exit={{ opacity: 0, y: -6 }}
                 className="block"
               >
-                {attending ? 'Going ✓' : "I'm Going"}
+                {attending ? '🐝 Going ✓' : 'GET YOUR SPOT'}
               </motion.span>
             </AnimatePresence>
           </motion.button>

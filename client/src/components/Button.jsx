@@ -3,44 +3,48 @@ import { motion } from 'framer-motion';
 const VARIANTS = {
   primary: {
     style: {
-      background: 'linear-gradient(135deg, #7C3AED 0%, #EC4899 100%)',
-      color: '#fff',
+      background: 'radial-gradient(ellipse 80% 140% at 35% 20%, #FFF7C0 0%, #FFE45C 22%, #FFB800 55%, #D87A00 100%)',
+      color: '#7A3D00',
       border: 'none',
+      boxShadow: '0 6px 18px rgba(255,150,0,0.38), inset 0 2px 5px rgba(255,255,255,0.65), inset 0 -3px 8px rgba(150,70,0,0.45)',
+      position: 'relative',
+      overflow: 'hidden',
     },
-    hover: { boxShadow: '0 0 28px rgba(124,58,237,0.55)', scale: 1.03 },
+    hover: { scale: 1.04, boxShadow: '0 8px 24px rgba(255,150,0,0.5), inset 0 2px 5px rgba(255,255,255,0.7), inset 0 -3px 8px rgba(150,70,0,0.5)' },
   },
   ghost: {
     style: {
       background: 'transparent',
-      color: '#A78BFA',
-      border: '1px solid rgba(167,139,250,0.4)',
+      color: '#FFE45C',
+      border: '1px solid rgba(255,184,0,0.4)',
     },
-    hover: { background: 'rgba(124,58,237,0.12)', borderColor: 'rgba(167,139,250,0.7)', scale: 1.02 },
+    hover: { background: 'rgba(255,184,0,0.1)', borderColor: 'rgba(255,184,0,0.7)', scale: 1.02 },
   },
   glass: {
     style: {
-      background: 'rgba(124,58,237,0.15)',
-      color: '#A78BFA',
-      border: '1px solid rgba(167,139,250,0.25)',
+      background: 'rgba(255,184,0,0.12)',
+      color: '#FFE45C',
+      border: '1px solid rgba(255,184,0,0.25)',
       backdropFilter: 'blur(12px)',
     },
-    hover: { background: 'rgba(124,58,237,0.25)', scale: 1.02 },
+    hover: { background: 'rgba(255,184,0,0.22)', scale: 1.02 },
   },
   accent: {
     style: {
-      background: 'linear-gradient(135deg, #EC4899 0%, #FB923C 100%)',
-      color: '#fff',
+      background: 'linear-gradient(135deg, #FFB800 0%, #C46A00 100%)',
+      color: '#1A0A00',
       border: 'none',
+      fontWeight: 800,
     },
-    hover: { boxShadow: '0 0 28px rgba(236,72,153,0.5)', scale: 1.03 },
+    hover: { boxShadow: '0 0 28px rgba(255,184,0,0.5)', scale: 1.03 },
   },
   danger: {
     style: {
       background: 'transparent',
-      color: '#EC4899',
-      border: '1px solid rgba(236,72,153,0.4)',
+      color: '#FF6B35',
+      border: '1px solid rgba(255,107,53,0.4)',
     },
-    hover: { background: 'rgba(236,72,153,0.1)', scale: 1.02 },
+    hover: { background: 'rgba(255,107,53,0.1)', scale: 1.02 },
   },
 };
 

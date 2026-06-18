@@ -9,14 +9,14 @@
   body {
     margin: 0;
     min-height: 100%;
-    background-color: #0D0A1A;
-    color: #F5F3FF;
+    background-color: #0A0A0A;
+    color: #FFF4D6;
     font-family: 'Inter', sans-serif;
     font-size: 16px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(124,58,237,0.22), transparent);
+    background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(255,184,0,0.1), transparent);
     background-attachment: fixed;
   }
 
@@ -28,38 +28,96 @@
 }
 
 @layer utilities {
-  /* Glass surfaces */
-  .glass {
-    background: rgba(22, 18, 43, 0.75);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(167, 139, 250, 0.13);
-    box-shadow: inset 0 1px 0 rgba(167,139,250,0.08), 0 4px 24px rgba(0,0,0,0.35);
-  }
-  .glass-card {
-    background: rgba(30, 24, 56, 0.6);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(167, 139, 250, 0.15);
-    box-shadow: inset 0 1px 0 rgba(167,139,250,0.12), 0 4px 24px rgba(0,0,0,0.4);
-  }
-  .glass-accent {
-    background: rgba(124, 58, 237, 0.12);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(124, 58, 237, 0.28);
-    box-shadow: inset 0 1px 0 rgba(167,139,250,0.1);
+  /* Honeycomb tiled background overlay */
+  .comb-bg {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='46'%3E%3Cpath d='M20 1 L39 11.5 L39 34.5 L20 45 L1 34.5 L1 11.5Z' fill='none' stroke='%23FFB800' stroke-opacity='0.055' stroke-width='1'/%3E%3C/svg%3E");
+    background-size: 40px 46px;
+    background-repeat: repeat;
   }
 
-  /* Text gradient */
+  /* Juicy honey button — glossy convex pill */
+  .juicy-btn {
+    background: radial-gradient(ellipse 80% 140% at 35% 20%, #FFF7C0 0%, #FFE45C 22%, #FFB800 55%, #D87A00 100%);
+    box-shadow: 0 6px 18px rgba(255,150,0,0.4), inset 0 2px 5px rgba(255,255,255,0.7), inset 0 -3px 8px rgba(150,70,0,0.5);
+    border-radius: 999px;
+    color: #7A3D00;
+    font-weight: 800;
+    position: relative;
+    overflow: hidden;
+    border: none;
+    cursor: pointer;
+  }
+  /* Gloss highlight streak across the top */
+  .juicy-btn::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 14px;
+    right: 30px;
+    height: 12px;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+    border-radius: 999px;
+    filter: blur(1px);
+    pointer-events: none;
+  }
+
+  /* Glossy hexagon cell */
+  .juicy-hex {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    background: radial-gradient(ellipse 75% 120% at 35% 22%, #FFF7C0 0%, #FFE45C 25%, #FFB800 55%, #C46A00 100%);
+    box-shadow: inset 0 2px 7px rgba(255,255,255,0.6), inset 0 -4px 10px rgba(140,65,0,0.55);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Dark honey-tinted card surface */
+  .gloss-card {
+    background: linear-gradient(160deg, #1C1708 0%, #120E04 100%);
+    border: 1px solid rgba(255,184,0,0.18);
+    box-shadow: inset 0 1px 0 rgba(255,220,80,0.08), 0 4px 24px rgba(0,0,0,0.55);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* Soft amber glow utility */
+  .honey-glow {
+    box-shadow: 0 0 28px rgba(255,184,0,0.3), 0 0 8px rgba(255,184,0,0.15);
+  }
+
+  /* Dark surfaces with honey tint */
+  .glass {
+    background: rgba(28,23,8,0.78);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,184,0,0.12);
+    box-shadow: inset 0 1px 0 rgba(255,220,80,0.06), 0 4px 24px rgba(0,0,0,0.45);
+  }
+  .glass-card {
+    background: rgba(28,23,8,0.65);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,184,0,0.15);
+    box-shadow: inset 0 1px 0 rgba(255,220,80,0.08), 0 4px 24px rgba(0,0,0,0.5);
+  }
+  .glass-accent {
+    background: rgba(255,184,0,0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,184,0,0.2);
+    box-shadow: inset 0 1px 0 rgba(255,220,80,0.06);
+  }
+
+  /* Text gradient — honey */
   .text-gradient {
-    background: linear-gradient(135deg, #A78BFA, #EC4899);
+    background: linear-gradient(135deg, #FFE45C, #FFB800);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
   .text-gradient-warm {
-    background: linear-gradient(135deg, #EC4899, #FB923C);
+    background: linear-gradient(135deg, #FFB800, #C46A00);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -69,13 +127,13 @@
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Shimmer skeleton background */
+  /* Honey shimmer skeleton */
   .shimmer-bg {
     background: linear-gradient(
       90deg,
-      rgba(30,24,56,0.6) 0%,
-      rgba(167,139,250,0.12) 50%,
-      rgba(30,24,56,0.6) 100%
+      rgba(28,23,8,0.8) 0%,
+      rgba(255,184,0,0.1) 50%,
+      rgba(28,23,8,0.8) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 2s ease-in-out infinite;

@@ -14,14 +14,12 @@ export function EventCardSkeleton() {
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        background: 'rgba(30,24,56,0.55)',
-        border: '1px solid rgba(167,139,250,0.1)',
-        boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+        background: 'linear-gradient(160deg, #1C1708 0%, #120E04 100%)',
+        border: '1px solid rgba(255,184,0,0.1)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.45)',
       }}
     >
-      {/* Image area */}
       <ShimmerBox className="h-44 rounded-none" />
-      {/* Info area */}
       <div className="px-4 pt-3 pb-4 space-y-2">
         <ShimmerBox className="h-4 w-3/4" />
         <ShimmerBox className="h-3 w-1/2" />
@@ -39,8 +37,8 @@ export function ListItemSkeleton() {
     <div
       className="rounded-2xl p-4 flex gap-3 items-center"
       style={{
-        background: 'rgba(30,24,56,0.55)',
-        border: '1px solid rgba(167,139,250,0.1)',
+        background: 'linear-gradient(160deg, #1C1708 0%, #120E04 100%)',
+        border: '1px solid rgba(255,184,0,0.1)',
       }}
     >
       <ShimmerBox className="w-11 h-11 rounded-xl flex-shrink-0" />

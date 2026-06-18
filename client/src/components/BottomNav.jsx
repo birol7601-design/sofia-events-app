@@ -3,14 +3,40 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import { apiGet } from '../lib/api';
 import { isLoggedIn } from '../lib/auth';
+import Logo from './Logo';
 
 const NAV = [
-  { to: '/saved',     icon: '🔖', label: 'Saved'      },
-  { to: '/messages',  icon: '💬', label: 'Messages', hasUnread: true },
-  { to: '/',          icon: '🏠', label: 'Home', exact: true, center: true },
-  { to: '/organizer', icon: '🎭', label: 'Organizers' },
-  { to: '/profile',   icon: '👤', label: 'Profile'    },
+  { to: '/saved',     emoji: '🔖', label: 'Saved'      },
+  { to: '/messages',  emoji: '💬', label: 'Messages', hasUnread: true },
+  { to: '/',          emoji: null,  label: 'Home', exact: true, center: true },
+  { to: '/organizer', emoji: '🎭', label: 'Orgs'       },
+  { to: '/profile',   emoji: '👤', label: 'Profile'    },
 ];
+
+function HexIcon({ emoji, active }) {
+  return (
+    <div
+      style={{
+        width: 30, height: 34,
+        clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+        background: active
+          ? 'radial-gradient(ellipse 80% 140% at 35% 20%, #FFE45C 0%, #FFB800 55%, #C46A00 100%)'
+          : 'rgba(138,123,74,0.1)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 13,
+        transition: 'background 0.22s ease',
+      }}
+    >
+      <span style={{
+        opacity: active ? 1 : 0.55,
+        filter: active ? 'drop-shadow(0 0 4px rgba(255,184,0,0.7))' : 'none',
+        transition: 'filter 0.22s ease, opacity 0.22s ease',
+      }}>
+        {emoji}
+      </span>
+    </div>
+  );
+}
 
 export default function BottomNav() {
   const location = useLocation();
@@ -27,17 +53,18 @@ export default function BottomNav() {
     <nav
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{
-        background: 'rgba(13,10,26,0.85)',
+        background: 'rgba(10,6,0,0.92)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
-        borderTop: '1px solid rgba(167,139,250,0.15)',
-        boxShadow: '0 -4px 30px rgba(0,0,0,0.4)',
+        borderTop: '1px solid rgba(255,184,0,0.2)',
+        boxShadow: '0 -4px 30px rgba(0,0,0,0.5)',
       }}
     >
       <div className="flex items-end max-w-lg mx-auto">
-        {NAV.map(({ to, icon, label, exact, center, hasUnread }) => {
-          const isActive =
-            exact ? location.pathname === to : location.pathname.startsWith(to) && to !== '/';
+        {NAV.map(({ to, emoji, label, exact, center, hasUnread }) => {
+          const isActive = exact
+            ? location.pathname === to
+            : location.pathname.startsWith(to) && to !== '/';
           const isHome = exact && to === '/';
           const active = isHome ? location.pathname === '/' : isActive;
 
@@ -47,59 +74,47 @@ export default function BottomNav() {
               to={to}
               end={exact}
               className="flex-1 flex flex-col items-center relative"
-              style={{ paddingBottom: center ? 0 : undefined }}
             >
               {center ? (
-                /* Home — elevated pill */
+                /* Home — elevated juicy-hex with Logo */
                 <motion.div
-                  className="flex flex-col items-center justify-center rounded-full mb-2"
+                  className="mb-1.5 flex items-center justify-center"
                   style={{
-                    width: 52, height: 52,
-                    background: active
-                      ? 'linear-gradient(135deg, #7C3AED, #EC4899)'
-                      : 'rgba(30,24,56,0.9)',
-                    border: '1px solid rgba(167,139,250,0.25)',
-                    boxShadow: active ? '0 0 20px rgba(124,58,237,0.5)' : '0 2px 12px rgba(0,0,0,0.4)',
                     transform: 'translateY(-10px)',
-                  }}
-                  animate={{
-                    boxShadow: active ? '0 0 24px rgba(124,58,237,0.6)' : '0 2px 12px rgba(0,0,0,0.4)',
+                    filter: active
+                      ? 'drop-shadow(0 0 14px rgba(255,184,0,0.6))'
+                      : 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))',
+                    transition: 'filter 0.25s ease',
                   }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <span style={{ fontSize: 22 }}>{icon}</span>
+                  <Logo size={52} />
                 </motion.div>
               ) : (
-                <div className="relative flex flex-col items-center py-2.5 w-full">
+                <div className="relative flex flex-col items-center py-2 w-full">
                   {/* Active background indicator */}
                   {active && (
                     <motion.div
                       layoutId="nav-indicator"
                       className="absolute inset-x-1 top-1 bottom-1 rounded-xl"
-                      style={{ background: 'rgba(124,58,237,0.15)' }}
+                      style={{ background: 'rgba(255,184,0,0.08)' }}
                       transition={{ type: 'spring', stiffness: 500, damping: 38 }}
                     />
                   )}
 
-                  <span
-                    className="relative text-xl leading-none mb-0.5 transition-all duration-200"
-                    style={{
-                      filter: active ? 'drop-shadow(0 0 6px rgba(167,139,250,0.7))' : 'none',
-                      transform: active ? 'scale(1.12)' : 'scale(1)',
-                    }}
-                  >
-                    {icon}
+                  <div className="relative mb-0.5">
+                    <HexIcon emoji={emoji} active={active} />
                     {/* Unread dot */}
                     {hasUnread && unread && (
                       <span
                         className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full"
-                        style={{ background: '#EC4899', boxShadow: '0 0 6px rgba(236,72,153,0.8)' }}
+                        style={{ background: '#FF6B35', boxShadow: '0 0 6px rgba(255,107,53,0.8)' }}
                       />
                     )}
-                  </span>
+                  </div>
                   <span
                     className="relative text-[10px] font-medium font-body"
-                    style={{ color: active ? '#A78BFA' : '#A39CC4' }}
+                    style={{ color: active ? '#FFB800' : '#8A7B4A' }}
                   >
                     {label}
                   </span>

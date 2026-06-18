@@ -44,19 +44,19 @@ export default function Saved() {
   return (
     <motion.div
       variants={pageVariants} initial="initial" animate="animate" exit="exit"
-      className="flex flex-col min-h-dvh pb-24"
+      className="flex flex-col min-h-dvh pb-24 comb-bg"
     >
       {/* Header */}
       <div className="pt-10 px-5 pb-3">
-        <h1 className="font-display font-bold text-2xl text-text">Collection</h1>
-        <p className="text-textMuted text-sm font-body">Your personal nights</p>
+        <h1 className="font-display font-bold text-2xl" style={{ color: '#FFF4D6' }}>Collection</h1>
+        <p className="text-sm font-body" style={{ color: '#8A7B4A' }}>Your personal hive</p>
       </div>
 
       {/* Tabs */}
       <div className="flex gap-2 px-5 pb-4">
         {[
           { id: 'saved',     label: '🔖 Saved',    count: savedEvents.length     },
-          { id: 'attending', label: '🎪 Attending', count: attendingEvents.length },
+          { id: 'attending', label: '🐝 Attending', count: attendingEvents.length },
         ].map(({ id, label, count }) => (
           <motion.button
             key={id}
@@ -64,13 +64,14 @@ export default function Saved() {
             className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold font-body"
             style={{
               background: tab === id
-                ? 'linear-gradient(135deg, #7C3AED, #EC4899)'
-                : 'rgba(30,24,56,0.65)',
+                ? 'radial-gradient(ellipse 80% 140% at 35% 20%, #FFE45C 0%, #FFB800 55%, #C46A00 100%)'
+                : 'rgba(28,23,8,0.85)',
               border: tab === id
-                ? '1px solid rgba(167,139,250,0.4)'
-                : '1px solid rgba(167,139,250,0.15)',
-              color: tab === id ? '#fff' : '#A39CC4',
-              boxShadow: tab === id ? '0 0 14px rgba(124,58,237,0.3)' : 'none',
+                ? '1px solid rgba(255,184,0,0.5)'
+                : '1px solid rgba(255,184,0,0.15)',
+              color: tab === id ? '#7A3D00' : '#C7B68A',
+              fontWeight: tab === id ? 800 : 600,
+              boxShadow: tab === id ? '0 0 14px rgba(255,184,0,0.3)' : 'none',
             }}
             whileTap={{ scale: 0.91 }}
           >
@@ -79,8 +80,8 @@ export default function Saved() {
               <span
                 className="rounded-full text-[10px] px-1.5 py-0.5 leading-none font-bold"
                 style={{
-                  background: tab === id ? 'rgba(255,255,255,0.25)' : 'rgba(167,139,250,0.2)',
-                  color:      tab === id ? '#fff' : '#A78BFA',
+                  background: tab === id ? 'rgba(122,61,0,0.25)' : 'rgba(255,184,0,0.12)',
+                  color:      tab === id ? '#7A3D00' : '#FFB800',
                 }}
               >
                 {count}
@@ -101,7 +102,7 @@ export default function Saved() {
         )}
 
         {!loading && !isLoggedIn() && (
-          <p className="text-textMuted text-sm text-center py-12">
+          <p className="text-sm text-center py-12 font-body" style={{ color: '#8A7B4A' }}>
             Sign in to see your collection.
           </p>
         )}
@@ -113,7 +114,8 @@ export default function Saved() {
                 <motion.p
                   key="empty"
                   initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                  className="text-textMuted text-sm text-center py-12"
+                  className="text-sm text-center py-12 font-body"
+                  style={{ color: '#8A7B4A' }}
                 >
                   {tab === 'saved'
                     ? 'No saved events yet. Tap ♥ on any event.'

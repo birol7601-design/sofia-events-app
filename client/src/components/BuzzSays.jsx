@@ -24,13 +24,35 @@ export default function BuzzSays({ page, className = '' }) {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -6 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
-          className={`glass-accent rounded-xl px-4 py-3 mb-3 ${className}`}
+          className={`rounded-xl px-4 py-3 mb-3 flex items-start gap-3 ${className}`}
+          style={{
+            background: 'rgba(255,184,0,0.07)',
+            border: '1px solid rgba(255,184,0,0.18)',
+            borderLeft: '3px solid #FFB800',
+          }}
         >
-          <p className="text-[10px] font-bold uppercase tracking-[2px] mb-1"
-            style={{ color: '#FB923C' }}>
-            BUZZ КАЗВА
-          </p>
-          <p className="text-text/85 text-sm italic leading-relaxed font-body">{comment}</p>
+          {/* Tiny hex bee icon */}
+          <div
+            className="flex-shrink-0 mt-0.5"
+            style={{
+              width: 22, height: 25,
+              clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+              background: 'radial-gradient(ellipse 80% 140% at 35% 20%, #FFE45C 0%, #FFB800 55%, #C46A00 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: 11,
+            }}
+          >
+            🐝
+          </div>
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[2px] mb-0.5 font-body"
+              style={{ color: '#FFB800' }}>
+              BUZZ КАЗВА
+            </p>
+            <p className="text-sm italic leading-relaxed font-body" style={{ color: '#FFF4D6', opacity: 0.85 }}>
+              {comment}
+            </p>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>
