@@ -391,6 +391,70 @@ async function checkUnreadMessages() {
   } catch {}
 }
 
+// ── LANGUAGE TOGGLE ───────────────────────────────────────────────────────────
+
+function setLang(lang) {
+  localStorage.setItem('lang', lang);
+  const bg = document.getElementById('lang-btn-bg');
+  const en = document.getElementById('lang-btn-en');
+  if (bg) bg.style.background = lang === 'bg' ? 'rgba(255,140,0,0.15)' : 'transparent';
+  if (en) en.style.background = lang === 'en' ? 'rgba(255,140,0,0.15)' : 'transparent';
+  window.location.reload();
+}
+
+function initLangToggle() {
+  const lang = localStorage.getItem('lang') || 'bg';
+  const bg = document.getElementById('lang-btn-bg');
+  const en = document.getElementById('lang-btn-en');
+  if (bg) bg.style.background = lang === 'bg' ? 'rgba(255,140,0,0.15)' : 'transparent';
+  if (en) en.style.background = lang === 'en' ? 'rgba(255,140,0,0.15)' : 'transparent';
+}
+
+// ── TASTE PROFILE ─────────────────────────────────────────────────────────────
+
+async function loadTasteProfile() {
+  const userId = localStorage.getItem('userId');
+  if (!userId) return;
+  try {
+    const [savedRes, attendingRes] = await Promise.all([
+      fetch(`${API}/api/users/${userId}/saved`, { headers: authHeaders() }),
+      fetch(`${API}/api/users/${userId}/attending`, { headers: authHeaders() })
+    ]);
+    const saved = savedRes.ok ? await savedRes.json() : [];
+    const attending = attendingRes.ok ? await attendingRes.json() : [];
+    const all = [...saved, ...attending];
+    if (all.length < 2) return;
+
+    const tally = {};
+    all.forEach(ev => {
+      const cat = (ev.category || '').toLowerCase();
+      tally[cat] = (tally[cat] || 0) + 1;
+    });
+
+    const top = Object.entries(tally).sort((a,b) => b[1]-a[1])[0];
+    if (!top) return;
+
+    const lang = localStorage.getItem('lang') || 'bg';
+    const t = (key) => (window.TRANSLATIONS && window.TRANSLATIONS[lang] && window.TRANSLATIONS[lang][key]) || key;
+
+    const catMap = {
+      rock: 'taste_rock', jazz: 'taste_jazz', festival: 'taste_festival',
+      electronic: 'taste_electronic', techno: 'taste_electronic', house: 'taste_electronic',
+      pop: 'taste_pop', reggae: 'taste_pop'
+    };
+    const tKey = catMap[top[0]] || 'taste_mixed';
+    const label = t(tKey);
+
+    const usernameEl = document.getElementById('profile-username');
+    if (!usernameEl) return;
+
+    const badge = document.createElement('div');
+    badge.style.cssText = 'display:inline-block;background:linear-gradient(135deg,rgba(255,140,0,0.18),rgba(255,107,53,0.12));border:1px solid rgba(255,140,0,0.35);border-radius:999px;padding:4px 14px;margin:4px 0 0;font-family:\'DM Serif Display\',serif;font-style:italic;font-size:13px;color:#FF8C00;letter-spacing:0.3px;';
+    badge.textContent = label;
+    usernameEl.insertAdjacentElement('afterend', badge);
+  } catch {}
+}
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 
 async function init() {
@@ -427,6 +491,8 @@ async function init() {
 
   checkUnreadMessages();
   loadFriendRequests();
+  initLangToggle();
+  loadTasteProfile();
 }
 
 init();

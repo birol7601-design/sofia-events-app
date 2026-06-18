@@ -32,6 +32,8 @@
 
   <main class="page-transition" style="padding-bottom:80px;max-width:600px;margin:0 auto;">
 
+    <div id="buzz-says-bar" data-page="profile" style="background:rgba(255,140,0,0.12);border-left:3px solid #FF8C00;border-radius:8px;padding:8px 14px;margin:14px 14px 4px;display:none;"></div>
+
     <!-- PROFILE HERO -->
     <div style="height:120px;background:linear-gradient(135deg,#3A1F6E 0%,#6B2D5C 50%,#1A1040 100%);position:relative;overflow:hidden;">
       <svg style="position:absolute;inset:0;width:100%;height:100%;" viewBox="0 0 300 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -127,6 +129,16 @@
       </a>
     </div>
 
+    <!-- LANGUAGE TOGGLE -->
+    <div style="padding:20px 14px 8px;text-align:center;">
+      <p style="font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:#6E6A5F;text-transform:uppercase;letter-spacing:1.5px;margin:0 0 8px;">🌐 Език / Language</p>
+      <div style="display:inline-flex;gap:0;border:1px solid rgba(255,140,0,0.3);border-radius:999px;overflow:hidden;">
+        <button id="lang-btn-bg" onclick="setLang('bg')" style="background:transparent;border:none;color:#FF8C00;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:700;padding:7px 20px;cursor:pointer;letter-spacing:0.5px;">БГ</button>
+        <div style="width:1px;background:rgba(255,140,0,0.3);"></div>
+        <button id="lang-btn-en" onclick="setLang('en')" style="background:transparent;border:none;color:#FF8C00;font-family:'IBM Plex Sans',sans-serif;font-size:12px;font-weight:700;padding:7px 20px;cursor:pointer;letter-spacing:0.5px;">EN</button>
+      </div>
+    </div>
+
   </main>
 
   <!-- EDIT PROFILE MODAL -->
@@ -159,8 +171,11 @@
     <a href="profile.html" class="nav-item active" id="nav-profile"><span class="nav-icon">👤</span><span class="nav-label">Profile</span></a>
   </nav>
 
+  <script src="translations.js"></script>
   <script src="avatars.js"></script>
   <script src="profile.js"></script>
   <script src="nav-badge.js"></script>
+  <script src="verify-banner.js"></script>
+  <script src="buzz-says.js"></script>
 </body>
 </html>
