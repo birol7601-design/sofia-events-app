@@ -6,7 +6,7 @@
   <title>Admin — SofiaBuzz</title>
   <link rel="stylesheet" href="style.css">
   <style>
-    .admin-tab-btn { background:transparent;border:none;border-bottom:2px solid transparent;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;transition:all 0.2s; }
+    .admin-tab-btn { background:transparent;border:none;border-bottom:2px solid transparent;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;transition:all 0.2s;white-space:nowrap; }
     .admin-tab-btn.active { border-bottom-color:#FF8C00;color:#FF8C00; }
     .stat-box { background:#220D00;border:1px solid rgba(255,140,0,0.2);border-radius:12px;padding:14px 16px;flex:1;min-width:130px;text-align:center; }
     .stat-num { font-family:'DM Serif Display',serif;font-style:italic;font-size:28px;color:#FF8C00;display:block; }
@@ -25,6 +25,30 @@
     .admin-form-input { background:#1A0A00;border:1px solid rgba(255,140,0,0.3);border-radius:8px;padding:9px 12px;color:#FFD199;font-family:'Cormorant Garamond',serif;font-size:14px;width:100%;box-sizing:border-box; }
     .admin-form-input:focus { outline:none;border-color:#FF8C00; }
     textarea.admin-form-input { resize:vertical;min-height:60px; }
+
+    /* Aggregation / pending UI */
+    .agg-result-box { background:#1A0800;border:1px solid rgba(255,140,0,0.25);border-radius:10px;padding:14px 16px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#C7A880;margin-bottom:16px;display:none; }
+    .agg-stat { display:inline-block;margin-right:18px; }
+    .agg-stat span { font-weight:700;color:#FF8C00; }
+    .pending-card { background:#1C0900;border:1px solid rgba(212,175,55,0.14);border-radius:12px;padding:12px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start; }
+    .pending-thumb { width:72px;height:56px;border-radius:7px;object-fit:cover;flex-shrink:0;background:#2A1400; }
+    .pending-thumb-placeholder { width:72px;height:56px;border-radius:7px;flex-shrink:0;background:#2A1400;display:flex;align-items:center;justify-content:center;font-size:22px; }
+    .pending-body { flex:1;min-width:0; }
+    .pending-title { font-family:'Cormorant Garamond',serif;font-size:15px;color:#FFD199;margin:0 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+    .pending-meta  { font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:#8B6040;margin-bottom:6px; }
+    .pending-actions { display:flex;gap:6px;flex-wrap:wrap; }
+    .source-badge { display:inline-block;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;font-family:'IBM Plex Sans',sans-serif;text-decoration:none; }
+    .source-badge.eventbrite { background:rgba(255,140,0,0.15);color:#FF8C00;border:1px solid rgba(255,140,0,0.3); }
+    .source-badge.manual     { background:rgba(100,100,100,0.15);color:#8B8080;border:1px solid rgba(100,100,100,0.3); }
+    .fetch-btn { display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#FF6B35,#FF8C00);color:#1A0A00;border:none;border-radius:999px;padding:10px 22px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s; }
+    .fetch-btn:disabled { opacity:0.5;cursor:not-allowed; }
+    .fetch-btn:not(:disabled):hover { transform:translateY(-1px);box-shadow:0 4px 16px rgba(255,140,0,0.4); }
+
+    /* Edit modal */
+    #edit-modal { position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px; }
+    #edit-modal.open { display:flex; }
+    .modal-box { background:#1A0800;border:1px solid rgba(255,140,0,0.3);border-radius:16px;padding:20px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;gap:10px; }
+    .modal-title { font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:18px;margin:0 0 4px; }
   </style>
 </head>
 <body>
@@ -76,8 +100,10 @@
       </div>
 
       <!-- TABS -->
-      <div style="display:flex;border-bottom:1px solid rgba(212,175,55,0.15);padding:0 14px;">
+      <div style="display:flex;border-bottom:1px solid rgba(212,175,55,0.15);padding:0 14px;overflow-x:auto;">
         <button class="admin-tab-btn active" onclick="switchTab('events')">Events</button>
+        <button class="admin-tab-btn" onclick="switchTab('pending')">⏳ Pending</button>
+        <button class="admin-tab-btn" onclick="switchTab('aggregate')">🔄 Aggregation</button>
         <button class="admin-tab-btn" onclick="switchTab('users')">Users</button>
         <button class="admin-tab-btn" onclick="switchTab('slots')">Featured Slots</button>
         <button class="admin-tab-btn" onclick="switchTab('add')">Quick Add</button>
@@ -87,6 +113,44 @@
       <div id="tab-events" style="padding:14px;">
         <input type="text" class="search-input" id="event-search" placeholder="Search events…" oninput="filterEvents()">
         <div id="admin-events-list"></div>
+      </div>
+
+      <!-- PENDING REVIEW TAB -->
+      <div id="tab-pending" style="padding:14px;display:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <h2 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:18px;margin:0;">Pending Review</h2>
+          <button class="btn-sm btn-edit" onclick="loadPending()">↻ Refresh</button>
+        </div>
+        <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;margin:0 0 14px;">All events awaiting approval — from Eventbrite aggregation or manual submissions.</p>
+        <div id="admin-pending-list"><p style="color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:13px;">Loading…</p></div>
+      </div>
+
+      <!-- AGGREGATION TAB -->
+      <div id="tab-aggregate" style="padding:14px;display:none;">
+        <h2 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:18px;margin:0 0 8px;">Eventbrite Aggregation</h2>
+        <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#8B6040;margin:0 0 16px;line-height:1.5;">
+          Fetches upcoming Sofia events from the Eventbrite API and adds them to the Pending Review queue.<br>
+          <strong style="color:#FF8C00;">Events are never auto-approved</strong> — you review and approve each one manually.<br>
+          Re-running the fetch is safe — duplicates are automatically skipped.
+        </p>
+
+        <button class="fetch-btn" id="fetch-eb-btn" onclick="fetchEventbrite()">
+          <span id="fetch-eb-icon">🔄</span> Fetch from Eventbrite
+        </button>
+
+        <!-- Result summary -->
+        <div class="agg-result-box" id="agg-result">
+          <div id="agg-result-inner"></div>
+        </div>
+
+        <div style="margin-top:24px;padding:14px;background:#1A0800;border:1px solid rgba(255,140,0,0.15);border-radius:10px;">
+          <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;margin:0 0 6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Setup notes</p>
+          <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#8B6040;margin:0;line-height:1.6;">
+            Requires <code style="color:#FF8C00;">EVENTBRITE_TOKEN</code> set in Railway environment variables.<br>
+            If search is blocked (some account tiers), organizer-specific fetching will be needed — ask Birol to provide organizer IDs.<br>
+            After fetching, go to <strong style="color:#C7A880;">⏳ Pending</strong> to review and approve events.
+          </p>
+        </div>
       </div>
 
       <!-- USERS TAB -->
@@ -117,8 +181,29 @@
         </div>
       </div>
 
-    </div>
+    </div><!-- /admin-dashboard -->
   </main>
+
+  <!-- EDIT MODAL -->
+  <div id="edit-modal">
+    <div class="modal-box">
+      <p class="modal-title">Edit Event</p>
+      <input type="hidden" id="edit-id">
+      <input type="text"           id="edit-title"    class="admin-form-input" placeholder="Title">
+      <textarea                    id="edit-desc"     class="admin-form-input" placeholder="Description"></textarea>
+      <input type="text"           id="edit-category" class="admin-form-input" placeholder="Category">
+      <input type="text"           id="edit-venue"    class="admin-form-input" placeholder="Venue">
+      <input type="datetime-local" id="edit-start"    class="admin-form-input">
+      <input type="text"           id="edit-price"    class="admin-form-input" placeholder="Price text">
+      <input type="text"           id="edit-ticket"   class="admin-form-input" placeholder="Ticket URL">
+      <input type="text"           id="edit-image"    class="admin-form-input" placeholder="Image URL">
+      <div style="display:flex;gap:10px;margin-top:6px;">
+        <button class="gold-btn" style="flex:1;" onclick="saveEdit()">Save changes</button>
+        <button class="btn-sm btn-delete" style="padding:10px 18px;" onclick="closeEditModal()">Cancel</button>
+      </div>
+      <p id="edit-msg" style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#FF8C00;min-height:16px;"></p>
+    </div>
+  </div>
 
   <script src="admin.js"></script>
 </body>

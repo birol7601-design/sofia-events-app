@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 const { sendEmail } = require('./emailService');
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'BuzzAdmin2026!Sofia';
+const { fetchSofiaEvents } = require('./services/eventbrite');
 const app = express();
 
 const authLimiter = rateLimit({
@@ -838,6 +839,66 @@ app.post('/api/admin/buzz-says', authenticateAdmin, async (req, res) => {
       [page, comment_bg, comment_en || null, context || 'default']
     );
     res.json(r.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── AGGREGATION ──────────────────────────────────────────────────────────────
+
+app.post('/api/admin/aggregate/eventbrite', authenticateAdmin, async (req, res) => {
+  const result = await fetchSofiaEvents();
+
+  if (result.error && result.events.length === 0) {
+    return res.status(result.error.includes('not configured') ? 503 : 502).json({
+      ok: false, error: result.error, fetched: 0, inserted: 0, skipped: 0,
+    });
+  }
+
+  let inserted = 0, skipped = 0;
+  const errors = [];
+
+  for (const ev of result.events) {
+    try {
+      await pool.query(
+        `INSERT INTO events
+           (title, description, start_time, venue, address, price_text, ticket_url,
+            image_url, category, source, source_id, source_url, approved)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,false)`,
+        [
+          ev.title, ev.description, ev.start_time, ev.venue, ev.address,
+          ev.price_text, ev.ticket_url, ev.image_url, ev.category,
+          ev.source, ev.source_id, ev.source_url,
+        ]
+      );
+      inserted++;
+    } catch (err) {
+      // unique index violation = already imported
+      if (err.code === '23505') { skipped++; }
+      else { errors.push(`${ev.title}: ${err.message}`); }
+    }
+  }
+
+  res.json({
+    ok: true,
+    method: result.method,
+    fetched:  result.events.length,
+    inserted,
+    skipped,
+    errors,
+    warning: result.error || undefined,
+  });
+});
+
+app.get('/api/admin/pending-events', authenticateAdmin, async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT id, title, description, venue, start_time, price_text, ticket_url,
+              image_url, category, source, source_id, source_url, approved, deleted, created_at
+       FROM events
+       WHERE COALESCE(approved, false) = false
+         AND COALESCE(deleted,  false) = false
+       ORDER BY created_at DESC`
+    );
+    res.json(r.rows);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
