@@ -2,6 +2,82 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   KEYFRAMES — all referenced by Tailwind animation utilities
+   and inline CSS animation properties
+   ============================================================ */
+
+@keyframes bob {
+  0%,100% { transform: translateY(0) rotate(-1deg); }
+  50%      { transform: translateY(-9px) rotate(1deg); }
+}
+
+/* Button shimmer sweep — skewed white strip, left→right */
+@keyframes shimmer {
+  0%       { transform: translateX(-180%) skewX(-16deg); }
+  55%,100% { transform: translateX(360%)  skewX(-16deg); }
+}
+
+/* Skeleton loading pulse — background-position sweep */
+@keyframes skeleton-shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+@keyframes pulseGlow {
+  0%,100% { opacity: .45; transform: scale(1);    }
+  50%     { opacity: .9;  transform: scale(1.07); }
+}
+
+@keyframes floatP {
+  0%   { transform: translateY(20px) scale(.7); opacity: 0;   }
+  15%  { opacity: .85; }
+  100% { transform: translateY(-160px) scale(1); opacity: 0;  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0);    }
+}
+
+/* Bee wing flutter — left wing */
+@keyframes wing {
+  0%,100% { transform: rotate(-30deg) scaleY(1);   }
+  50%     { transform: rotate(-37deg) scaleY(.82); }
+}
+
+/* Bee wing flutter — right wing */
+@keyframes wingR {
+  0%,100% { transform: rotate(30deg) scaleY(1);   }
+  50%     { transform: rotate(37deg) scaleY(.82); }
+}
+
+/* Featured card breathing glow */
+@keyframes dripGlow {
+  0%,100% {
+    box-shadow: 0 0 0 1px rgba(255,184,0,.5),
+                0 14px 46px -10px rgba(196,106,0,.5);
+  }
+  50% {
+    box-shadow: 0 0 0 1px rgba(255,184,0,.8),
+                0 18px 60px -8px rgba(196,106,0,.75);
+  }
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px) scale(.98); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);   }
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
   html { height: 100%; }
@@ -27,18 +103,25 @@
   }
 }
 
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
 @layer utilities {
-  /* Honeycomb tiled background overlay */
+
+  /* --- Honeycomb tiled background (reference SVG pattern) --- */
   .comb-bg {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='46'%3E%3Cpath d='M20 1 L39 11.5 L39 34.5 L20 45 L1 34.5 L1 11.5Z' fill='none' stroke='%23FFB800' stroke-opacity='0.055' stroke-width='1'/%3E%3C/svg%3E");
-    background-size: 40px 46px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='49' viewBox='0 0 28 49'%3E%3Cg fill='%23FFB800' fill-opacity='0.07' fill-rule='evenodd'%3E%3Cpath d='M13.99 9.25l13 7.5v15l-13 7.5L1 31.75v-15l12.99-7.5zM3 17.97v11.56l9.99 5.77V23.74L3 17.97zM15 23.74v11.56l9.99-5.77V17.97L15 23.74zM13.99 11.56L4.99 16.7l9 5.2 8.99-5.2-8.99-5.14z'/%3E%3C/g%3E%3C/svg%3E");
+    background-size: 28px 49px;
     background-repeat: repeat;
   }
 
-  /* Juicy honey button — glossy convex pill */
+  /* --- Juicy honey button — exact reference values --- */
   .juicy-btn {
-    background: radial-gradient(ellipse 80% 140% at 35% 20%, #FFF7C0 0%, #FFE45C 22%, #FFB800 55%, #D87A00 100%);
-    box-shadow: 0 6px 18px rgba(255,150,0,0.4), inset 0 2px 5px rgba(255,255,255,0.7), inset 0 -3px 8px rgba(150,70,0,0.5);
+    background: radial-gradient(120% 150% at 28% 14%, #FFF7C0 0%, #FFE45C 30%, #FFB800 62%, #D87A00 100%);
+    box-shadow: 0 12px 28px -6px rgba(196,106,0,.7),
+                inset 0 2px 1px rgba(255,255,255,.9),
+                inset 0 -8px 13px -4px rgba(122,61,0,.6);
     border-radius: 999px;
     color: #7A3D00;
     font-weight: 800;
@@ -47,25 +130,48 @@
     border: none;
     cursor: pointer;
   }
-  /* Gloss highlight streak across the top */
+
+  /* Gloss highlight strip across top third */
   .juicy-btn::before {
     content: '';
     position: absolute;
-    top: 4px;
-    left: 14px;
-    right: 30px;
-    height: 12px;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.8), transparent);
+    top: 3px;
+    left: 7%;
+    right: 7%;
+    height: 36%;
+    background: linear-gradient(rgba(255,255,255,.9), transparent);
     border-radius: 999px;
     filter: blur(1px);
     pointer-events: none;
+    z-index: 1;
   }
 
-  /* Glossy hexagon cell */
+  /* Shimmer sweep overlay */
+  .juicy-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 36%;
+    background: linear-gradient(
+      to right,
+      transparent,
+      rgba(255,255,255,.55),
+      transparent
+    );
+    animation: shimmer 4.5s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* --- Glossy hexagon cell — exact reference values --- */
   .juicy-hex {
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    background: radial-gradient(ellipse 75% 120% at 35% 22%, #FFF7C0 0%, #FFE45C 25%, #FFB800 55%, #C46A00 100%);
-    box-shadow: inset 0 2px 7px rgba(255,255,255,0.6), inset 0 -4px 10px rgba(140,65,0,0.55);
+    background: radial-gradient(120% 120% at 30% 22%, #FFF7C0 0%, #FFE45C 28%, #FFB800 58%, #D87A00 100%);
+    box-shadow: inset 0 5px 4px rgba(255,255,255,.92),
+                inset 0 -22px 30px -10px rgba(122,61,0,.75),
+                inset 0 0 0 2px rgba(255,247,192,.4);
     position: relative;
     overflow: hidden;
     display: flex;
@@ -73,43 +179,68 @@
     justify-content: center;
   }
 
-  /* Dark honey-tinted card surface */
+  /* --- Dark honey-tinted gloss card --- */
   .gloss-card {
-    background: linear-gradient(160deg, #1C1708 0%, #120E04 100%);
-    border: 1px solid rgba(255,184,0,0.18);
-    box-shadow: inset 0 1px 0 rgba(255,220,80,0.08), 0 4px 24px rgba(0,0,0,0.55);
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background: linear-gradient(150deg, #1C1708 0%, #120E04 100%);
+    border: 1px solid rgba(255,184,0,.14);
+    box-shadow: inset 0 1px 0 rgba(255,247,192,.12), 0 4px 24px rgba(0,0,0,.55);
+    transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+  }
+
+  /* Featured card drip-glow breathing animation */
+  .drip-glow {
+    animation: dripGlow 4s ease-in-out infinite;
   }
 
   /* Soft amber glow utility */
   .honey-glow {
-    box-shadow: 0 0 28px rgba(255,184,0,0.3), 0 0 8px rgba(255,184,0,0.15);
+    box-shadow: 0 0 28px rgba(255,184,0,.3), 0 0 8px rgba(255,184,0,.15);
   }
 
-  /* Dark surfaces with honey tint */
+  /* Pulse glow (map pins / accents) */
+  .pulse-glow {
+    animation: pulseGlow 2.4s ease-in-out infinite;
+  }
+
+  /* Bob (logo float) */
+  .animate-bob {
+    animation: bob 3.6s ease-in-out infinite;
+  }
+
+  /* Rise entrance */
+  .animate-rise {
+    animation: rise .45s ease-out forwards;
+  }
+
+  /* Fade-up entrance */
+  .animate-fade-up {
+    animation: fadeUp .45s ease-out forwards;
+  }
+
+  /* Dark glass surfaces */
   .glass {
-    background: rgba(28,23,8,0.78);
+    background: rgba(28,23,8,.78);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255,184,0,0.12);
-    box-shadow: inset 0 1px 0 rgba(255,220,80,0.06), 0 4px 24px rgba(0,0,0,0.45);
+    border: 1px solid rgba(255,184,0,.12);
+    box-shadow: inset 0 1px 0 rgba(255,220,80,.06), 0 4px 24px rgba(0,0,0,.45);
   }
   .glass-card {
-    background: rgba(28,23,8,0.65);
+    background: rgba(28,23,8,.65);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,184,0,0.15);
-    box-shadow: inset 0 1px 0 rgba(255,220,80,0.08), 0 4px 24px rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,184,0,.15);
+    box-shadow: inset 0 1px 0 rgba(255,220,80,.08), 0 4px 24px rgba(0,0,0,.5);
   }
   .glass-accent {
-    background: rgba(255,184,0,0.08);
+    background: rgba(255,184,0,.08);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,184,0,0.2);
-    box-shadow: inset 0 1px 0 rgba(255,220,80,0.06);
+    border: 1px solid rgba(255,184,0,.2);
+    box-shadow: inset 0 1px 0 rgba(255,220,80,.06);
   }
 
-  /* Text gradient — honey */
+  /* Honey text gradients */
   .text-gradient {
     background: linear-gradient(135deg, #FFE45C, #FFB800);
     -webkit-background-clip: text;
@@ -127,15 +258,15 @@
   .scrollbar-none::-webkit-scrollbar { display: none; }
   .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* Honey shimmer skeleton */
+  /* Skeleton shimmer (uses separate keyframe to avoid conflict with button shimmer) */
   .shimmer-bg {
     background: linear-gradient(
       90deg,
-      rgba(28,23,8,0.8) 0%,
-      rgba(255,184,0,0.1) 50%,
-      rgba(28,23,8,0.8) 100%
+      rgba(28,23,8,.8) 0%,
+      rgba(255,184,0,.1) 50%,
+      rgba(28,23,8,.8) 100%
     );
     background-size: 200% 100%;
-    animation: shimmer 2s ease-in-out infinite;
+    animation: skeleton-shimmer 2s ease-in-out infinite;
   }
 }

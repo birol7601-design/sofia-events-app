@@ -1,63 +1,116 @@
-export default function Logo({ size = 48 }) {
+export default function Logo({ size = 48, bob = false }) {
+  const h  = Math.round(size * 1.15);
+  const s  = size / 50;
+
+  // Bee body (striped teardrop abdomen)
+  const bw = Math.round(13 * s);
+  const bh = Math.round(18 * s);
+  const stripeH   = Math.max(1.5, Math.round(2.4 * s * 10) / 10);
+  const stripeGap = Math.round(5 * s);
+
+  // Wings
+  const ww = Math.round(14 * s);
+  const wh = Math.round(16 * s);
+
+  // Bee container dimensions
+  const wingBodyOverlapX = Math.round(3 * s);   // how far wings tuck behind body
+  const wingBodyOverlapY = Math.round(5 * s);   // vertical overlap of wings and body top
+  const beeW = (ww - wingBodyOverlapX) * 2 + bw;
+  const beeH = wh + bh - wingBodyOverlapY;
+
   return (
-    <svg
-      width={size}
-      height={Math.round(size * 1.15)}
-      viewBox="0 0 100 115"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
+    <div
+      style={{
+        display: 'inline-block',
+        width: size,
+        height: h,
+        filter: 'drop-shadow(0 0 14px rgba(196,106,0,.55))',
+        animation: bob ? 'bob 3.6s ease-in-out infinite' : undefined,
+        flexShrink: 0,
+      }}
     >
-      <defs>
-        <radialGradient id="honey-gloss" cx="35%" cy="22%" r="70%" gradientUnits="objectBoundingBox">
-          <stop offset="0%"   stopColor="#FFF7C0" />
-          <stop offset="22%"  stopColor="#FFE45C" />
-          <stop offset="55%"  stopColor="#FFB800" />
-          <stop offset="100%" stopColor="#C46A00" />
-        </radialGradient>
-        <filter id="gloss-blur">
-          <feGaussianBlur stdDeviation="3.5" />
-        </filter>
-      </defs>
+      {/* Glossy hex cell */}
+      <div
+        style={{
+          width: size,
+          height: h,
+          clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+          background: 'radial-gradient(120% 120% at 30% 22%, #FFF7C0 0%, #FFE45C 28%, #FFB800 58%, #D87A00 100%)',
+          boxShadow: [
+            'inset 0 5px 4px rgba(255,255,255,.92)',
+            'inset 0 -22px 30px -10px rgba(122,61,0,.75)',
+            'inset 0 0 0 2px rgba(255,247,192,.4)',
+          ].join(', '),
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
+        {/* Bee */}
+        <div style={{ position: 'relative', width: beeW, height: beeH }}>
 
-      {/* Hex cell */}
-      <polygon
-        points="50,4 96,28 96,87 50,111 4,87 4,28"
-        fill="url(#honey-gloss)"
-      />
+          {/* Left wing */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: ww,
+              height: wh,
+              borderRadius: '72% 50% 60% 40% / 82% 70% 40% 30%',
+              background: 'radial-gradient(circle at 60% 35%, rgba(255,255,255,.95), rgba(255,255,255,.15) 75%)',
+              transformOrigin: 'bottom right',
+              animation: 'wing 2.2s ease-in-out infinite',
+            }}
+          />
 
-      {/* Upper-left gloss highlight */}
-      <ellipse
-        cx="33" cy="28" rx="24" ry="11"
-        fill="rgba(255,255,255,0.32)"
-        filter="url(#gloss-blur)"
-      />
+          {/* Right wing */}
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              width: ww,
+              height: wh,
+              borderRadius: '50% 72% 40% 60% / 70% 82% 30% 40%',
+              background: 'radial-gradient(circle at 40% 35%, rgba(255,255,255,.95), rgba(255,255,255,.15) 75%)',
+              transformOrigin: 'bottom left',
+              animation: 'wingR 2.2s ease-in-out infinite',
+            }}
+          />
 
-      {/* Wings (behind body) */}
-      <ellipse cx="34" cy="57" rx="12" ry="5.5"
-        fill="rgba(255,255,255,0.84)"
-        transform="rotate(-28 34 57)"
-      />
-      <ellipse cx="66" cy="57" rx="12" ry="5.5"
-        fill="rgba(255,255,255,0.84)"
-        transform="rotate(28 66 57)"
-      />
-
-      {/* Body */}
-      <ellipse cx="50" cy="70" rx="9" ry="13" fill="#1A1200" />
-
-      {/* Head */}
-      <circle cx="50" cy="53" r="7.5" fill="#1A1200" />
-
-      {/* Gold stripes */}
-      <rect x="42" y="63" width="16" height="3"   rx="1.5" fill="#FFB800" fillOpacity="0.9" />
-      <rect x="42" y="69.5" width="16" height="3" rx="1.5" fill="#FFB800" fillOpacity="0.9" />
-      <rect x="42" y="76" width="16" height="3"   rx="1.5" fill="#FFB800" fillOpacity="0.9" />
-
-      {/* Antennae */}
-      <line x1="46" y1="46" x2="38" y2="36" stroke="#1A1200" strokeWidth="2.5" strokeLinecap="round" />
-      <line x1="54" y1="46" x2="62" y2="36" stroke="#1A1200" strokeWidth="2.5" strokeLinecap="round" />
-      <circle cx="37" cy="35" r="3" fill="#FFB800" />
-      <circle cx="63" cy="35" r="3" fill="#FFB800" />
-    </svg>
+          {/* Body (striped abdomen) */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              width: bw,
+              height: bh,
+              borderRadius: '48% 48% 50% 50% / 38% 38% 62% 62%',
+              background: 'linear-gradient(160deg, #7A3D00, #2a1400)',
+              overflow: 'hidden',
+            }}
+          >
+            {/* Two #FFB800 stripes — stripe 1 is the div, stripe 2 via box-shadow */}
+            <div
+              style={{
+                position: 'absolute',
+                left: '8%',
+                right: '8%',
+                top: '26%',
+                height: stripeH,
+                background: '#FFB800',
+                boxShadow: `0 ${stripeGap}px 0 #FFB800`,
+                borderRadius: 1,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

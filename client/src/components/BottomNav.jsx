@@ -82,13 +82,13 @@ export default function BottomNav() {
                   style={{
                     transform: 'translateY(-10px)',
                     filter: active
-                      ? 'drop-shadow(0 0 14px rgba(255,184,0,0.6))'
+                      ? 'drop-shadow(0 0 18px rgba(196,106,0,.75))'
                       : 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))',
                     transition: 'filter 0.25s ease',
                   }}
                   whileTap={{ scale: 0.9 }}
                 >
-                  <Logo size={52} />
+                  <Logo size={52} bob />
                 </motion.div>
               ) : (
                 <div className="relative flex flex-col items-center py-2 w-full">

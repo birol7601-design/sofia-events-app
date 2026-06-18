@@ -4,22 +4,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Core surfaces
         bg:           '#0A0A0A',
         bg2:          '#120E04',
         surface:      '#1C1708',
         surface2:     '#120E04',
-        // Honey palette
         honey:        '#FFB800',
         honeyLight:   '#FFE45C',
         honeyPale:    '#FFF7C0',
         honeyDeep:    '#C46A00',
         honeyDark:    '#7A3D00',
-        // Wax text tones
         wax:          '#FFF4D6',
         waxMuted:     '#C7B68A',
         waxDim:       '#8A7B4A',
-        // Legacy aliases (keep so existing Tailwind classes auto-remap)
+        // Legacy aliases — keep so old Tailwind class names auto-remap
         primary:      '#FFB800',
         primaryLight: '#FFE45C',
         accent:       '#C46A00',
@@ -31,7 +28,6 @@ export default {
         'hero-gradient':   'linear-gradient(135deg, #FFB800 0%, #C46A00 100%)',
         'hero-gradient-r': 'linear-gradient(135deg, #C46A00 0%, #FFB800 100%)',
         'glow':            'radial-gradient(circle at 50% 0%, rgba(255,184,0,0.18), transparent 70%)',
-        'shimmer':         'linear-gradient(90deg, transparent 0%, rgba(255,184,0,0.12) 50%, transparent 100%)',
       },
       boxShadow: {
         'glow':           '0 0 30px rgba(255,184,0,0.28)',
@@ -45,23 +41,25 @@ export default {
         body:    ['"Inter"', 'sans-serif'],
       },
       keyframes: {
+        // Only marquee defined here; all other keyframes live in index.css
         'marquee-x': {
           '0%':   { transform: 'translateX(0%)' },
           '100%': { transform: 'translateX(-50%)' },
         },
-        shimmer: {
-          '0%':   { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
-        },
-        'pulse-glow': {
-          '0%, 100%': { opacity: 0.6 },
-          '50%':      { opacity: 1 },
-        },
       },
       animation: {
-        'marquee':    'marquee-x 28s linear infinite',
-        'shimmer':    'shimmer 2s ease-in-out infinite',
-        'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+        // Marquee
+        'marquee': 'marquee-x 28s linear infinite',
+        // Honey theme animations (keyframes defined in index.css)
+        'bob':            'bob 3.6s ease-in-out infinite',
+        'shimmer':        'shimmer 4.5s ease-in-out infinite',
+        'pulse-glow':     'pulseGlow 2.4s ease-in-out infinite',
+        'drip-glow':      'dripGlow 4s ease-in-out infinite',
+        'rise':           'rise 0.45s ease-out forwards',
+        'fade-up':        'fadeUp 0.45s ease-out forwards',
+        'float-p':        'floatP 3.5s ease-out infinite',
+        'slide-in':       'slideIn 0.35s ease-out forwards',
+        'skeleton':       'skeleton-shimmer 2s ease-in-out infinite',
       },
     },
   },
