@@ -1,5 +1,28 @@
 const API = 'https://sofiabuzz.com';
 
+const API_BASE_AUTH = 'https://sofiabuzz.com';
+
+function toggleForgot() {
+  const f = document.getElementById('forgot-form');
+  f.style.display = f.style.display === 'none' ? '' : 'none';
+}
+
+async function sendForgot() {
+  const email = document.getElementById('forgot-email').value.trim();
+  const msg = document.getElementById('forgot-msg');
+  const btn = document.getElementById('forgot-btn');
+  if (!email) { msg.textContent = 'Please enter your email.'; return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await fetch(`${API}/api/users/forgot-password`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    msg.textContent = 'Check your email for a reset link 📧';
+  } catch { msg.textContent = 'Network error. Try again.'; }
+  finally { btn.disabled = false; btn.textContent = 'Send reset link'; }
+}
+
 function togglePw(inputId, btnId) {
   const input = document.getElementById(inputId);
   const btn = document.getElementById(btnId);

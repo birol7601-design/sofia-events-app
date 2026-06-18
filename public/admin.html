@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — SofiaBuzz</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .admin-tab-btn { background:transparent;border:none;border-bottom:2px solid transparent;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;transition:all 0.2s; }
+    .admin-tab-btn.active { border-bottom-color:#FF8C00;color:#FF8C00; }
+    .stat-box { background:#220D00;border:1px solid rgba(255,140,0,0.2);border-radius:12px;padding:14px 16px;flex:1;min-width:130px;text-align:center; }
+    .stat-num { font-family:'DM Serif Display',serif;font-style:italic;font-size:28px;color:#FF8C00;display:block; }
+    .stat-label { font-family:'IBM Plex Sans',sans-serif;font-size:10px;color:#6E6A5F;text-transform:uppercase;letter-spacing:1px;margin-top:2px; }
+    .admin-row { display:flex;align-items:center;gap:10px;padding:10px 12px;border-bottom:1px solid rgba(212,175,55,0.1);font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#C7A880; }
+    .admin-row:last-child { border-bottom:none; }
+    .admin-row .title { flex:1;font-family:'Cormorant Garamond',serif;font-size:15px;color:#FFD199; }
+    .btn-sm { border:none;border-radius:999px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;transition:all 0.2s; }
+    .btn-approve { background:rgba(0,180,80,0.15);color:#40E080;border:1px solid rgba(0,180,80,0.3); }
+    .btn-reject  { background:rgba(255,70,0,0.12);color:#FF6B35;border:1px solid rgba(255,70,0,0.3); }
+    .btn-delete  { background:rgba(200,0,0,0.12);color:#FF4040;border:1px solid rgba(200,0,0,0.3); }
+    .btn-edit    { background:rgba(255,140,0,0.12);color:#FF8C00;border:1px solid rgba(255,140,0,0.3); }
+    .btn-gold    { background:linear-gradient(135deg,#FF6B35,#FF8C00);color:#1A0A00;border:none; }
+    .search-input { background:#1A0A00;border:1px solid rgba(255,140,0,0.3);border-radius:8px;padding:8px 12px;color:#FFD199;font-family:'IBM Plex Sans',sans-serif;font-size:13px;width:100%;box-sizing:border-box;margin-bottom:12px; }
+    .search-input:focus { outline:none;border-color:#FF8C00; }
+    .admin-form-input { background:#1A0A00;border:1px solid rgba(255,140,0,0.3);border-radius:8px;padding:9px 12px;color:#FFD199;font-family:'Cormorant Garamond',serif;font-size:14px;width:100%;box-sizing:border-box; }
+    .admin-form-input:focus { outline:none;border-color:#FF8C00; }
+    textarea.admin-form-input { resize:vertical;min-height:60px; }
+  </style>
+</head>
+<body>
+  <div class="starfield" aria-hidden="true"></div>
+
+  <header>
+    <div class="header-inner">
+      <div class="header-logo">
+        <div class="logo-circle">
+          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+            <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF6B35"/><stop offset="50%" stop-color="#FF8C00"/><stop offset="100%" stop-color="#FFD700"/></linearGradient></defs>
+            <circle cx="20" cy="20" r="19" fill="url(#sg)"/>
+            <path d="M20 8L20 32M8 20L32 20M11.5 11.5L28.5 28.5M28.5 11.5L11.5 28.5" stroke="#1A0A00" stroke-width="2.5" stroke-linecap="round"/>
+            <circle cx="20" cy="20" r="5" fill="#1A0A00"/>
+          </svg>
+        </div>
+        <div class="logo-text-group">
+          <span class="logo-text">Buzz</span>
+          <span class="header-slogan">Admin</span>
+        </div>
+      </div>
+      <button id="logout-admin-btn" style="display:none;background:transparent;border:1px solid rgba(255,140,0,0.4);border-radius:999px;padding:6px 14px;color:#FF8C00;font-family:'IBM Plex Sans',sans-serif;font-size:12px;cursor:pointer;" onclick="adminLogout()">Log out</button>
+    </div>
+  </header>
+
+  <main style="padding:0 0 40px;max-width:800px;margin:0 auto;">
+
+    <!-- LOGIN -->
+    <div id="admin-login" style="padding:60px 14px;text-align:center;">
+      <div style="font-size:48px;margin-bottom:16px;">🔐</div>
+      <h1 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:26px;margin:0 0 24px;">Admin Access</h1>
+      <div style="max-width:320px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
+        <input type="password" id="admin-pw" class="admin-form-input" placeholder="Admin password" style="text-align:center;" onkeydown="if(event.key==='Enter')adminLogin()">
+        <button class="gold-btn" onclick="adminLogin()">Access →</button>
+        <p id="admin-login-err" style="color:#E8456B;font-family:'IBM Plex Sans',sans-serif;font-size:13px;min-height:18px;"></p>
+      </div>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="admin-dashboard" style="display:none;">
+
+      <!-- STATS -->
+      <div style="display:flex;flex-wrap:wrap;gap:10px;padding:16px 14px 12px;">
+        <div class="stat-box"><span class="stat-num" id="s-events">—</span><span class="stat-label">Total Events</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-users">—</span><span class="stat-label">Total Users</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-featured">—</span><span class="stat-label">Featured</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-events-month">—</span><span class="stat-label">Events / mo</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-users-month">—</span><span class="stat-label">New Users / mo</span></div>
+      </div>
+
+      <!-- TABS -->
+      <div style="display:flex;border-bottom:1px solid rgba(212,175,55,0.15);padding:0 14px;">
+        <button class="admin-tab-btn active" onclick="switchTab('events')">Events</button>
+        <button class="admin-tab-btn" onclick="switchTab('users')">Users</button>
+        <button class="admin-tab-btn" onclick="switchTab('slots')">Featured Slots</button>
+        <button class="admin-tab-btn" onclick="switchTab('add')">Quick Add</button>
+      </div>
+
+      <!-- EVENTS TAB -->
+      <div id="tab-events" style="padding:14px;">
+        <input type="text" class="search-input" id="event-search" placeholder="Search events…" oninput="filterEvents()">
+        <div id="admin-events-list"></div>
+      </div>
+
+      <!-- USERS TAB -->
+      <div id="tab-users" style="padding:14px;display:none;">
+        <div id="admin-users-list"></div>
+      </div>
+
+      <!-- SLOTS TAB -->
+      <div id="tab-slots" style="padding:14px;display:none;">
+        <div id="admin-slots-list"></div>
+      </div>
+
+      <!-- QUICK ADD TAB -->
+      <div id="tab-add" style="padding:14px;display:none;">
+        <h2 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:18px;margin:0 0 14px;">Add event</h2>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input type="text"           id="qa-title"      class="admin-form-input" placeholder="Event title">
+          <textarea                    id="qa-desc"       class="admin-form-input" placeholder="Description"></textarea>
+          <textarea                    id="qa-bio"        class="admin-form-input" placeholder="Artist bio (optional)"></textarea>
+          <input type="text"           id="qa-category"   class="admin-form-input" placeholder="Category (Rock, Jazz…)">
+          <input type="text"           id="qa-venue"      class="admin-form-input" placeholder="Venue">
+          <input type="datetime-local" id="qa-start"      class="admin-form-input">
+          <input type="text"           id="qa-price"      class="admin-form-input" placeholder="Price text (e.g. from €20)">
+          <input type="text"           id="qa-ticket"     class="admin-form-input" placeholder="Ticket URL">
+          <input type="text"           id="qa-image"      class="admin-form-input" placeholder="Image URL (optional)">
+          <button class="gold-btn" onclick="adminAddEvent()">Add event</button>
+          <p id="qa-msg" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#FF8C00;min-height:18px;"></p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>

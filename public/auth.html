@@ -57,6 +57,14 @@
         </div>
         <button class="gold-btn" id="login-btn">Log in</button>
         <p id="login-error" style="font-size:13px;color:#E8456B;min-height:18px;font-family:'IBM Plex Sans',sans-serif;"></p>
+        <p style="text-align:center;"><span onclick="toggleForgot()" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#FF8C00;cursor:pointer;">Forgot password?</span></p>
+        <!-- FORGOT PASSWORD INLINE FORM -->
+        <div id="forgot-form" style="display:none;padding:12px;background:rgba(255,140,0,0.06);border:1px solid rgba(255,140,0,0.25);border-radius:10px;">
+          <p style="font-family:'Cormorant Garamond',serif;font-size:14px;color:#C7A880;margin:0 0 10px;">Enter your email and we'll send a reset link.</p>
+          <input type="email" id="forgot-email" class="dark-input" placeholder="Your email" style="margin-bottom:8px;">
+          <button class="gold-btn" id="forgot-btn" onclick="sendForgot()">Send reset link</button>
+          <p id="forgot-msg" style="font-size:13px;color:#FF8C00;min-height:18px;font-family:'Cormorant Garamond',serif;font-style:italic;margin-top:6px;"></p>
+        </div>
         <p style="text-align:center;font-size:13px;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;">Don't have an account? <a href="#" onclick="showTab('register');return false;" style="color:#FF8C00;text-decoration:none;">Register →</a></p>
       </div>
     </div>
