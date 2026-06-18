@@ -69,7 +69,8 @@ document.getElementById('register-btn').addEventListener('click', async () => {
   errEl.textContent = '';
 
   if (!username || !email || !password || !confirm) { errEl.textContent = 'Please fill in all fields.'; return; }
-  if (username.length < 3) { errEl.textContent = 'Username must be at least 3 characters.'; return; }
+  if (username.length < 3 || username.length > 30) { errEl.textContent = 'Username must be 3–30 characters.'; return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Please enter a valid email address.'; return; }
   if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
   if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; return; }
   if (!privacyConsent) { errEl.textContent = 'Please accept the Privacy Policy to continue.'; return; }

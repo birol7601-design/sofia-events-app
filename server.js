@@ -179,7 +179,10 @@ function authenticateUser(req, res, next) {
 app.post('/api/users/register', authLimiter, async (req, res) => {
   try {
     const { username, email, password, email_marketing = false } = req.body;
-    if (!username || !email || !password) return res.status(400).json({ error: 'All fields required' });
+    if (!username || !email || !password) return res.status(400).json({ error: 'All fields required.' });
+    if (username.length < 3 || username.length > 30) return res.status(400).json({ error: 'Username must be 3–30 characters.' });
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ error: 'Invalid email address.' });
+    if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
     const hash = await bcrypt.hash(password, 10);
     const result = await pool.query(
       'INSERT INTO users (username, email, password_hash, email_marketing) VALUES ($1, $2, $3, $4) RETURNING id, username, email',
@@ -598,6 +601,15 @@ app.patch('/api/users/onboarding', authenticateUser, async (req, res) => {
     await pool.query('UPDATE users SET onboarding_complete=true WHERE id=$1', [req.userId]);
     res.json({ ok: true });
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('*', (req, res) => {
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({ error: err.message || 'An unexpected error occurred.' });
 });
 
 const PORT = process.env.PORT || 3000;
