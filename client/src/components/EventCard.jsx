@@ -49,14 +49,24 @@ function MiniAvatars({ count }) {
   );
 }
 
-export default function EventCard({ event, attendingCount, initialSaved = false }) {
+export default function EventCard({
+  event,
+  attendingCount,
+  initialSaved    = false,
+  initialAttending = false,
+  onSaveChange,
+  onAttendChange,
+}) {
   const navigate = useNavigate();
-  const [imgLoaded, setImgLoaded] = useState(false);
-  const [saved, setSaved]         = useState(initialSaved);
-  const [flying, setFlying]       = useState(false);
+  const [imgLoaded,    setImgLoaded]    = useState(false);
+  const [saved,        setSaved]        = useState(initialSaved);
+  const [attending,    setAttending]    = useState(initialAttending);
+  const [saveFlying,   setSaveFlying]   = useState(false);
+  const [attendFlying, setAttendFlying] = useState(false);
 
-  // Sync if parent fetches saved state after initial render
-  useEffect(() => { setSaved(initialSaved); }, [initialSaved]);
+  // Sync when parent fetches state after initial render
+  useEffect(() => { setSaved(initialSaved); },     [initialSaved]);
+  useEffect(() => { setAttending(initialAttending); }, [initialAttending]);
 
   const hasImage = !!event.image_url && !event.image_url.endsWith('.svg');
   const date = event.start_time
@@ -69,16 +79,34 @@ export default function EventCard({ event, attendingCount, initialSaved = false 
   const toggleSave = async (e) => {
     e.stopPropagation();
     if (!isLoggedIn()) { navigate('/auth'); return; }
-    if (flying) return;
-    setSaved(s => !s); // optimistic
-    setFlying(true);
+    if (saveFlying) return;
+    setSaved(s => !s);
+    setSaveFlying(true);
     try {
       const data = await apiPost(`/api/users/saved/${event.id}`);
-      setSaved(data.saved); // confirm with server truth
+      setSaved(data.saved);
+      onSaveChange?.(event.id, data.saved);
     } catch {
-      setSaved(s => !s); // revert on error
+      setSaved(s => !s);
     } finally {
-      setFlying(false);
+      setSaveFlying(false);
+    }
+  };
+
+  const toggleAttend = async (e) => {
+    e.stopPropagation();
+    if (!isLoggedIn()) { navigate('/auth'); return; }
+    if (attendFlying) return;
+    setAttending(s => !s);
+    setAttendFlying(true);
+    try {
+      const data = await apiPost(`/api/users/attending/${event.id}`);
+      setAttending(data.attending);
+      onAttendChange?.(event.id, data.attending);
+    } catch {
+      setAttending(s => !s);
+    } finally {
+      setAttendFlying(false);
     }
   };
 
@@ -100,10 +128,10 @@ export default function EventCard({ event, attendingCount, initialSaved = false 
       }}
       whileTap={{ scale: 0.98, y: -2 }}
     >
-      {/* Image / Hero area */}
+      {/* Hero area */}
       <div className="relative h-44 overflow-hidden">
         {hasImage ? (
-          <motion.div className="absolute inset-0" variants={{ hover: { scale: 1.06 } }} transition={{ duration: 0.4 }}>
+          <motion.div className="absolute inset-0" transition={{ duration: 0.4 }}>
             <motion.img
               src={event.image_url}
               alt={event.title}
@@ -126,7 +154,7 @@ export default function EventCard({ event, attendingCount, initialSaved = false 
           style={{ background: 'linear-gradient(to bottom, rgba(13,10,26,0.1) 0%, rgba(30,24,56,0.5) 60%, rgba(30,24,56,0.95) 100%)' }}
         />
 
-        {/* Category badge */}
+        {/* Category badge — top left */}
         <div className="absolute top-3 left-3 z-10">
           <span
             className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full font-body"
@@ -141,7 +169,7 @@ export default function EventCard({ event, attendingCount, initialSaved = false 
           </span>
         </div>
 
-        {/* Heart button */}
+        {/* Heart button — top right */}
         <motion.button
           onClick={toggleSave}
           className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center"
@@ -165,6 +193,8 @@ export default function EventCard({ event, attendingCount, initialSaved = false 
         <p className="text-textMuted text-xs mb-2 font-body truncate">
           {event.venue}{date ? ` · ${date}, ${time}` : ''}
         </p>
+
+        {/* Bottom row: price + going badge + avatars */}
         <div className="flex items-center justify-between mt-2">
           {event.price_text ? (
             <span className="text-[13px] font-semibold font-display" style={{ color: '#FB923C' }}>
@@ -173,7 +203,24 @@ export default function EventCard({ event, attendingCount, initialSaved = false 
           ) : (
             <span className="text-[13px] font-semibold font-display" style={{ color: '#10B981' }}>Free</span>
           )}
-          <MiniAvatars count={attendingCount} />
+
+          <div className="flex items-center gap-2">
+            {attending && (
+              <motion.button
+                onClick={toggleAttend}
+                className="text-[10px] font-bold font-body px-2 py-0.5 rounded-full leading-none"
+                style={{
+                  background: 'rgba(16,185,129,0.15)',
+                  color: '#10B981',
+                  border: '1px solid rgba(16,185,129,0.3)',
+                }}
+                whileTap={{ scale: 0.86 }}
+              >
+                ✓ Going
+              </motion.button>
+            )}
+            <MiniAvatars count={attendingCount} />
+          </div>
         </div>
       </div>
     </motion.div>

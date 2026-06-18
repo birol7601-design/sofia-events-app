@@ -1,9 +1,10 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import EventCard from '../components/EventCard';
 import BuzzSays from '../components/BuzzSays';
+import { EventCardSkeleton } from '../components/Skeleton';
 import { apiGet } from '../lib/api';
-import { getUser } from '../lib/auth';
+import { isLoggedIn } from '../lib/auth';
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -12,50 +13,141 @@ const pageVariants = {
 };
 
 export default function Saved() {
-  const [tab, setTab] = useState('saved');
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const { id } = getUser();
+  const [tab,             setTab]             = useState('saved');
+  const [savedEvents,     setSavedEvents]     = useState([]);
+  const [attendingEvents, setAttendingEvents] = useState([]);
+  const [loading,         setLoading]         = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!isLoggedIn()) { setLoading(false); return; }
     setLoading(true);
-    apiGet(`/api/users/${id}/${tab}`)
-      .then(setEvents)
-      .catch(() => setEvents([]))
+    Promise.all([
+      apiGet('/api/events'),
+      apiGet('/api/users/saved/ids'),
+      apiGet('/api/users/attending/ids'),
+    ])
+      .then(([allEvents, savedData, attendingData]) => {
+        const savedSet     = new Set(savedData?.savedIds || []);
+        const attendingSet = new Set(attendingData?.attendingIds || []);
+        setSavedEvents(allEvents.filter(e => savedSet.has(e.id)));
+        setAttendingEvents(allEvents.filter(e => attendingSet.has(e.id)));
+      })
+      .catch(() => {})
       .finally(() => setLoading(false));
-  }, [tab, id]);
+  }, []);
+
+  const handleUnsave    = (eventId) => setSavedEvents(prev => prev.filter(e => e.id !== eventId));
+  const handleUnattend  = (eventId) => setAttendingEvents(prev => prev.filter(e => e.id !== eventId));
+
+  const shown = tab === 'saved' ? savedEvents : attendingEvents;
 
   return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit"
-      className="flex flex-col min-h-dvh pb-20"
+    <motion.div
+      variants={pageVariants} initial="initial" animate="animate" exit="exit"
+      className="flex flex-col min-h-dvh pb-24"
     >
-      <div className="pt-6 px-4 pb-3">
+      {/* Header */}
+      <div className="pt-10 px-5 pb-3">
         <h1 className="font-display font-bold text-2xl text-text">Collection</h1>
         <p className="text-textMuted text-sm font-body">Your personal nights</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 px-4 pb-3">
-        {['saved','attending'].map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`rounded-full px-4 py-1.5 text-xs font-semibold font-body transition-colors ${
-              tab === t ? 'bg-primary text-white' : 'glass text-textMuted'
-            }`}>
-            {t === 'saved' ? '🔖 Saved' : '🎪 Attending'}
-          </button>
+      <div className="flex gap-2 px-5 pb-4">
+        {[
+          { id: 'saved',     label: '🔖 Saved',    count: savedEvents.length     },
+          { id: 'attending', label: '🎪 Attending', count: attendingEvents.length },
+        ].map(({ id, label, count }) => (
+          <motion.button
+            key={id}
+            onClick={() => setTab(id)}
+            className="flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold font-body"
+            style={{
+              background: tab === id
+                ? 'linear-gradient(135deg, #7C3AED, #EC4899)'
+                : 'rgba(30,24,56,0.65)',
+              border: tab === id
+                ? '1px solid rgba(167,139,250,0.4)'
+                : '1px solid rgba(167,139,250,0.15)',
+              color: tab === id ? '#fff' : '#A39CC4',
+              boxShadow: tab === id ? '0 0 14px rgba(124,58,237,0.3)' : 'none',
+            }}
+            whileTap={{ scale: 0.91 }}
+          >
+            {label}
+            {!loading && count > 0 && (
+              <span
+                className="rounded-full text-[10px] px-1.5 py-0.5 leading-none font-bold"
+                style={{
+                  background: tab === id ? 'rgba(255,255,255,0.25)' : 'rgba(167,139,250,0.2)',
+                  color:      tab === id ? '#fff' : '#A78BFA',
+                }}
+              >
+                {count}
+              </span>
+            )}
+          </motion.button>
         ))}
       </div>
 
-      <div className="px-4 space-y-2 flex-1">
+      {/* Content */}
+      <div className="px-5 flex-1">
         <BuzzSays page="saved" />
-        {loading && <p className="text-textMuted text-sm text-center py-10">Loading…</p>}
-        {!loading && events.length === 0 && (
-          <p className="text-textMuted text-sm text-center py-10">
-            {tab === 'saved' ? 'No saved events yet. Tap ♥ on any event.' : 'Not attending any events yet.'}
+
+        {loading && (
+          <div className="space-y-3 mt-4">
+            {[0, 1, 2].map(i => <EventCardSkeleton key={i} />)}
+          </div>
+        )}
+
+        {!loading && !isLoggedIn() && (
+          <p className="text-textMuted text-sm text-center py-12">
+            Sign in to see your collection.
           </p>
         )}
-        {!loading && events.map(ev => <EventCard key={ev.id} event={ev} />)}
+
+        {!loading && isLoggedIn() && (
+          <div className="mt-3">
+            <AnimatePresence mode="popLayout">
+              {shown.length === 0 ? (
+                <motion.p
+                  key="empty"
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="text-textMuted text-sm text-center py-12"
+                >
+                  {tab === 'saved'
+                    ? 'No saved events yet. Tap ♥ on any event.'
+                    : 'Not attending any events yet.'}
+                </motion.p>
+              ) : (
+                shown.map(ev => (
+                  <motion.div
+                    key={ev.id}
+                    layout
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0, transition: { duration: 0.32, ease: [0.16, 1, 0.3, 1] } }}
+                    exit={{ opacity: 0, x: -48, scale: 0.95, transition: { duration: 0.26 } }}
+                    className="mb-3"
+                  >
+                    {tab === 'saved' ? (
+                      <EventCard
+                        event={ev}
+                        initialSaved={true}
+                        onSaveChange={(id, isSaved) => { if (!isSaved) handleUnsave(id); }}
+                      />
+                    ) : (
+                      <EventCard
+                        event={ev}
+                        initialAttending={true}
+                        onAttendChange={(id, isAttending) => { if (!isAttending) handleUnattend(id); }}
+                      />
+                    )}
+                  </motion.div>
+                ))
+              )}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     </motion.div>
   );
