@@ -1,36 +1,113 @@
-const GRADIENTS = {
-  star:    ['#7C3AED','#EC4899'],
-  crown:   ['#FB923C','#FBBF24'],
-  moon:    ['#3B82F6','#7C3AED'],
-  diamond: ['#06B6D4','#3B82F6'],
-  flame:   ['#EF4444','#FB923C'],
-  compass: ['#10B981','#3B82F6'],
-  eye:     ['#8B5CF6','#EC4899'],
-  vinyl:   ['#374151','#7C3AED'],
+const CONFIGS = {
+  star: {
+    g: ['#7C3AED', '#EC4899'],
+    icon: (s) => (
+      <svg width={s*0.52} height={s*0.52} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L13.8 9H21L15.1 13.6L17.2 21L12 16.8L6.8 21L8.9 13.6L3 9H10.2L12 2Z"
+          fill="white" fillOpacity="0.92"/>
+      </svg>
+    ),
+  },
+  crown: {
+    g: ['#FB923C', '#FBBF24'],
+    icon: (s) => (
+      <svg width={s*0.52} height={s*0.52} viewBox="0 0 24 24" fill="none">
+        <path d="M3 17L5 9L9 13L12 6L15 13L19 9L21 17H3Z" fill="white" fillOpacity="0.92"/>
+        <rect x="3" y="18" width="18" height="2" rx="1" fill="white" fillOpacity="0.75"/>
+      </svg>
+    ),
+  },
+  moon: {
+    g: ['#3B82F6', '#7C3AED'],
+    icon: (s) => (
+      <svg width={s*0.52} height={s*0.52} viewBox="0 0 24 24" fill="none">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"
+          fill="white" fillOpacity="0.92"/>
+      </svg>
+    ),
+  },
+  diamond: {
+    g: ['#06B6D4', '#3B82F6'],
+    icon: (s) => (
+      <svg width={s*0.52} height={s*0.52} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2L22 12L12 22L2 12Z" fill="white" fillOpacity="0.92"/>
+        <path d="M12 6L18 12L12 18L6 12Z" fill="white" fillOpacity="0.35"/>
+      </svg>
+    ),
+  },
+  flame: {
+    g: ['#EF4444', '#FB923C'],
+    icon: (s) => (
+      <svg width={s*0.52} height={s*0.52} viewBox="0 0 24 24" fill="none">
+        <path d="M12 2C12 2 8 7 8 12C8 14 9 15.5 10 16.5C10 14 11 13 12 12C12 14 13.5 15 14 16.5C15.5 15 16 13.5 16 12C16 9 14 6 12 2Z"
+          fill="white" fillOpacity="0.95"/>
+        <path d="M12 13C12 13 10 15 10 17.5C10 19.5 10.9 21 12 22C13.1 21 14 19.5 14 17.5C14 15 12 13 12 13Z"
+          fill="white" fillOpacity="0.7"/>
+      </svg>
+    ),
+  },
+  compass: {
+    g: ['#10B981', '#3B82F6'],
+    icon: (s) => (
+      <svg width={s*0.52} height={s*0.52} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="9" stroke="white" strokeOpacity="0.5" strokeWidth="1.5" fill="none"/>
+        <path d="M12 3V5M12 19V21M3 12H5M19 12H21" stroke="white" strokeOpacity="0.6" strokeWidth="1.5" strokeLinecap="round"/>
+        <polygon points="12,5 14,12 12,14 10,12" fill="white" fillOpacity="0.95"/>
+        <polygon points="12,19 14,12 12,10 10,12" fill="white" fillOpacity="0.4"/>
+      </svg>
+    ),
+  },
+  eye: {
+    g: ['#8B5CF6', '#EC4899'],
+    icon: (s) => (
+      <svg width={s*0.52} height={s*0.52} viewBox="0 0 24 24" fill="none">
+        <path d="M1 12C1 12 5 5 12 5C19 5 23 12 23 12C23 12 19 19 12 19C5 19 1 12 1 12Z"
+          stroke="white" strokeOpacity="0.85" strokeWidth="1.5" fill="none"/>
+        <circle cx="12" cy="12" r="3.5" fill="white" fillOpacity="0.9"/>
+        <circle cx="13.2" cy="10.8" r="1" fill="white" fillOpacity="0.5"/>
+      </svg>
+    ),
+  },
+  vinyl: {
+    g: ['#1F2937', '#7C3AED'],
+    icon: (s) => (
+      <svg width={s*0.52} height={s*0.52} viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="10" stroke="white" strokeOpacity="0.6" strokeWidth="1" fill="none"/>
+        <circle cx="12" cy="12" r="7" stroke="white" strokeOpacity="0.35" strokeWidth="1" fill="none"/>
+        <circle cx="12" cy="12" r="4" stroke="white" strokeOpacity="0.5" strokeWidth="1" fill="none"/>
+        <circle cx="12" cy="12" r="1.8" fill="white" fillOpacity="0.9"/>
+        <circle cx="12" cy="12" r="0.7" fill="rgba(30,24,56,0.8)"/>
+      </svg>
+    ),
+  },
 };
 
-const SYMBOLS = {
-  star:'✦', crown:'♛', moon:'◑', diamond:'◈', flame:'✦', compass:'⊕', eye:'◉', vinyl:'◎',
-};
+export default function Avatar({ type = 'star', size = 40, ring = false, name = '' }) {
+  const cfg = CONFIGS[type] || CONFIGS.star;
+  const [c1, c2] = cfg.g;
+  const initial = name ? name[0].toUpperCase() : null;
 
-export default function Avatar({ type = 'star', size = 40, name = '' }) {
-  const [c1, c2] = GRADIENTS[type] || GRADIENTS.star;
-  const symbol = SYMBOLS[type] || '✦';
-  const initial = name ? name[0].toUpperCase() : '';
   return (
     <div
       style={{
-        width: size, height: size,
+        width: size,
+        height: size,
         borderRadius: '50%',
         background: `linear-gradient(135deg, ${c1}, ${c2})`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: size * 0.38,
-        color: 'rgba(255,255,255,0.9)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
         flexShrink: 0,
         userSelect: 'none',
+        boxShadow: ring
+          ? `0 0 0 2px #D4AF37, 0 0 0 4px rgba(212,175,55,0.25), 0 0 16px rgba(124,58,237,0.3)`
+          : `0 2px 12px rgba(0,0,0,0.4)`,
       }}
     >
-      {initial || symbol}
+      {initial
+        ? <span style={{ color: 'rgba(255,255,255,0.95)', fontSize: size * 0.42, fontWeight: 700, fontFamily: '"Space Grotesk", sans-serif' }}>{initial}</span>
+        : cfg.icon(size)
+      }
     </div>
   );
 }

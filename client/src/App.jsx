@@ -9,7 +9,8 @@ import Saved       from './pages/Saved';
 import Messages    from './pages/Messages';
 import Auth        from './pages/Auth';
 import Organizer   from './pages/Organizer';
-import Onboarding  from './pages/Onboarding';
+import Onboarding        from './pages/Onboarding';
+import ComponentsPreview from './pages/ComponentsPreview';
 
 const HIDE_NAV = ['/auth', '/onboarding'];
 
@@ -29,7 +30,8 @@ function AnimatedRoutes() {
           <Route path="/messages"    element={<Messages />} />
           <Route path="/organizer"   element={<Organizer />} />
           <Route path="/auth"        element={<Auth />} />
-          <Route path="/onboarding"  element={<Onboarding />} />
+          <Route path="/onboarding"        element={<Onboarding />} />
+          <Route path="/components-preview" element={<ComponentsPreview />} />
         </Routes>
       </AnimatePresence>
       {showNav && <BottomNav />}

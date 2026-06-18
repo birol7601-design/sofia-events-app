@@ -4,7 +4,6 @@
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
-
   html { height: 100%; }
 
   body {
@@ -17,8 +16,7 @@
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* fixed ambient glow at the top */
-    background-image: radial-gradient(circle at 50% 0%, rgba(124,58,237,0.18), transparent 60%);
+    background-image: radial-gradient(ellipse 80% 40% at 50% -10%, rgba(124,58,237,0.22), transparent);
     background-attachment: fixed;
   }
 
@@ -30,22 +28,56 @@
 }
 
 @layer utilities {
+  /* Glass surfaces */
   .glass {
-    background: rgba(22, 18, 43, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(124, 58, 237, 0.18);
+    background: rgba(22, 18, 43, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(167, 139, 250, 0.13);
+    box-shadow: inset 0 1px 0 rgba(167,139,250,0.08), 0 4px 24px rgba(0,0,0,0.35);
+  }
+  .glass-card {
+    background: rgba(30, 24, 56, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(167, 139, 250, 0.15);
+    box-shadow: inset 0 1px 0 rgba(167,139,250,0.12), 0 4px 24px rgba(0,0,0,0.4);
   }
   .glass-accent {
     background: rgba(124, 58, 237, 0.12);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(124, 58, 237, 0.3);
+    border: 1px solid rgba(124, 58, 237, 0.28);
+    box-shadow: inset 0 1px 0 rgba(167,139,250,0.1);
   }
+
+  /* Text gradient */
   .text-gradient {
     background: linear-gradient(135deg, #A78BFA, #EC4899);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+  }
+  .text-gradient-warm {
+    background: linear-gradient(135deg, #EC4899, #FB923C);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Scrollbar hide */
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Shimmer skeleton background */
+  .shimmer-bg {
+    background: linear-gradient(
+      90deg,
+      rgba(30,24,56,0.6) 0%,
+      rgba(167,139,250,0.12) 50%,
+      rgba(30,24,56,0.6) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
   }
 }

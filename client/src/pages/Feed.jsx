@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import EventCard from '../components/EventCard';
 import BuzzSays from '../components/BuzzSays';
+import { EventCardSkeleton } from '../components/Skeleton';
 import { apiGet } from '../lib/api';
 
 const pageVariants = {
@@ -53,7 +54,7 @@ export default function Feed() {
 
       <div className="px-4 space-y-2 flex-1">
         <BuzzSays page="feed" />
-        {loading && <p className="text-textMuted text-sm text-center py-10">Loading…</p>}
+        {loading && [0,1,2,3].map(i => <EventCardSkeleton key={i} />)}
         {error   && <p className="text-accent text-sm text-center py-10">{error}</p>}
         {!loading && !error && filtered.map(ev => <EventCard key={ev.id} event={ev} />)}
         {!loading && !error && filtered.length === 0 && (
