@@ -1,6 +1,7 @@
 const API_BASE = 'https://sofiabuzz.com';
 let adminToken = localStorage.getItem('adminToken') || '';
 let allAdminEvents = [];
+let ssTabInited = false;
 
 function adminHeaders() {
   return { 'Authorization': `Bearer ${adminToken}`, 'Content-Type': 'application/json' };
@@ -36,6 +37,7 @@ async function showDashboard() {
   document.getElementById('logout-admin-btn').style.display = '';
   loadStats();
   loadEvents();
+  initScreenshotTab();
 }
 
 async function loadStats() {
@@ -296,7 +298,7 @@ async function saveEdit() {
 
 // ── Tab routing ───────────────────────────────────────────────────────────────
 
-const ALL_TABS = ['events', 'pending', 'aggregate', 'users', 'slots', 'add'];
+const ALL_TABS = ['events', 'pending', 'aggregate', 'users', 'slots', 'add', 'screenshot'];
 
 function switchTab(tab) {
   ALL_TABS.forEach(t => {
@@ -314,7 +316,181 @@ function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// Close modal on backdrop click
+// ── Screenshot → Event ───────────────────────────────────────────────────────
+
+function initScreenshotTab() {
+  if (ssTabInited) return;
+  ssTabInited = true;
+
+  const zone      = document.getElementById('ss-drop-zone');
+  const fileInput = document.getElementById('ss-file-input');
+
+  // Click zone → open file picker (ignore clicks on inner form elements)
+  zone.addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) handleSsImageFile(file);
+    e.target.value = '';
+  });
+
+  // Drag and drop
+  zone.addEventListener('dragover',  e => { e.preventDefault(); zone.style.borderColor = '#FF8C00'; });
+  zone.addEventListener('dragleave', () => { zone.style.borderColor = 'rgba(255,140,0,0.3)'; });
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.style.borderColor = 'rgba(255,140,0,0.3)';
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) handleSsImageFile(file);
+  });
+
+  // Global paste — only fires when screenshot tab is visible
+  document.addEventListener('paste', e => {
+    const tab = document.getElementById('tab-screenshot');
+    if (!tab || tab.style.display === 'none') return;
+    const items = e.clipboardData?.items || [];
+    for (const item of items) {
+      if (item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) { handleSsImageFile(file); break; }
+      }
+    }
+  });
+}
+
+function handleSsImageFile(file) {
+  const allowed = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
+  if (!allowed.includes(file.type)) {
+    showSsError('Unsupported file type. Use PNG, JPEG, GIF, or WebP.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    // Show preview in drop zone
+    const img = document.getElementById('ss-preview-img');
+    img.src = dataUrl;
+    img.style.display = '';
+    document.getElementById('ss-drop-prompt').style.display = 'none';
+
+    // Strip the data:…;base64, prefix to get raw base64
+    const base64 = dataUrl.split(',')[1];
+    extractFromImage(base64, file.type);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function extractFromImage(imageBase64, mediaType) {
+  document.getElementById('ss-loading').style.display = '';
+  document.getElementById('ss-error').style.display   = 'none';
+  document.getElementById('ss-form').style.display    = 'none';
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/admin/event-from-image`, {
+      method: 'POST',
+      headers: adminHeaders(),
+      body: JSON.stringify({ imageBase64, mediaType }),
+    });
+    const data = await res.json();
+    document.getElementById('ss-loading').style.display = 'none';
+
+    if (!res.ok || !data.ok) {
+      showSsError(data.error || 'Extraction failed.');
+      return;
+    }
+
+    populateSsForm(data.event);
+  } catch (err) {
+    document.getElementById('ss-loading').style.display = 'none';
+    showSsError('Network error: ' + err.message);
+  }
+}
+
+const SS_CATEGORIES = ['Rock','Pop','Electronic','Jazz','Festival','Reggae','Hip-Hop','Chalga','Other'];
+
+function populateSsForm(ev) {
+  document.getElementById('ss-title').value   = ev.title       || '';
+  document.getElementById('ss-desc').value    = ev.description || '';
+  document.getElementById('ss-venue').value   = ev.venue       || '';
+  document.getElementById('ss-address').value = ev.address     || '';
+  document.getElementById('ss-price').value   = ev.price_text  || '';
+  document.getElementById('ss-ticket').value  = ev.ticket_url  || '';
+  document.getElementById('ss-image').value   = '';
+
+  const cat = document.getElementById('ss-category');
+  cat.value = SS_CATEGORIES.includes(ev.category) ? ev.category : 'Other';
+
+  // Parse start_time — try ISO first, fall back to showing raw text as a hint
+  const rawStart = ev.start_time || '';
+  const hint     = document.getElementById('ss-start-hint');
+  const parsed   = rawStart ? new Date(rawStart) : null;
+  if (parsed && !isNaN(parsed.getTime())) {
+    document.getElementById('ss-start').value = parsed.toISOString().slice(0, 16);
+    hint.style.display = 'none';
+  } else if (rawStart) {
+    document.getElementById('ss-start').value = '';
+    hint.textContent   = `Claude read: "${rawStart}" — enter the date manually above`;
+    hint.style.display = '';
+  } else {
+    document.getElementById('ss-start').value = '';
+    hint.style.display = 'none';
+  }
+
+  document.getElementById('ss-approve').checked  = false;
+  document.getElementById('ss-save-msg').textContent = '';
+  document.getElementById('ss-form').style.display   = '';
+}
+
+function showSsError(msg) {
+  const el = document.getElementById('ss-error');
+  el.textContent  = msg;
+  el.style.display = '';
+}
+
+async function saveScreenshotEvent() {
+  const msg = document.getElementById('ss-save-msg');
+  const body = {
+    title:       document.getElementById('ss-title').value.trim(),
+    description: document.getElementById('ss-desc').value.trim(),
+    category:    document.getElementById('ss-category').value,
+    venue:       document.getElementById('ss-venue').value.trim(),
+    address:     document.getElementById('ss-address').value.trim() || null,
+    start_time:  document.getElementById('ss-start').value,
+    price_text:  document.getElementById('ss-price').value.trim(),
+    ticket_url:  document.getElementById('ss-ticket').value.trim()  || null,
+    image_url:   document.getElementById('ss-image').value.trim()   || null,
+    source:      'manual',
+    approved:    document.getElementById('ss-approve').checked,
+  };
+
+  if (!body.title || !body.venue || !body.start_time) {
+    msg.style.color  = '#E8456B';
+    msg.textContent  = 'Title, venue and date are required.';
+    return;
+  }
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/admin/events`, {
+      method: 'POST', headers: adminHeaders(), body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      msg.style.color = '#E8456B';
+      msg.textContent = data.error || 'Error saving event';
+      return;
+    }
+    msg.style.color = '#40E080';
+    msg.textContent = `Saved "${data.title}" ✓${body.approved ? ' (approved)' : ' — in Pending queue'}`;
+    loadStats(); loadEvents();
+    if (!body.approved) loadPending();
+  } catch {
+    msg.style.color = '#E8456B';
+    msg.textContent = 'Network error';
+  }
+}
+
+// ── Close modal on backdrop click ─────────────────────────────────────────────
 document.getElementById('edit-modal').addEventListener('click', function(e) {
   if (e.target === this) closeEditModal();
 });

@@ -107,6 +107,7 @@
         <button class="admin-tab-btn" onclick="switchTab('users')">Users</button>
         <button class="admin-tab-btn" onclick="switchTab('slots')">Featured Slots</button>
         <button class="admin-tab-btn" onclick="switchTab('add')">Quick Add</button>
+        <button class="admin-tab-btn" onclick="switchTab('screenshot')">📸 From Screenshot</button>
       </div>
 
       <!-- EVENTS TAB -->
@@ -178,6 +179,64 @@
           <input type="text"           id="qa-image"      class="admin-form-input" placeholder="Image URL (optional)">
           <button class="gold-btn" onclick="adminAddEvent()">Add event</button>
           <p id="qa-msg" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#FF8C00;min-height:18px;"></p>
+        </div>
+      </div>
+
+      <!-- FROM SCREENSHOT TAB -->
+      <div id="tab-screenshot" style="padding:14px;display:none;">
+        <h2 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:18px;margin:0 0 6px;">Event from Screenshot</h2>
+        <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;margin:0 0 14px;">Paste a poster/flyer with <strong style="color:#C7A880;">Ctrl+V</strong>, drag &amp; drop, or click the zone to upload. Claude reads the image and pre-fills the form.</p>
+
+        <!-- Drop / paste zone -->
+        <div id="ss-drop-zone" style="border:2px dashed rgba(255,140,0,0.3);border-radius:12px;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:14px;overflow:hidden;transition:border-color 0.2s;background:#110800;">
+          <img id="ss-preview-img" style="display:none;max-height:180px;max-width:100%;object-fit:contain;border-radius:6px;margin:10px;">
+          <div id="ss-drop-prompt" style="text-align:center;padding:24px;">
+            <div style="font-size:34px;margin-bottom:8px;">📋</div>
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#8B6040;margin:0;">Ctrl+V to paste &nbsp;·&nbsp; drag &amp; drop &nbsp;·&nbsp; or click to choose file</p>
+          </div>
+          <input type="file" id="ss-file-input" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none">
+        </div>
+
+        <!-- Loading -->
+        <div id="ss-loading" style="display:none;text-align:center;padding:18px 0;">
+          <p style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:17px;margin:0 0 4px;">Reading poster…</p>
+          <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;margin:0;">Claude is extracting event details</p>
+        </div>
+
+        <!-- Error -->
+        <div id="ss-error" style="display:none;background:rgba(255,70,0,0.1);border:1px solid rgba(255,70,0,0.3);border-radius:8px;padding:10px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#FF6B35;margin-bottom:12px;line-height:1.5;"></div>
+
+        <!-- Extracted editable form (hidden until data arrives) -->
+        <div id="ss-form" style="display:none;">
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#40E080;margin:0 0 2px;">✓ Details extracted — review and edit before saving</p>
+            <input type="text"           id="ss-title"    class="admin-form-input" placeholder="Event title">
+            <textarea                    id="ss-desc"     class="admin-form-input" placeholder="Description" style="min-height:70px;"></textarea>
+            <select                      id="ss-category" class="admin-form-input" style="background:#1A0A00;color:#FFD199;">
+              <option value="Rock">Rock</option>
+              <option value="Pop">Pop</option>
+              <option value="Electronic">Electronic</option>
+              <option value="Jazz">Jazz</option>
+              <option value="Festival">Festival</option>
+              <option value="Reggae">Reggae</option>
+              <option value="Hip-Hop">Hip-Hop</option>
+              <option value="Chalga">Chalga</option>
+              <option value="Other" selected>Other</option>
+            </select>
+            <input type="text"           id="ss-venue"    class="admin-form-input" placeholder="Venue">
+            <input type="text"           id="ss-address"  class="admin-form-input" placeholder="Address">
+            <input type="datetime-local" id="ss-start"    class="admin-form-input">
+            <p id="ss-start-hint" style="display:none;font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:#FF8C00;margin:0;padding:4px 0;"></p>
+            <input type="text"           id="ss-price"    class="admin-form-input" placeholder="Price text (e.g. FREE, от €15)">
+            <input type="url"            id="ss-ticket"   class="admin-form-input" placeholder="Ticket URL">
+            <input type="url"            id="ss-image"    class="admin-form-input" placeholder="Image URL — leave blank (poster may be copyrighted)">
+            <label style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#C7A880;cursor:pointer;padding:4px 0;">
+              <input type="checkbox" id="ss-approve" style="accent-color:#FF8C00;width:15px;height:15px;">
+              Approve immediately (skip pending queue)
+            </label>
+            <button class="gold-btn" onclick="saveScreenshotEvent()">Save event</button>
+            <p id="ss-save-msg" style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;min-height:18px;margin:0;"></p>
+          </div>
         </div>
       </div>
 

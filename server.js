@@ -21,7 +21,7 @@ const authLimiter = rateLimit({
 });
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'home.html'));
 });
@@ -791,11 +791,16 @@ app.patch('/api/admin/events/:id', authenticateAdmin, async (req, res) => {
 
 app.post('/api/admin/events', authenticateAdmin, async (req, res) => {
   try {
-    const { title, description, artist_bio, category, venue, start_time, price_text, ticket_url, image_url } = req.body;
+    const { title, description, artist_bio, category, venue, start_time, price_text,
+            ticket_url, image_url, address, source, approved } = req.body;
     const r = await pool.query(
-      `INSERT INTO events (title, description, artist_bio, category, venue, start_time, price_text, ticket_url, image_url, approved)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true) RETURNING *`,
-      [title, description, artist_bio, category, venue, start_time, price_text, ticket_url, image_url]
+      `INSERT INTO events
+         (title, description, artist_bio, category, venue, start_time, price_text,
+          ticket_url, image_url, address, source, approved)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) RETURNING *`,
+      [title, description, artist_bio || null, category, venue, start_time, price_text,
+       ticket_url || null, image_url || null, address || null,
+       source || 'manual', approved !== undefined ? approved : true]
     );
     res.json(r.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
@@ -900,6 +905,70 @@ app.get('/api/admin/pending-events', authenticateAdmin, async (req, res) => {
     );
     res.json(r.rows);
   } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── SCREENSHOT → EVENT (Claude vision) ───────────────────────────────────────
+
+app.post('/api/admin/event-from-image', authenticateAdmin, async (req, res) => {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return res.status(503).json({ error: 'AI key not configured — set ANTHROPIC_API_KEY in Railway environment variables.' });
+  }
+
+  const { imageBase64, mediaType } = req.body;
+  if (!imageBase64 || !mediaType) {
+    return res.status(400).json({ error: 'imageBase64 and mediaType are required.' });
+  }
+
+  const PROMPT = 'You are reading an event poster or flyer, likely in Bulgarian or English. Extract the event details and return ONLY valid JSON, no markdown, no other text. Fields: title, description, start_time (ISO 8601 if you can determine the date including year, otherwise the date/time text as written), venue, address, price_text (use FREE if free, otherwise the price as shown, otherwise empty string), category (one of: Rock, Pop, Electronic, Jazz, Festival, Reggae, Hip-Hop, Chalga, Other). Keep all text in its original language. If a field is unknown use an empty string.';
+
+  try {
+    const aiResp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key':         apiKey,
+        'anthropic-version': '2023-06-01',
+        'content-type':      'application/json',
+      },
+      body: JSON.stringify({
+        model:      'claude-sonnet-4-6',
+        max_tokens: 1024,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
+            { type: 'text',  text: PROMPT },
+          ],
+        }],
+      }),
+    });
+
+    if (!aiResp.ok) {
+      const errBody = await aiResp.json().catch(() => ({}));
+      return res.status(502).json({
+        error: `Anthropic API error ${aiResp.status}: ${errBody.error?.message || aiResp.statusText}`,
+      });
+    }
+
+    const aiData = await aiResp.json();
+    let text = aiData.content?.[0]?.text || '';
+    // Strip ```json fences if Claude wraps the response
+    text = text.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/,'').trim();
+
+    let event;
+    try {
+      event = JSON.parse(text);
+    } catch {
+      return res.status(502).json({
+        error: 'Could not parse Claude response as JSON. Try a clearer image.',
+        raw: text.slice(0, 300),
+      });
+    }
+
+    res.json({ ok: true, event });
+  } catch (err) {
+    res.status(500).json({ error: `Request failed: ${err.message}` });
+  }
 });
 
 // ── ORGANIZER EDIT / DELETE ───────────────────────────────────────────────────
