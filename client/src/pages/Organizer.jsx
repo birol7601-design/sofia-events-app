@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import BuzzSays from '../components/BuzzSays';
-import GlassCard from '../components/GlassCard';
 
 const pageVariants = {
   initial: { opacity: 0, y: 16 },
@@ -8,32 +7,40 @@ const pageVariants = {
   exit:    { opacity: 0, y: -8, transition: { duration: 0.2 } },
 };
 
+const FEATURES = [
+  ['⭐', 'Безплатни обяви',     'Добавяй неограничено събития в SofiaBuzz'],
+  ['🔥', 'Промотирано място',   'Изведи събитието до топа на фийда от €35 за 7 дни'],
+  ['📊', 'Аудитория и статистики', 'Виж колко хора са видели събитието ти'],
+  ['🎯', 'Директен обхват',     'Достигни хиляди локали в София'],
+];
+
 export default function Organizer() {
   return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit"
-      className="flex flex-col min-h-dvh pb-20 px-4"
+    <motion.div
+      variants={pageVariants} initial="initial" animate="animate" exit="exit"
+      className="flex flex-col min-h-dvh pb-20 px-5 comb-bg"
     >
-      <div className="pt-6 pb-3">
-        <h1 className="font-display font-bold text-2xl text-text">For Organizers</h1>
-        <p className="text-textMuted text-sm font-body">List your events. Reach your audience.</p>
+      <div className="pt-10 pb-3">
+        <h1 className="font-display font-bold text-2xl" style={{ color: '#FFF4D6' }}>Организатори</h1>
+        <p className="text-sm font-body" style={{ color: '#8A7B4A' }}>Обяви събитие. Достигни публиката си.</p>
       </div>
-      <BuzzSays page="organizer" />
-      <GlassCard className="space-y-3 mt-2">
-        {[['⭐','Free listings','Add unlimited events to the SofiaBuzz feed'],
-          ['🔥','Featured placement','Promote to the top of the feed from €35 for 7 days'],
-          ['📊','Audience insights','See how many people viewed your event'],
-          ['🎯','Direct reach','Reach thousands of Sofia locals']].map(([icon, title, sub]) => (
+
+      <BuzzSays page="feed" />
+
+      <div className="gloss-card rounded-2xl p-4 space-y-4 mt-2">
+        {FEATURES.map(([icon, title, sub]) => (
           <div key={title} className="flex gap-3 items-start">
-            <span className="text-lg">{icon}</span>
+            <span className="text-xl leading-none mt-0.5">{icon}</span>
             <div>
-              <p className="text-text text-sm font-semibold font-display">{title}</p>
-              <p className="text-textMuted text-xs font-body">{sub}</p>
+              <p className="text-sm font-semibold font-display" style={{ color: '#FFF4D6' }}>{title}</p>
+              <p className="text-xs font-body" style={{ color: '#C7B68A' }}>{sub}</p>
             </div>
           </div>
         ))}
-      </GlassCard>
-      <p className="text-textMuted text-xs mt-6 text-center font-body">
-        Full organizer dashboard coming soon — or log in at the existing portal.
+      </div>
+
+      <p className="text-xs mt-6 text-center font-body" style={{ color: '#8A7B4A' }}>
+        Пълен организаторски панел — очаквайте скоро, или влезте в съществуващия портал.
       </p>
     </motion.div>
   );

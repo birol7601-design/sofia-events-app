@@ -113,8 +113,8 @@ export default function EventDetail() {
             setAttending(Array.isArray(attendingData?.attendingIds) && attendingData.attendingIds.includes(parseInt(id)));
           } catch {}
         }
-      } catch (err) {
-        console.error('Failed to load event:', err);
+      } catch {
+        // handled by null check below
       } finally {
         setLoading(false);
       }

@@ -9,16 +9,32 @@ const pageVariants = {
 
 export default function Messages() {
   return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit"
-      className="flex flex-col min-h-dvh pb-20"
+    <motion.div
+      variants={pageVariants} initial="initial" animate="animate" exit="exit"
+      className="flex flex-col min-h-dvh pb-20 comb-bg"
     >
-      <div className="pt-6 px-4 pb-3">
-        <h1 className="font-display font-bold text-2xl text-text">Messages</h1>
-        <p className="text-textMuted text-sm font-body">Chat with your friends</p>
+      <div className="pt-10 px-5 pb-3">
+        <h1 className="font-display font-bold text-2xl" style={{ color: '#FFF4D6' }}>Съобщения</h1>
+        <p className="text-sm font-body" style={{ color: '#8A7B4A' }}>Чат с приятели</p>
       </div>
-      <div className="px-4">
+      <div className="px-5">
         <BuzzSays page="messages" />
-        <p className="text-textMuted text-sm text-center py-16">No conversations yet. Add friends on your profile to start chatting.</p>
+
+        {/* Empty state */}
+        <div className="flex flex-col items-center justify-center py-24 gap-4">
+          <div
+            className="juicy-hex opacity-25"
+            style={{ width: 64, height: 72, fontSize: 28 }}
+          >
+            🐝
+          </div>
+          <p className="font-display font-semibold text-base" style={{ color: '#C7B68A' }}>
+            Кошерът мълчи.
+          </p>
+          <p className="text-sm font-body text-center max-w-xs" style={{ color: '#8A7B4A' }}>
+            Добави приятели от профила си, за да започнеш разговор.
+          </p>
+        </div>
       </div>
     </motion.div>
   );
