@@ -5,7 +5,10 @@ const pool = require('./db');
 require('dotenv').config();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
+const { sendEmail } = require('./emailService');
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'BuzzAdmin2026!Sofia';
 const app = express();
 
 const authLimiter = rateLimit({
@@ -55,6 +58,7 @@ app.get('/api/events', async (req, res) => {
                   THEN true ELSE false END AS is_featured
       FROM events e
       LEFT JOIN featured_slots fs ON fs.event_id = e.id
+      WHERE COALESCE(e.deleted, false) = false AND COALESCE(e.approved, true) = true
       ORDER BY is_featured DESC, fs.slot_number ASC, e.start_time ASC
     `);
     res.json(result.rows);
@@ -188,7 +192,22 @@ app.post('/api/users/register', authLimiter, async (req, res) => {
       'INSERT INTO users (username, email, password_hash, email_marketing) VALUES ($1, $2, $3, $4) RETURNING id, username, email',
       [username.trim(), email.trim().toLowerCase(), hash, !!email_marketing]
     );
-    res.json(result.rows[0]);
+    const newUser = result.rows[0];
+    // send verification email (fire-and-forget)
+    const vToken = crypto.randomBytes(32).toString('hex');
+    await pool.query('INSERT INTO verification_tokens (user_id, token) VALUES ($1, $2)', [newUser.id, vToken]);
+    sendEmail(newUser.email, 'Verify your SofiaBuzz email',
+      `<div style="background:#1A0A00;color:#FFD199;padding:32px;font-family:Georgia,serif;">
+        <h1 style="color:#FF8C00;font-size:28px;">Welcome to SofiaBuzz! 🎉</h1>
+        <p>Confirm your email to unlock everything:</p>
+        <a href="https://sofiabuzz.com/verify-email.html?token=${vToken}"
+           style="display:inline-block;background:linear-gradient(135deg,#FF6B35,#FF8C00);color:#1A0A00;font-weight:700;padding:14px 28px;border-radius:999px;text-decoration:none;margin:16px 0;">
+          Verify my email →
+        </a>
+        <p style="color:#8B6040;font-size:13px;">If you didn't create this account, ignore this email.</p>
+      </div>`
+    );
+    res.json(newUser);
   } catch (err) {
     if (err.code === '23505') {
       if (err.detail && err.detail.includes('username')) return res.status(400).json({ error: 'Username already taken' });
@@ -221,7 +240,7 @@ app.post('/api/users/login', authLimiter, async (req, res) => {
 app.get('/api/users/me', authenticateUser, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, username, email, bio, avatar_color, avatar_type, is_public, created_at FROM users WHERE id = $1',
+      'SELECT id, username, email, bio, avatar_color, avatar_type, is_public, email_verified, created_at FROM users WHERE id = $1',
       [req.userId]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'User not found' });
@@ -600,6 +619,267 @@ app.patch('/api/users/onboarding', authenticateUser, async (req, res) => {
   try {
     await pool.query('UPDATE users SET onboarding_complete=true WHERE id=$1', [req.userId]);
     res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── PASSWORD RESET ────────────────────────────────────────────────────────────
+
+app.post('/api/users/forgot-password', authLimiter, async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email required.' });
+    const r = await pool.query('SELECT id FROM users WHERE email = $1', [email.trim().toLowerCase()]);
+    if (r.rows.length > 0) {
+      const userId = r.rows[0].id;
+      const token = crypto.randomBytes(32).toString('hex');
+      await pool.query('DELETE FROM password_reset_tokens WHERE user_id = $1', [userId]);
+      await pool.query(
+        'INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES ($1, $2, NOW() + INTERVAL \'1 hour\')',
+        [userId, token]
+      );
+      sendEmail(email.trim().toLowerCase(), 'Reset your SofiaBuzz password',
+        `<div style="background:#1A0A00;color:#FFD199;padding:32px;font-family:Georgia,serif;">
+          <h1 style="color:#FF8C00;font-size:24px;">Password reset 🔑</h1>
+          <p>Click the link below to choose a new password. The link expires in 1 hour.</p>
+          <a href="https://sofiabuzz.com/reset-password.html?token=${token}"
+             style="display:inline-block;background:linear-gradient(135deg,#FF6B35,#FF8C00);color:#1A0A00;font-weight:700;padding:14px 28px;border-radius:999px;text-decoration:none;margin:16px 0;">
+            Reset password →
+          </a>
+          <p style="color:#8B6040;font-size:13px;">If you didn't request this, ignore this email.</p>
+        </div>`
+      );
+    }
+    res.json({ message: 'If that email exists, a reset link has been sent.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/users/reset-password', async (req, res) => {
+  try {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) return res.status(400).json({ error: 'Token and new password required.' });
+    if (newPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    const r = await pool.query(
+      'SELECT * FROM password_reset_tokens WHERE token = $1 AND expires_at > NOW()',
+      [token]
+    );
+    if (r.rows.length === 0) return res.status(400).json({ error: 'Invalid or expired link.' });
+    const { user_id } = r.rows[0];
+    const hash = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE users SET password_hash = $1 WHERE id = $2', [hash, user_id]);
+    await pool.query('DELETE FROM password_reset_tokens WHERE token = $1', [token]);
+    res.json({ message: 'Password updated successfully.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── EMAIL VERIFICATION ────────────────────────────────────────────────────────
+
+app.get('/api/users/verify-email/:token', async (req, res) => {
+  try {
+    const r = await pool.query('SELECT * FROM verification_tokens WHERE token = $1', [req.params.token]);
+    if (r.rows.length === 0) return res.status(400).json({ error: 'Invalid or expired link.' });
+    const { user_id } = r.rows[0];
+    await pool.query('UPDATE users SET email_verified = true WHERE id = $1', [user_id]);
+    await pool.query('DELETE FROM verification_tokens WHERE token = $1', [req.params.token]);
+    res.json({ message: 'Email verified successfully.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/users/resend-verification', authenticateUser, async (req, res) => {
+  try {
+    const r = await pool.query('SELECT email, email_verified FROM users WHERE id = $1', [req.userId]);
+    if (!r.rows[0]) return res.status(404).json({ error: 'User not found.' });
+    if (r.rows[0].email_verified) return res.json({ message: 'Already verified.' });
+    await pool.query('DELETE FROM verification_tokens WHERE user_id = $1', [req.userId]);
+    const token = crypto.randomBytes(32).toString('hex');
+    await pool.query('INSERT INTO verification_tokens (user_id, token) VALUES ($1, $2)', [req.userId, token]);
+    sendEmail(r.rows[0].email, 'Verify your SofiaBuzz email',
+      `<div style="background:#1A0A00;color:#FFD199;padding:32px;font-family:Georgia,serif;">
+        <h1 style="color:#FF8C00;">Verify your email ✉️</h1>
+        <a href="https://sofiabuzz.com/verify-email.html?token=${token}"
+           style="display:inline-block;background:linear-gradient(135deg,#FF6B35,#FF8C00);color:#1A0A00;font-weight:700;padding:14px 28px;border-radius:999px;text-decoration:none;margin:16px 0;">
+          Verify email →
+        </a>
+      </div>`
+    );
+    res.json({ message: 'Verification email sent.' });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+
+function authenticateAdmin(req, res, next) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) return res.status(401).json({ error: 'No token' });
+  const token = authHeader.split(' ')[1];
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded.admin) return res.status(403).json({ error: 'Not admin' });
+    next();
+  } catch { res.status(401).json({ error: 'Invalid token' }); }
+}
+
+app.post('/api/admin/login', async (req, res) => {
+  const { password } = req.body;
+  if (password !== ADMIN_PASSWORD) return res.status(401).json({ error: 'Invalid password' });
+  const token = jwt.sign({ admin: true }, process.env.JWT_SECRET, { expiresIn: '24h' });
+  res.json({ token });
+});
+
+app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
+  try {
+    const [eventsR, usersR, featuredR, eventsMonthR, usersMonthR] = await Promise.all([
+      pool.query('SELECT COUNT(*) FROM events WHERE COALESCE(deleted,false)=false'),
+      pool.query('SELECT COUNT(*) FROM users'),
+      pool.query('SELECT COUNT(*) FROM featured_slots WHERE NOW() BETWEEN start_date AND end_date'),
+      pool.query("SELECT COUNT(*) FROM events WHERE created_at >= date_trunc('month', NOW()) AND COALESCE(deleted,false)=false"),
+      pool.query("SELECT COUNT(*) FROM users WHERE created_at >= date_trunc('month', NOW())"),
+    ]);
+    res.json({
+      totalEvents: eventsR.rows[0].count,
+      totalUsers: usersR.rows[0].count,
+      activeFeaturedSlots: featuredR.rows[0].count,
+      eventsThisMonth: eventsMonthR.rows[0].count,
+      usersThisMonth: usersMonthR.rows[0].count,
+    });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/events', authenticateAdmin, async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT e.*, o.name AS organizer_name FROM events e LEFT JOIN organizers o ON e.organizer_id = o.id ORDER BY e.id DESC`
+    );
+    res.json(r.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/events/:id/approve', authenticateAdmin, async (req, res) => {
+  try {
+    await pool.query('UPDATE events SET approved=true WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/events/:id/reject', authenticateAdmin, async (req, res) => {
+  try {
+    await pool.query('UPDATE events SET approved=false WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/admin/events/:id', authenticateAdmin, async (req, res) => {
+  try {
+    await pool.query('UPDATE events SET deleted=true WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.patch('/api/admin/events/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const allowed = ['title','description','category','venue','start_time','price_text','ticket_url','image_url','artist_bio'];
+    const fields = []; const values = []; let i = 1;
+    for (const k of allowed) {
+      if (req.body[k] !== undefined) { fields.push(`${k}=$${i++}`); values.push(req.body[k]); }
+    }
+    if (!fields.length) return res.status(400).json({ error: 'No fields' });
+    values.push(req.params.id);
+    const r = await pool.query(`UPDATE events SET ${fields.join(',')} WHERE id=$${i} RETURNING *`, values);
+    res.json(r.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/events', authenticateAdmin, async (req, res) => {
+  try {
+    const { title, description, artist_bio, category, venue, start_time, price_text, ticket_url, image_url } = req.body;
+    const r = await pool.query(
+      `INSERT INTO events (title, description, artist_bio, category, venue, start_time, price_text, ticket_url, image_url, approved)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true) RETURNING *`,
+      [title, description, artist_bio, category, venue, start_time, price_text, ticket_url, image_url]
+    );
+    res.json(r.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/users', authenticateAdmin, async (req, res) => {
+  try {
+    const r = await pool.query('SELECT id, username, email, email_verified, created_at FROM users ORDER BY id DESC');
+    res.json(r.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/admin/users/:id', authenticateAdmin, async (req, res) => {
+  try {
+    await pool.query('DELETE FROM users WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.get('/api/admin/featured-slots', authenticateAdmin, async (req, res) => {
+  try {
+    const r = await pool.query(
+      `SELECT fs.*, e.title AS event_title FROM featured_slots fs LEFT JOIN events e ON fs.event_id=e.id ORDER BY fs.slot_number`
+    );
+    res.json(r.rows);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/featured-slots/:id/activate', authenticateAdmin, async (req, res) => {
+  try {
+    await pool.query("UPDATE featured_slots SET start_date=NOW(), end_date=NOW()+INTERVAL '30 days' WHERE id=$1", [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.post('/api/admin/buzz-says', authenticateAdmin, async (req, res) => {
+  try {
+    const { page, comment_bg, comment_en, context } = req.body;
+    const r = await pool.query(
+      'INSERT INTO buzz_says (page, comment_bg, comment_en, context) VALUES ($1,$2,$3,$4) RETURNING *',
+      [page, comment_bg, comment_en || null, context || 'default']
+    );
+    res.json(r.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── ORGANIZER EDIT / DELETE ───────────────────────────────────────────────────
+
+app.patch('/api/organizer/events/:id', authenticateOrganizer, async (req, res) => {
+  try {
+    const check = await pool.query('SELECT id FROM events WHERE id=$1 AND organizer_id=$2', [req.params.id, req.organizerId]);
+    if (!check.rows.length) return res.status(403).json({ error: 'Not your event.' });
+    const allowed = ['title','description','category','venue','start_time','price_text','ticket_url','image_url','artist_bio'];
+    const fields = []; const values = []; let i = 1;
+    for (const k of allowed) {
+      if (req.body[k] !== undefined) { fields.push(`${k}=$${i++}`); values.push(req.body[k]); }
+    }
+    if (!fields.length) return res.status(400).json({ error: 'No fields to update.' });
+    values.push(req.params.id);
+    const r = await pool.query(`UPDATE events SET ${fields.join(',')} WHERE id=$${i} RETURNING *`, values);
+    res.json(r.rows[0]);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+app.delete('/api/organizer/events/:id', authenticateOrganizer, async (req, res) => {
+  try {
+    const check = await pool.query('SELECT id FROM events WHERE id=$1 AND organizer_id=$2', [req.params.id, req.organizerId]);
+    if (!check.rows.length) return res.status(403).json({ error: 'Not your event.' });
+    await pool.query('UPDATE events SET deleted=true WHERE id=$1', [req.params.id]);
+    res.json({ ok: true });
+  } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// ── BUZZ SAYS ────────────────────────────────────────────────────────────────
+
+app.get('/api/buzz-says/:page', async (req, res) => {
+  try {
+    const { context } = req.query;
+    const params = [req.params.page];
+    let q = 'SELECT * FROM buzz_says WHERE page=$1 AND active=true';
+    if (context) { q += ' AND context=$2'; params.push(context); }
+    q += ' ORDER BY RANDOM() LIMIT 1';
+    const r = await pool.query(q, params);
+    if (!r.rows.length) return res.json(null);
+    res.json(r.rows[0]);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 

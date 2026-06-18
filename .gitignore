@@ -1,6 +1,8 @@
 node_modules/
 .env
 migrate-to-railway.js
+setup-email-tables.js
+setup-admin-tables.js
 add-artist-bio-railway.js
 update-content-railway.js
 add-club33-event-railway.js
