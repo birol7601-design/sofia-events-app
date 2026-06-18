@@ -56,6 +56,30 @@ function renderHighlights(events) {
   }).join('');
 }
 
+function renderForYouHome(events, userGenres) {
+  const section = document.getElementById('for-you-section');
+  if (!section) return;
+  if (!userGenres || !userGenres.length) return;
+  const matching = events.filter(e => userGenres.includes(e.category));
+  if (!matching.length) return;
+
+  section.style.display = '';
+  const strip = document.getElementById('for-you-strip');
+  strip.innerHTML = matching.slice(0, 8).map(e => {
+    const info = getCatInfo(e.category);
+    const d = new Date(e.start_time);
+    const dateStr = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return `
+      <div class="for-you-card" onclick="homeNavigate('event.html?id=${e.id}')">
+        <div class="for-you-card-top" style="background:${info.accent};">${info.emoji}</div>
+        <div class="for-you-card-body">
+          <div class="for-you-card-title">${e.title}</div>
+          <div class="for-you-card-date">${dateStr}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 function renderGenreBrowse(events, userGenres) {
   const container = document.getElementById('genre-browse');
   const genres = [...new Set(events.map(e => e.category))].filter(Boolean).sort();
@@ -89,6 +113,7 @@ async function init() {
     const savedData = savedRes.ok   ? await savedRes.json()   : { savedIds: [] };
     const unread    = unreadRes.ok  ? await unreadRes.json()  : { count: 0 };
 
+    renderForYouHome(events, prefs.genres || []);
     renderHighlights(events);
     renderGenreBrowse(events, prefs.genres || []);
 

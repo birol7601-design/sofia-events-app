@@ -23,6 +23,7 @@ function storeAndRedirect(data, isNewUser) {
   localStorage.setItem('userName', data.username);
   localStorage.setItem('userAvatarColor', data.avatarColor || '#FF8C00');
   localStorage.setItem('userId', String(data.id));
+  localStorage.setItem('userAvatarType', data.avatarType || 'star');
   if (isNewUser || !data.onboardingComplete) {
     window.location.href = 'onboarding.html';
   } else {
