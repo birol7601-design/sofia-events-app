@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import { apiGet } from '../lib/api';
+import { isLoggedIn } from '../lib/auth';
 import EventCard from '../components/EventCard';
 import BuzzSays from '../components/BuzzSays';
 import Marquee from '../components/Marquee';
@@ -22,17 +23,23 @@ const cardVariants = {
 };
 
 export default function Feed() {
-  const [events, setEvents]   = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError]     = useState(null);
-  const [filter, setFilter]   = useState('all');
+  const [events, setEvents]     = useState([]);
+  const [loading, setLoading]   = useState(true);
+  const [error, setError]       = useState(null);
+  const [filter, setFilter]     = useState('all');
   const [scrolled, setScrolled] = useState(false);
+  const [savedIds, setSavedIds] = useState(new Set());
 
   useEffect(() => {
     apiGet('/api/events')
       .then(setEvents)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
+    if (isLoggedIn()) {
+      apiGet('/api/users/saved/ids')
+        .then(d => setSavedIds(new Set(d?.savedIds || [])))
+        .catch(() => {});
+    }
   }, []);
 
   useEffect(() => {
@@ -147,7 +154,7 @@ export default function Feed() {
                       </span>
                     </div>
                     <div style={{ boxShadow: '0 0 22px rgba(251,146,60,0.18)' }}>
-                      <EventCard event={ev} />
+                      <EventCard event={ev} initialSaved={savedIds.has(ev.id)} />
                     </div>
                   </motion.div>
                 ))}

@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion';
 import { useNavigate, useParams } from 'react-router-dom';
-import { apiGet, apiPost, apiDelete } from '../lib/api';
-import { getUser, isLoggedIn } from '../lib/auth';
+import { apiGet, apiPost } from '../lib/api';
+import { isLoggedIn } from '../lib/auth';
 import EventCard from '../components/EventCard';
 import BuzzSays from '../components/BuzzSays';
 import { EventCardSkeleton } from '../components/Skeleton';
@@ -104,16 +104,15 @@ export default function EventDetail() {
         // Load more in same category
         const all = await apiGet('/api/events');
         setMoreEvents(all.filter(e => e.id !== parseInt(id) && e.category === ev.category).slice(0, 4));
-        // Check initial save/attend state
+        // Check initial save/attend state using lightweight ID endpoints
         if (isLoggedIn()) {
-          const user = getUser();
           try {
-            const [savedList, attendingList] = await Promise.all([
-              apiGet(`/api/users/${user.id}/saved`),
-              apiGet(`/api/users/${user.id}/attending`),
+            const [savedData, attendingData] = await Promise.all([
+              apiGet('/api/users/saved/ids'),
+              apiGet('/api/users/attending/ids'),
             ]);
-            if (Array.isArray(savedList))     setSaved(savedList.some(e => e.id === parseInt(id)));
-            if (Array.isArray(attendingList)) setAttending(attendingList.some(e => e.id === parseInt(id)));
+            setSaved(Array.isArray(savedData?.savedIds) && savedData.savedIds.includes(parseInt(id)));
+            setAttending(Array.isArray(attendingData?.attendingIds) && attendingData.attendingIds.includes(parseInt(id)));
           } catch {}
         }
       } catch (err) {
@@ -128,27 +127,31 @@ export default function EventDetail() {
   const toggleSave = async () => {
     if (!isLoggedIn()) { navigate('/auth'); return; }
     if (saveFlying) return;
-    const next = !saved;
-    setSaved(next);
+    setSaved(s => !s); // optimistic
     setSaveFlying(true);
     try {
-      if (next) await apiPost(`/api/events/${id}/save`);
-      else      await apiDelete(`/api/events/${id}/save`);
-    } catch { setSaved(!next); }
-    finally { setSaveFlying(false); }
+      const data = await apiPost(`/api/users/saved/${id}`);
+      setSaved(data.saved); // confirm with server truth
+    } catch {
+      setSaved(s => !s); // revert on network error
+    } finally {
+      setSaveFlying(false);
+    }
   };
 
   const toggleAttend = async () => {
     if (!isLoggedIn()) { navigate('/auth'); return; }
     if (attendFlying) return;
-    const next = !attending;
-    setAttending(next);
+    setAttending(s => !s); // optimistic
     setAttendFlying(true);
     try {
-      if (next) await apiPost(`/api/events/${id}/attend`);
-      else      await apiDelete(`/api/events/${id}/attend`);
-    } catch { setAttending(!next); }
-    finally { setAttendFlying(false); }
+      const data = await apiPost(`/api/users/attending/${id}`);
+      setAttending(data.attending); // confirm with server truth
+    } catch {
+      setAttending(s => !s); // revert on network error
+    } finally {
+      setAttendFlying(false);
+    }
   };
 
   const hasImage = !!event?.image_url && !event?.image_url.endsWith('.svg');

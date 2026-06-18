@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { apiPost } from '../lib/api';
+import { isLoggedIn } from '../lib/auth';
 
 const CAT_COLORS = {
   rock:       ['#7C3AED','#5B21B6'],
@@ -20,7 +22,6 @@ function catGradient(cat = '') {
   return `linear-gradient(135deg, ${c1}, ${c2})`;
 }
 
-// Small overlapping avatar dots for social proof
 function MiniAvatars({ count }) {
   if (!count || count < 2) return null;
   const colors = ['#7C3AED','#EC4899','#3B82F6','#10B981','#FB923C'];
@@ -48,10 +49,14 @@ function MiniAvatars({ count }) {
   );
 }
 
-export default function EventCard({ event, attendingCount }) {
+export default function EventCard({ event, attendingCount, initialSaved = false }) {
   const navigate = useNavigate();
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saved, setSaved]         = useState(initialSaved);
+  const [flying, setFlying]       = useState(false);
+
+  // Sync if parent fetches saved state after initial render
+  useEffect(() => { setSaved(initialSaved); }, [initialSaved]);
 
   const hasImage = !!event.image_url && !event.image_url.endsWith('.svg');
   const date = event.start_time
@@ -60,6 +65,22 @@ export default function EventCard({ event, attendingCount }) {
   const time = event.start_time
     ? new Date(event.start_time).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
     : '';
+
+  const toggleSave = async (e) => {
+    e.stopPropagation();
+    if (!isLoggedIn()) { navigate('/auth'); return; }
+    if (flying) return;
+    setSaved(s => !s); // optimistic
+    setFlying(true);
+    try {
+      const data = await apiPost(`/api/users/saved/${event.id}`);
+      setSaved(data.saved); // confirm with server truth
+    } catch {
+      setSaved(s => !s); // revert on error
+    } finally {
+      setFlying(false);
+    }
+  };
 
   return (
     <motion.div
@@ -81,7 +102,6 @@ export default function EventCard({ event, attendingCount }) {
     >
       {/* Image / Hero area */}
       <div className="relative h-44 overflow-hidden">
-        {/* Background: image or gradient */}
         {hasImage ? (
           <motion.div className="absolute inset-0" variants={{ hover: { scale: 1.06 } }} transition={{ duration: 0.4 }}>
             <motion.img
@@ -95,20 +115,18 @@ export default function EventCard({ event, attendingCount }) {
           </motion.div>
         ) : (
           <div className="absolute inset-0" style={{ background: catGradient(event.category), opacity: 0.75 }}>
-            {/* Decorative pattern */}
             <div className="absolute inset-0 flex items-center justify-center opacity-20">
               <span style={{ fontSize: 80, filter: 'blur(2px)' }}>✦</span>
             </div>
           </div>
         )}
 
-        {/* Gradient overlay — always present */}
         <div
           className="absolute inset-0"
           style={{ background: 'linear-gradient(to bottom, rgba(13,10,26,0.1) 0%, rgba(30,24,56,0.5) 60%, rgba(30,24,56,0.95) 100%)' }}
         />
 
-        {/* Category badge — top left */}
+        {/* Category badge */}
         <div className="absolute top-3 left-3 z-10">
           <span
             className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full font-body"
@@ -123,9 +141,9 @@ export default function EventCard({ event, attendingCount }) {
           </span>
         </div>
 
-        {/* Heart button — top right */}
+        {/* Heart button */}
         <motion.button
-          onClick={(e) => { e.stopPropagation(); setSaved(s => !s); }}
+          onClick={toggleSave}
           className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full flex items-center justify-center"
           style={{
             background: 'rgba(13,10,26,0.55)',
@@ -147,8 +165,6 @@ export default function EventCard({ event, attendingCount }) {
         <p className="text-textMuted text-xs mb-2 font-body truncate">
           {event.venue}{date ? ` · ${date}, ${time}` : ''}
         </p>
-
-        {/* Bottom row: price + social proof */}
         <div className="flex items-center justify-between mt-2">
           {event.price_text ? (
             <span className="text-[13px] font-semibold font-display" style={{ color: '#FB923C' }}>

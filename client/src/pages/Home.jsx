@@ -32,6 +32,7 @@ export default function Home() {
   const [events, setEvents]       = useState([]);
   const [loading, setLoading]     = useState(true);
   const [genreFilter, setGenre]   = useState(null);
+  const [savedIds, setSavedIds]   = useState(new Set());
   const user = getUser();
 
   useEffect(() => {
@@ -39,6 +40,11 @@ export default function Home() {
       .then(setEvents)
       .catch(() => {})
       .finally(() => setLoading(false));
+    if (isLoggedIn()) {
+      apiGet('/api/users/saved/ids')
+        .then(d => setSavedIds(new Set(d?.savedIds || [])))
+        .catch(() => {});
+    }
   }, []);
 
   const highlights    = events.slice(0, 8);
@@ -106,7 +112,7 @@ export default function Home() {
                   initial={{ opacity: 0, x: 24 }}
                   animate={{ opacity: 1, x: 0, transition: { delay: 0.12 + i * 0.055, duration: 0.38, ease: 'easeOut' } }}
                 >
-                  <EventCard event={ev} />
+                  <EventCard event={ev} initialSaved={savedIds.has(ev.id)} />
                 </motion.div>
               ))
           }
@@ -149,7 +155,7 @@ export default function Home() {
           <h2 className="font-display font-semibold text-base text-text">{genreFilter} events</h2>
           {genreFiltered.length === 0
             ? <p className="text-textMuted text-sm py-4">No {genreFilter} events right now.</p>
-            : genreFiltered.map(ev => <EventCard key={ev.id} event={ev} />)
+            : genreFiltered.map(ev => <EventCard key={ev.id} event={ev} initialSaved={savedIds.has(ev.id)} />)
           }
         </motion.section>
       )}
