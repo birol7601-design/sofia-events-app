@@ -22,10 +22,8 @@ const authLimiter = rateLimit({
 
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'home.html'));
-});
 app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'client', 'dist')));
 function authenticateOrganizer(req, res, next) {
   const authHeader = req.headers.authorization;
   if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -1015,7 +1013,7 @@ app.get('/api/buzz-says/:page', async (req, res) => {
 
 app.use((req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/api/')) {
-    res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
+    res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
   } else {
     next();
   }
