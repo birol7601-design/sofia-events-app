@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin — SofiaBuzz</title>
+  <title>Admin - SofiaBuzz</title>
   <link rel="stylesheet" href="style.css">
   <style>
     .admin-tab-btn { background:transparent;border:none;border-bottom:2px solid transparent;color:#8B6040;font-family:'IBM Plex Sans',sans-serif;font-size:13px;font-weight:600;padding:10px 16px;cursor:pointer;transition:all 0.2s;white-space:nowrap; }
@@ -25,6 +25,7 @@
     .admin-form-input { background:#1A0A00;border:1px solid rgba(255,140,0,0.3);border-radius:8px;padding:9px 12px;color:#FFD199;font-family:'Cormorant Garamond',serif;font-size:14px;width:100%;box-sizing:border-box; }
     .admin-form-input:focus { outline:none;border-color:#FF8C00; }
     textarea.admin-form-input { resize:vertical;min-height:60px; }
+    select.admin-form-input { background:#1A0A00;color:#FFD199; }
 
     /* Aggregation / pending UI */
     .agg-result-box { background:#1A0800;border:1px solid rgba(255,140,0,0.25);border-radius:10px;padding:14px 16px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#C7A880;margin-bottom:16px;display:none; }
@@ -58,11 +59,21 @@
     <div class="header-inner">
       <div class="header-logo">
         <div class="logo-circle">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-            <defs><linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#FF6B35"/><stop offset="50%" stop-color="#FF8C00"/><stop offset="100%" stop-color="#FFD700"/></linearGradient></defs>
-            <circle cx="20" cy="20" r="19" fill="url(#sg)"/>
-            <path d="M20 8L20 32M8 20L32 20M11.5 11.5L28.5 28.5M28.5 11.5L11.5 28.5" stroke="#1A0A00" stroke-width="2.5" stroke-linecap="round"/>
-            <circle cx="20" cy="20" r="5" fill="#1A0A00"/>
+          <svg width="40" height="40" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <radialGradient id="hg-admin" cx="30%" cy="22%" r="90%">
+                <stop offset="0%" stop-color="#FFF7C0"/>
+                <stop offset="28%" stop-color="#FFE45C"/>
+                <stop offset="58%" stop-color="#FFB800"/>
+                <stop offset="100%" stop-color="#D87A00"/>
+              </radialGradient>
+            </defs>
+            <polygon points="50,2 96,26 96,74 50,98 4,74 4,26" fill="url(#hg-admin)"/>
+            <ellipse cx="50" cy="63" rx="10" ry="15" fill="#1E0900"/>
+            <rect x="41" y="58" width="18" height="5" rx="2.5" fill="#FFB800"/>
+            <circle cx="50" cy="40" r="9" fill="#1E0900"/>
+            <ellipse cx="31" cy="47" rx="13" ry="7" fill="rgba(255,255,255,0.75)" transform="rotate(-28 31 47)"/>
+            <ellipse cx="69" cy="47" rx="13" ry="7" fill="rgba(255,255,255,0.75)" transform="rotate(28 69 47)"/>
           </svg>
         </div>
         <div class="logo-text-group">
@@ -70,7 +81,7 @@
           <span class="header-slogan">Admin</span>
         </div>
       </div>
-      <button id="logout-admin-btn" style="display:none;background:transparent;border:1px solid rgba(255,140,0,0.4);border-radius:999px;padding:6px 14px;color:#FF8C00;font-family:'IBM Plex Sans',sans-serif;font-size:12px;cursor:pointer;" onclick="adminLogout()">Log out</button>
+      <button type="button" id="logout-admin-btn" style="display:none;background:transparent;border:1px solid rgba(255,140,0,0.4);border-radius:999px;padding:6px 14px;color:#FF8C00;font-family:'IBM Plex Sans',sans-serif;font-size:12px;cursor:pointer;" onclick="adminLogout()">Log out</button>
     </div>
   </header>
 
@@ -78,11 +89,11 @@
 
     <!-- LOGIN -->
     <div id="admin-login" style="padding:60px 14px;text-align:center;">
-      <div style="font-size:48px;margin-bottom:16px;">🔐</div>
+      <div style="font-size:48px;margin-bottom:16px;">&#128272;</div>
       <h1 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:26px;margin:0 0 24px;">Admin Access</h1>
       <div style="max-width:320px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
         <input type="password" id="admin-pw" class="admin-form-input" placeholder="Admin password" style="text-align:center;" onkeydown="if(event.key==='Enter')adminLogin()">
-        <button class="gold-btn" onclick="adminLogin()">Access →</button>
+        <button type="button" class="gold-btn" onclick="adminLogin()">Access &#8594;</button>
         <p id="admin-login-err" style="color:#E8456B;font-family:'IBM Plex Sans',sans-serif;font-size:13px;min-height:18px;"></p>
       </div>
     </div>
@@ -92,27 +103,27 @@
 
       <!-- STATS -->
       <div style="display:flex;flex-wrap:wrap;gap:10px;padding:16px 14px 12px;">
-        <div class="stat-box"><span class="stat-num" id="s-events">—</span><span class="stat-label">Total Events</span></div>
-        <div class="stat-box"><span class="stat-num" id="s-users">—</span><span class="stat-label">Total Users</span></div>
-        <div class="stat-box"><span class="stat-num" id="s-featured">—</span><span class="stat-label">Featured</span></div>
-        <div class="stat-box"><span class="stat-num" id="s-events-month">—</span><span class="stat-label">Events / mo</span></div>
-        <div class="stat-box"><span class="stat-num" id="s-users-month">—</span><span class="stat-label">New Users / mo</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-events">&#8212;</span><span class="stat-label">Total Events</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-users">&#8212;</span><span class="stat-label">Total Users</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-featured">&#8212;</span><span class="stat-label">Featured</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-events-month">&#8212;</span><span class="stat-label">Events / mo</span></div>
+        <div class="stat-box"><span class="stat-num" id="s-users-month">&#8212;</span><span class="stat-label">New Users / mo</span></div>
       </div>
 
       <!-- TABS -->
       <div style="display:flex;border-bottom:1px solid rgba(212,175,55,0.15);padding:0 14px;overflow-x:auto;">
-        <button class="admin-tab-btn active" onclick="switchTab('events')">Events</button>
-        <button class="admin-tab-btn" onclick="switchTab('pending')">⏳ Pending</button>
-        <button class="admin-tab-btn" onclick="switchTab('aggregate')">🔄 Aggregation</button>
-        <button class="admin-tab-btn" onclick="switchTab('users')">Users</button>
-        <button class="admin-tab-btn" onclick="switchTab('slots')">Featured Slots</button>
-        <button class="admin-tab-btn" onclick="switchTab('add')">Quick Add</button>
-        <button class="admin-tab-btn" onclick="switchTab('screenshot')">📸 From Screenshot</button>
+        <button type="button" class="admin-tab-btn active" onclick="switchTab('events')">Events</button>
+        <button type="button" class="admin-tab-btn" onclick="switchTab('pending')">&#9203; Pending</button>
+        <button type="button" class="admin-tab-btn" onclick="switchTab('aggregate')">&#128260; Aggregation</button>
+        <button type="button" class="admin-tab-btn" onclick="switchTab('users')">Users</button>
+        <button type="button" class="admin-tab-btn" onclick="switchTab('slots')">Featured Slots</button>
+        <button type="button" class="admin-tab-btn" onclick="switchTab('add')">Quick Add</button>
+        <button type="button" class="admin-tab-btn" onclick="switchTab('screenshot')">&#128248; From Screenshot</button>
       </div>
 
       <!-- EVENTS TAB -->
       <div id="tab-events" style="padding:14px;">
-        <input type="text" class="search-input" id="event-search" placeholder="Search events…" oninput="filterEvents()">
+        <input type="text" class="search-input" id="event-search" placeholder="Search events..." oninput="filterEvents()">
         <div id="admin-events-list"></div>
       </div>
 
@@ -120,10 +131,10 @@
       <div id="tab-pending" style="padding:14px;display:none;">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
           <h2 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:18px;margin:0;">Pending Review</h2>
-          <button class="btn-sm btn-edit" onclick="loadPending()">↻ Refresh</button>
+          <button type="button" class="btn-sm btn-edit" onclick="loadPending()">&#8635; Refresh</button>
         </div>
-        <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;margin:0 0 14px;">All events awaiting approval — from Eventbrite aggregation or manual submissions.</p>
-        <div id="admin-pending-list"><p style="color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:13px;">Loading…</p></div>
+        <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;margin:0 0 14px;">All events awaiting approval.</p>
+        <div id="admin-pending-list"><p style="color:#6E6A5F;font-family:'IBM Plex Sans',sans-serif;font-size:13px;">Loading...</p></div>
       </div>
 
       <!-- AGGREGATION TAB -->
@@ -131,25 +142,19 @@
         <h2 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:18px;margin:0 0 8px;">Eventbrite Aggregation</h2>
         <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#8B6040;margin:0 0 16px;line-height:1.5;">
           Fetches upcoming Sofia events from the Eventbrite API and adds them to the Pending Review queue.<br>
-          <strong style="color:#FF8C00;">Events are never auto-approved</strong> — you review and approve each one manually.<br>
-          Re-running the fetch is safe — duplicates are automatically skipped.
+          <strong style="color:#FF8C00;">Events are never auto-approved</strong> &#8212; you review and approve each one manually.
         </p>
-
-        <button class="fetch-btn" id="fetch-eb-btn" onclick="fetchEventbrite()">
-          <span id="fetch-eb-icon">🔄</span> Fetch from Eventbrite
+        <button type="button" class="fetch-btn" id="fetch-eb-btn" onclick="fetchEventbrite()">
+          <span id="fetch-eb-icon">&#128260;</span> Fetch from Eventbrite
         </button>
-
-        <!-- Result summary -->
         <div class="agg-result-box" id="agg-result">
           <div id="agg-result-inner"></div>
         </div>
-
         <div style="margin-top:24px;padding:14px;background:#1A0800;border:1px solid rgba(255,140,0,0.15);border-radius:10px;">
           <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;margin:0 0 6px;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Setup notes</p>
           <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#8B6040;margin:0;line-height:1.6;">
             Requires <code style="color:#FF8C00;">EVENTBRITE_TOKEN</code> set in Railway environment variables.<br>
-            If search is blocked (some account tiers), organizer-specific fetching will be needed — ask Birol to provide organizer IDs.<br>
-            After fetching, go to <strong style="color:#C7A880;">⏳ Pending</strong> to review and approve events.
+            After fetching, go to <strong style="color:#C7A880;">&#9203; Pending</strong> to review and approve events.
           </p>
         </div>
       </div>
@@ -168,16 +173,16 @@
       <div id="tab-add" style="padding:14px;display:none;">
         <h2 style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:18px;margin:0 0 14px;">Add event</h2>
         <div style="display:flex;flex-direction:column;gap:10px;">
-          <input type="text"           id="qa-title"      class="admin-form-input" placeholder="Event title">
-          <textarea                    id="qa-desc"       class="admin-form-input" placeholder="Description"></textarea>
-          <textarea                    id="qa-bio"        class="admin-form-input" placeholder="Artist bio (optional)"></textarea>
-          <input type="text"           id="qa-category"   class="admin-form-input" placeholder="Category (Rock, Jazz…)">
-          <input type="text"           id="qa-venue"      class="admin-form-input" placeholder="Venue">
-          <input type="datetime-local" id="qa-start"      class="admin-form-input">
-          <input type="text"           id="qa-price"      class="admin-form-input" placeholder="Price text (e.g. from €20)">
-          <input type="text"           id="qa-ticket"     class="admin-form-input" placeholder="Ticket URL">
-          <input type="text"           id="qa-image"      class="admin-form-input" placeholder="Image URL (optional)">
-          <button class="gold-btn" onclick="adminAddEvent()">Add event</button>
+          <input type="text"           id="qa-title"    class="admin-form-input" placeholder="Event title">
+          <textarea                    id="qa-desc"     class="admin-form-input" placeholder="Description"></textarea>
+          <textarea                    id="qa-bio"      class="admin-form-input" placeholder="Artist bio (optional)"></textarea>
+          <input type="text"           id="qa-category" class="admin-form-input" placeholder="Category (Rock, Jazz...)">
+          <input type="text"           id="qa-venue"    class="admin-form-input" placeholder="Venue">
+          <input type="datetime-local" id="qa-start"    class="admin-form-input">
+          <input type="text"           id="qa-price"    class="admin-form-input" placeholder="Price text (e.g. from 20 lv)">
+          <input type="text"           id="qa-ticket"   class="admin-form-input" placeholder="Ticket URL">
+          <input type="text"           id="qa-image"    class="admin-form-input" placeholder="Image URL (optional)">
+          <button type="button" class="gold-btn" onclick="adminAddEvent()">Add event</button>
           <p id="qa-msg" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#FF8C00;min-height:18px;"></p>
         </div>
       </div>
@@ -191,28 +196,28 @@
         <div id="ss-drop-zone" style="border:2px dashed rgba(255,140,0,0.3);border-radius:12px;min-height:120px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;margin-bottom:14px;overflow:hidden;transition:border-color 0.2s;background:#110800;">
           <img id="ss-preview-img" style="display:none;max-height:180px;max-width:100%;object-fit:contain;border-radius:6px;margin:10px;">
           <div id="ss-drop-prompt" style="text-align:center;padding:24px;">
-            <div style="font-size:34px;margin-bottom:8px;">📋</div>
-            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#8B6040;margin:0;">Ctrl+V to paste &nbsp;·&nbsp; drag &amp; drop &nbsp;·&nbsp; or click to choose file</p>
+            <div style="font-size:34px;margin-bottom:8px;">&#128203;</div>
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#8B6040;margin:0;">Ctrl+V to paste &nbsp;&middot;&nbsp; drag &amp; drop &nbsp;&middot;&nbsp; or click to choose file</p>
           </div>
           <input type="file" id="ss-file-input" accept="image/png,image/jpeg,image/gif,image/webp" style="display:none">
         </div>
 
         <!-- Loading -->
         <div id="ss-loading" style="display:none;text-align:center;padding:18px 0;">
-          <p style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:17px;margin:0 0 4px;">Reading poster…</p>
+          <p style="font-family:'DM Serif Display',serif;font-style:italic;color:#FF8C00;font-size:17px;margin:0 0 4px;">Reading poster...</p>
           <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#6E6A5F;margin:0;">Claude is extracting event details</p>
         </div>
 
         <!-- Error -->
         <div id="ss-error" style="display:none;background:rgba(255,70,0,0.1);border:1px solid rgba(255,70,0,0.3);border-radius:8px;padding:10px 14px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#FF6B35;margin-bottom:12px;line-height:1.5;"></div>
 
-        <!-- Extracted editable form (hidden until data arrives) -->
+        <!-- Extracted editable form -->
         <div id="ss-form" style="display:none;">
           <div style="display:flex;flex-direction:column;gap:10px;">
-            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#40E080;margin:0 0 2px;">✓ Details extracted — review and edit before saving</p>
+            <p style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#40E080;margin:0 0 2px;">&#10003; Details extracted &#8212; review and edit before saving</p>
             <input type="text"           id="ss-title"    class="admin-form-input" placeholder="Event title">
             <textarea                    id="ss-desc"     class="admin-form-input" placeholder="Description" style="min-height:70px;"></textarea>
-            <select                      id="ss-category" class="admin-form-input" style="background:#1A0A00;color:#FFD199;">
+            <select                      id="ss-category" class="admin-form-input">
               <option value="Rock">Rock</option>
               <option value="Pop">Pop</option>
               <option value="Electronic">Electronic</option>
@@ -227,14 +232,14 @@
             <input type="text"           id="ss-address"  class="admin-form-input" placeholder="Address">
             <input type="datetime-local" id="ss-start"    class="admin-form-input">
             <p id="ss-start-hint" style="display:none;font-family:'IBM Plex Sans',sans-serif;font-size:11px;color:#FF8C00;margin:0;padding:4px 0;"></p>
-            <input type="text"           id="ss-price"    class="admin-form-input" placeholder="Price text (e.g. FREE, от €15)">
+            <input type="text"           id="ss-price"    class="admin-form-input" placeholder="Price text (e.g. FREE, from 15 lv)">
             <input type="url"            id="ss-ticket"   class="admin-form-input" placeholder="Ticket URL">
-            <input type="url"            id="ss-image"    class="admin-form-input" placeholder="Image URL — leave blank (poster may be copyrighted)">
+            <input type="url"            id="ss-image"    class="admin-form-input" placeholder="Image URL &#8212; leave blank (poster may be copyrighted)">
             <label style="display:flex;align-items:center;gap:8px;font-family:'IBM Plex Sans',sans-serif;font-size:13px;color:#C7A880;cursor:pointer;padding:4px 0;">
               <input type="checkbox" id="ss-approve" style="accent-color:#FF8C00;width:15px;height:15px;">
               Approve immediately (skip pending queue)
             </label>
-            <button class="gold-btn" onclick="saveScreenshotEvent()">Save event</button>
+            <button type="button" class="gold-btn" onclick="saveScreenshotEvent()">Save event</button>
             <p id="ss-save-msg" style="font-family:'IBM Plex Sans',sans-serif;font-size:13px;min-height:18px;margin:0;"></p>
           </div>
         </div>
@@ -257,8 +262,8 @@
       <input type="text"           id="edit-ticket"   class="admin-form-input" placeholder="Ticket URL">
       <input type="text"           id="edit-image"    class="admin-form-input" placeholder="Image URL">
       <div style="display:flex;gap:10px;margin-top:6px;">
-        <button class="gold-btn" style="flex:1;" onclick="saveEdit()">Save changes</button>
-        <button class="btn-sm btn-delete" style="padding:10px 18px;" onclick="closeEditModal()">Cancel</button>
+        <button type="button" class="gold-btn" style="flex:1;" onclick="saveEdit()">Save changes</button>
+        <button type="button" class="btn-sm btn-delete" style="padding:10px 18px;" onclick="closeEditModal()">Cancel</button>
       </div>
       <p id="edit-msg" style="font-family:'IBM Plex Sans',sans-serif;font-size:12px;color:#FF8C00;min-height:16px;"></p>
     </div>
