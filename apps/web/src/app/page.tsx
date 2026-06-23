@@ -1,3 +1,9 @@
+import {
+  Show,
+  SignInButton,
+  SignUpButton,
+  UserButton,
+} from "@clerk/nextjs";
 import { CalendarDays, MapPin, Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 
@@ -33,10 +39,23 @@ export default function Home() {
               Event discovery workspace
             </h1>
           </div>
-          <Button>
-            <Plus aria-hidden="true" />
-            Create event
-          </Button>
+          <div className="flex items-center gap-2">
+            <Show when="signed-out">
+              <SignInButton>
+                <Button variant="outline">Sign in</Button>
+              </SignInButton>
+              <SignUpButton>
+                <Button>Sign up</Button>
+              </SignUpButton>
+            </Show>
+            <Show when="signed-in">
+              <Button>
+                <Plus aria-hidden="true" />
+                Create event
+              </Button>
+              <UserButton />
+            </Show>
+          </div>
         </div>
       </header>
 
