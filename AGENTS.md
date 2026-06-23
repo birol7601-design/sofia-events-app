@@ -14,11 +14,13 @@ Convex agent skills for common tasks can be installed by running
 
 ## Project conventions
 
-- Runtime env is app-scoped. For the web app, use `apps/web/.env.local` and
-  keep `apps/web/.env.example` updated. Do not rely on root `.env.local` for
-  Next.js runtime configuration.
-- Env must be parsed through Zod before app code uses it. Missing or invalid
-  required env should fail fast.
-- Export Zod schemas in PascalCase, for example `WebEnvSchema` and
-  `EventInputSchema`. Export inferred types in PascalCase.
+- Run `npm run format:check`, `npm run lint`, and `npm run typecheck` after
+  scaffold or shared-code changes. Run `npm run build` for app/runtime changes.
+- Runtime env is app-scoped. For the web app, use `apps/web/.env.local`; keep
+  `apps/web/.env.example` updated.
+- Env is parsed once through Zod and exported as a valid `env` object. Do not add
+  downstream fallback checks for required env.
+- Export Zod schemas and inferred types in PascalCase, for example
+  `WebEnvSchema`, `EventInputSchema`, and `WebEnv`.
+- Shared UI belongs in `packages/ui`; import it as `@workspace/ui/...`.
 - Do not add Stripe code or env until payment flows are intentionally scoped.

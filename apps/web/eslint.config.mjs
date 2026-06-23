@@ -22,10 +22,24 @@ const config = [
         { fixStyle: "inline-type-imports" },
       ],
       "@typescript-eslint/no-floating-promises": "error",
+      "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/no-misused-promises": "error",
+      "@typescript-eslint/no-non-null-assertion": "error",
       "@typescript-eslint/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
+      ],
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/components/ui/*"],
+              message:
+                "Shared UI belongs in @workspace/ui. Import from @workspace/ui/components/* instead.",
+            },
+          ],
+        },
       ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
     },
