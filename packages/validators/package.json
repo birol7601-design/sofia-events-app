@@ -8,6 +8,7 @@
   },
   "scripts": {
     "lint": "eslint . --max-warnings=0",
+    "lint:fix": "eslint . --fix --max-warnings=0",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -15,7 +16,7 @@
   },
   "devDependencies": {
     "@repo/typescript-config": "*",
-    "eslint": "^9.39.4",
+    "eslint": "9.39.4",
     "typescript": "6.0.3",
     "typescript-eslint": "8.62.0"
   }

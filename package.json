@@ -14,6 +14,7 @@
     "format": "prettier --write \"**/*.{css,js,json,md,mjs,ts,tsx,yaml,yml}\"",
     "format:check": "prettier --check \"**/*.{css,js,json,md,mjs,ts,tsx,yaml,yml}\"",
     "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
     "typecheck": "turbo typecheck"
   },
   "dependencies": {
