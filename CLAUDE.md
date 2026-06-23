@@ -23,4 +23,6 @@ Convex agent skills for common tasks can be installed by running
 - Export Zod schemas and inferred types in PascalCase, for example
   `WebEnvSchema`, `EventInputSchema`, and `WebEnv`.
 - Shared UI belongs in `packages/ui`; import it as `@workspace/ui/...`.
+- For React/Next.js performance-sensitive work, use the repo-local
+  `.agents/skills/vercel-react-best-practices` skill.
 - Do not add Stripe code or env until payment flows are intentionally scoped.
