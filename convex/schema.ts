@@ -11,6 +11,6 @@ export default defineSchema({
     category: v.string(),
     createdBy: v.optional(v.string()),
   })
-    .index("by_start", ["startsAt"])
+    .index("by_startsAt", ["startsAt"])
     .index("by_category", ["category"]),
 });

@@ -10,10 +10,14 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
+    "dev:convex": "convex dev",
+    "format": "prettier --write \"**/*.{css,js,json,md,mjs,ts,tsx,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{css,js,json,md,mjs,ts,tsx,yaml,yml}\"",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck"
+  },
+  "dependencies": {
+    "convex": "1.41.0"
   },
   "devDependencies": {
     "prettier": "3.8.4",
