@@ -1,1 +1,1 @@
-export { eventInputSchema } from "./schemas/event";
+export { EventInputSchema } from "./schemas/event";

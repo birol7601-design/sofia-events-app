@@ -1,9 +1,4 @@
-import {
-  Show,
-  SignInButton,
-  SignUpButton,
-  UserButton,
-} from "@clerk/nextjs";
+import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
 import { CalendarDays, MapPin, Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 

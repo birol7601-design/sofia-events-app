@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const eventInputSchema = z.object({
+export const EventInputSchema = z.object({
   title: z.string().trim().min(3).max(120),
   description: z.string().trim().max(5000).optional(),
   startsAt: z.iso.datetime(),
