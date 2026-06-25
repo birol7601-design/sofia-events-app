@@ -1,27 +1,7 @@
 import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
-import { CalendarDays, MapPin, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-
-const featuredEvents = [
-  {
-    title: "Rooftop Jazz Night",
-    venue: "Central Sofia",
-    date: "Fri, 20:30",
-    category: "Music",
-  },
-  {
-    title: "Design District Walk",
-    venue: "KvARTal",
-    date: "Sat, 11:00",
-    category: "Culture",
-  },
-  {
-    title: "Late Market Session",
-    venue: "Women’s Market",
-    date: "Sun, 18:00",
-    category: "Food",
-  },
-];
+import { FeaturedEvents } from "@/components/featured-events";
 
 export default function Home() {
   return (
@@ -61,36 +41,7 @@ export default function Home() {
             <Button variant="secondary">View all</Button>
           </div>
 
-          <div className="grid gap-3">
-            {featuredEvents.map((event) => (
-              <article
-                className="rounded-lg border bg-card p-4 shadow-sm"
-                key={event.title}
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-medium text-primary">
-                      {event.category}
-                    </p>
-                    <h3 className="mt-1 text-xl font-semibold">
-                      {event.title}
-                    </h3>
-                  </div>
-                  <Button variant="outline">Manage</Button>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-4 text-sm text-muted-foreground">
-                  <span className="inline-flex items-center gap-2">
-                    <CalendarDays aria-hidden="true" className="size-4" />
-                    {event.date}
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <MapPin aria-hidden="true" className="size-4" />
-                    {event.venue}
-                  </span>
-                </div>
-              </article>
-            ))}
-          </div>
+          <FeaturedEvents />
         </div>
 
         <aside className="space-y-3">

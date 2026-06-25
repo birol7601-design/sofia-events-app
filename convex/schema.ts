@@ -9,8 +9,14 @@ export default defineSchema({
     venueName: v.string(),
     city: v.string(),
     category: v.string(),
-    createdBy: v.optional(v.string()),
+    priceText: v.optional(v.string()),
+    ticketUrl: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
+    buzzSays: v.optional(v.string()),
+    tags: v.array(v.string()),
+    createdBy: v.string(),
   })
     .index("by_startsAt", ["startsAt"])
-    .index("by_category", ["category"]),
+    .index("by_category", ["category"])
+    .index("by_createdBy", ["createdBy"]),
 });
